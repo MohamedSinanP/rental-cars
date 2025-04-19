@@ -1,0 +1,138 @@
+import React, { FormEvent, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { login } from '../../services/apis/authApi';
+import { useDispatch } from 'react-redux';
+import { removeAuth, setAuth } from '../../redux/slices/authSlice';
+import { toast } from 'react-toastify';
+import GoogleLoginButton from '../../components/GoogleLoginButton';
+
+const LoginPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  const validateForm = () => {
+    const validationErrors: { email?: string; password?: string } = {};
+
+    if (!formData.email.trim()) {
+      validationErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      validationErrors.email = 'Invalid email format';
+    }
+
+    if (!formData.password.trim()) {
+      validationErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      validationErrors.password = 'Password must be at least 6 characters';
+    }
+
+    return validationErrors;
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    try {
+      const result = await login(formData);
+      await dispatch(setAuth({
+        user: {
+          userName: result.data.userDetails.user.userName,
+          email: result.data.userDetails.user.email,
+          role: result.data.userDetails.user.role,
+          isBlocked: result.data.userDetails.user.isBlocked,
+          isVerified: result.data.userDetails.user.isVerified
+        },
+        accessToken: result.data.userDetails.accessToken,
+      }));
+      console.log(result.data, "this is reslult");
+
+      if (result.data.userDetails.user.role === "owner") {
+        navigate('/owner/dashboard');
+      } else if (result.data.userDetails.user.role === "user") {
+        navigate('/');
+      }
+      toast.success(result.message);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: '' });
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+      <div className="bg-white shadow-md rounded-lg p-6 sm:p-10 w-full max-w-4xl flex flex-col sm:flex-row items-center">
+        <div className="hidden sm:flex w-1/2 justify-center">
+          <img src="/images/car1.jpg" alt="Car" className="w-80 h-80 rounded-full object-cover" />
+        </div>
+
+        <div className="w-full sm:w-1/2">
+          <h2 className="text-2xl font-bold text-center mb-6">Login Now</h2>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div>
+              {errors.email && <p className="text-red-500 text-sm m-0">{errors.email}</p>}
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={formData.email}
+                className="w-full p-2 border border-gray-300 rounded"
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              {errors.password && <p className="text-red-500 text-sm m-0">{errors.password}</p>}
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                className="w-full p-2 border border-gray-300 rounded"
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="flex">
+              <p className="text-xs font-light text-gray-600">
+                Don't have an account?{' '}
+                <NavLink to="/signup" className="text-sm font-medium cursor-pointer">
+                  Register Now
+                </NavLink>
+              </p>
+
+              <p className="text-sm font-medium text-gray-600 ml-auto cursor-pointer">
+                <NavLink to="/forget-password">Forgot password?</NavLink>
+              </p>
+            </div>
+
+            <button className="w-full bg-black text-white py-3 rounded hover:bg-gray-900 cursor-pointer">
+              Login
+            </button>
+          </form>
+
+          <div className="flex items-center justify-center my-4">
+            <div className="w-1/3 border-t border-gray-300"></div>
+            <p className="mx-2 text-sm text-gray-500">OR Login with</p>
+            <div className="w-1/3 border-t border-gray-300"></div>
+          </div>
+          <div className="flex items-center justify-center border border-gray-300 rounded-md px-4 py-2"
+          >
+            <GoogleLoginButton />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;
