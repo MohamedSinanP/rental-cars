@@ -28,7 +28,7 @@ interface BookingFormData {
 }
 
 interface ICarExtended extends ICar {
-  pricePerHour?: number; // Optional, added for hourly pricing
+  pricePerHour?: number;
 }
 
 const CarBookingPage: React.FC = () => {
@@ -92,16 +92,18 @@ const CarBookingPage: React.FC = () => {
   }, [id, setValue]);
 
   const calculateTotalCost = () => {
-    if (!car || !pickupDateTime || !dropoffDateTime) {
+    if (!car) {
       return { rentalCost: 0, tax: 0, total: 0, hours: 0 };
+    } else if (!pickupDateTime || !dropoffDateTime) {
+      return { rentalCost: 0, tax: 0, total: car.deposit, hours: 0 };
     }
 
     const start = new Date(pickupDateTime);
     const end = new Date(dropoffDateTime);
-    const hours = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600))); // Minimum 1 hour
-    const rentalCost = (car.pricePerHour || 100) * hours; // Default ₹100/hour if undefined
-    const taxAmount = rentalCost * 0.1; // 10% tax
-    return { rentalCost, tax: taxAmount, total: rentalCost + taxAmount, hours };
+    const hours = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600)));
+    const rentalCost = (car.pricePerHour || 100) * hours;
+    const taxAmount = rentalCost * 0.1;
+    return { rentalCost, tax: taxAmount, total: rentalCost + taxAmount + car.deposit, hours };
   };
 
   const onSubmit = async (data: BookingFormData) => {
@@ -160,6 +162,7 @@ const CarBookingPage: React.FC = () => {
     try {
       const bookingData: IBooking = {
         carId: id,
+        ownerId: car.ownerId,
         userDetails: {
           address: data.address,
           email: data.email,
@@ -176,8 +179,9 @@ const CarBookingPage: React.FC = () => {
       };
 
       const result = await carBookingApi(bookingData);
+      const bookingId = result.data._id;
       toast.success(result.message);
-      navigate('/');
+      navigate(`/greetings/${bookingId}`);
     } catch (err: any) {
       toast.error(`Booking failed: ${err.message}`);
     } finally {
@@ -452,6 +456,10 @@ const CarBookingPage: React.FC = () => {
 
               <div className="mb-6">
                 <h2 className="text-lg font-semibold mb-4">Price Breakdown</h2>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600">Rental Cost ({cost.hours} hour{cost.hours !== 1 ? 's' : ''}):</span>
+                  <span>{formatINR(car.deposit)}</span>
+                </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-600">Rental Cost ({cost.hours} hour{cost.hours !== 1 ? 's' : ''}):</span>
                   <span>{formatINR(cost.rentalCost)}</span>

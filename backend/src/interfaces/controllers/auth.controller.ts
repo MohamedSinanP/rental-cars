@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express"
 export default interface IAuthController {
   signupUser(req: Request, res: Response, next: NextFunction): Promise<void>;
   signupOwner(req: Request, res: Response, next: NextFunction): Promise<void>;
+  adminLogin(req: Request, res: Response, next: NextFunction): Promise<void>;
   login(req: Request, res: Response, next: NextFunction): Promise<void>;
   handleGoogleCallback(req: Request, res: Response, next: NextFunction): Promise<void>;
   verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void>;

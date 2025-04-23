@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import ImageCropperModal from './ImageCropperModal';
 import { CarFormData } from '../types/types';
 import { MapPicker } from './MapPicker';
@@ -131,7 +131,6 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-          {/* === Basic Inputs === */}
           <div>
             <label>Car Name</label>
             <input type="text" {...register('name', { required: 'Car name is required' })} className="w-full border p-2 rounded" />
@@ -151,7 +150,7 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
               <option value="Hatchback">Hatchback</option>
               <option value="Sedan">Sedan</option>
               <option value="SUV">SUV</option>
-              <option value="Convertible">Convertible</option>
+              <option value="Luxury">Luxury</option>
               <option value="Pickup">Pickup</option>
               <option value="Van">Van</option>
             </select>
@@ -169,8 +168,6 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
             </select>
             {errors.seats && <p className="text-red-500 text-sm">{errors.seats.message}</p>}
           </div>
-
-          {/* === Transmission Dropdown === */}
           <div>
             <label>Transmission</label>
             <select {...register('transmission', { required: 'Transmission is required' })} className="w-full border p-2 rounded">
@@ -182,8 +179,6 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
             </select>
             {errors.transmission && <p className="text-red-500 text-sm">{errors.transmission.message}</p>}
           </div>
-
-          {/* === Fuel Type Dropdown === */}
           <div>
             <label>Fuel Type</label>
             <select {...register('fuelType', { required: 'Fuel type is required' })} className="w-full border p-2 rounded">
@@ -204,8 +199,6 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
             </select>
             {errors.fuelOption && <p className="text-red-500 text-sm">{errors.fuelOption.message}</p>}
           </div>
-
-          {/* === Image Upload and Preview === */}
           <div className="col-span-2">
             <label>Upload Car Images</label>
             <input
@@ -218,7 +211,6 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
             {previewUrls.length < 3 && <p className="text-red-500 text-sm">At least 3 image is required</p>}
             {previewUrls.length > 5 && <p className="text-red-500 text-sm">Max 5 images allowed</p>}
           </div>
-
           <div className="flex gap-2 mt-2 flex-wrap col-span-2">
             {previewUrls.map((url, index) => (
               <div key={index} className="relative w-24 h-24 border rounded overflow-hidden">
@@ -231,12 +223,9 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
                     setCropModalOpen(true);
                   }}
                 />
-
               </div>
             ))}
           </div>
-
-          {/* === Dropdown and Other Fields === */}
           <div className="col-span-2">
             <label>Pick Car Location on Map</label>
             <MapPicker
@@ -248,7 +237,6 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
             />
             {errors.location && <p className="text-red-500 text-sm">{errors.location.message}</p>}
           </div>
-
           <div>
             <label>Car Price Per Hour</label>
             <input type="number" {...register('pricePerDay', { required: 'Price is required', valueAsNumber: true })} className="w-full border p-2 rounded" />
@@ -260,7 +248,6 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
             <input type="number" {...register('deposit', { required: 'Deposit is required', valueAsNumber: true })} className="w-full border p-2 rounded" />
             {errors.deposit && <p className="text-red-500 text-sm">{errors.deposit.message}</p>}
           </div>
-
           <div>
             <label>Car Features</label>
             <div className="flex gap-2 flex-wrap">
@@ -272,7 +259,6 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
               ))}
             </div>
           </div>
-
           <div>
             <label>Availability Status</label>
             <select {...register('availability', { required: 'Availability is required' })} className="w-full border p-2 rounded">
@@ -282,13 +268,11 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
             </select>
             {errors.availability && <p className="text-red-500 text-sm">{errors.availability.message}</p>}
           </div>
-
           <div>
             <label>Last Maintenance Date</label>
             <input type="date" {...register('maintenanceDate', { required: 'Maintenance date is required' })} className="w-full border p-2 rounded" />
             {errors.maintenanceDate && <p className="text-red-500 text-sm">{errors.maintenanceDate.message}</p>}
           </div>
-
           <div>
             <label>Maintenance Interval (days)</label>
             <input type="number" {...register('maintenanceInterval', { required: 'Interval is required', valueAsNumber: true })} className="w-full border p-2 rounded" />
@@ -298,19 +282,58 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
           {/* --- Document Uploads --- */}
           <div>
             <label>RC Document</label>
-            <input type="file" {...register('rcDoc', { required: 'RC document is required' })} className="w-full border p-2 rounded" />
+            <input
+              type="file"
+              accept="application/pdf"
+              {...register('rcDoc', {
+                required: 'RC document is required',
+                validate: {
+                  isPDF: (file) => {
+                    const fileName = file[0]?.name || '';
+                    return fileName.toLowerCase().endsWith('.pdf') || 'Only PDF files are allowed';
+                  },
+                },
+              })}
+              className="w-full border p-2 rounded"
+            />
             {errors.rcDoc && <p className="text-red-500 text-sm">{errors.rcDoc.message}</p>}
           </div>
 
           <div>
             <label>PUC Certificate</label>
-            <input type="file" {...register('pucDoc', { required: 'PUC certificate is required' })} className="w-full border p-2 rounded" />
+            <input
+              type="file"
+              accept="application/pdf"
+              {...register('pucDoc', {
+                required: 'PUC certificate is required',
+                validate: {
+                  isPDF: (file) => {
+                    const fileName = file[0]?.name || '';
+                    return fileName.toLowerCase().endsWith('.pdf') || 'Only PDF files are allowed';
+                  },
+                },
+              })}
+              className="w-full border p-2 rounded"
+            />
             {errors.pucDoc && <p className="text-red-500 text-sm">{errors.pucDoc.message}</p>}
           </div>
 
           <div>
             <label>Insurance Document</label>
-            <input type="file" {...register('insuranceDoc', { required: 'Insurance is required' })} className="w-full border p-2 rounded" />
+            <input
+              type="file"
+              accept="application/pdf"
+              {...register('insuranceDoc', {
+                required: 'Insurance document is required',
+                validate: {
+                  isPDF: (file) => {
+                    const fileName = file[0]?.name || '';
+                    return fileName.toLowerCase().endsWith('.pdf') || 'Only PDF files are allowed';
+                  },
+                },
+              })}
+              className="w-full border p-2 rounded"
+            />
             {errors.insuranceDoc && <p className="text-red-500 text-sm">{errors.insuranceDoc.message}</p>}
           </div>
 

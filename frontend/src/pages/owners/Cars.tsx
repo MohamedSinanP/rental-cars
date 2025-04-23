@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import axios from 'axios';
 import Sidebar from '../../layouts/owners/Sidebar';
@@ -6,10 +6,8 @@ import CarModal from '../../components/CarModal';
 import { toast } from 'react-toastify';
 import { getCars } from '../../services/apis/ownerApi';
 import { ICar } from '../../types/types';
+import EditCarModal from '../../components/EditCarModal';
 
-// TypeScript interface for car data
-
-// Sub-component for car list item
 const CarListItem: React.FC<{
   car: ICar;
   isSelected: boolean;
@@ -34,36 +32,34 @@ const CarListItem: React.FC<{
 const Cars: React.FC = () => {
   const [cars, setCars] = useState<ICar[]>([]);
   const [selectedCar, setSelectedCar] = useState<ICar | null>(null);
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [addCarModalOpen, setAddCarModalOpen] = useState<boolean>(false);
+  const [editCarModalOpen, setEditCarModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch cars from backend
-  useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        setLoading(true);
-        const response = await getCars();
-        console.log(response);
-
-        const fetchedCars = Array.isArray(response.data.cars) ? response.data.cars : [];
-        console.log(fetchedCars, 'thise are the fethced cars');
-
-        setCars(fetchedCars);
-        setSelectedCar(fetchedCars[0] || null);
-        console.log(selectedCar, 'this is selected car');
-
-      } catch (err) {
-        setError('Failed to fetch cars. Please try again.');
-        toast.error('Error fetching cars');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCars();
+  const fetchCars = useCallback(async () => {
+    try {
+      const response = await getCars();
+      const fetchedCars = Array.isArray(response.data.cars) ? response.data.cars : [];
+      setCars(fetchedCars);
+    } catch (err) {
+      setError('Failed to fetch cars. Please try again.');
+      toast.error('Error fetching cars');
+    }
   }, []);
 
-  // Handle car deletion
+  useEffect(() => {
+    fetchCars();
+  }, [fetchCars]);
+
+
+  const handleCarUpdated = (updatedCar: ICar) => {
+    setCars((prev) =>
+      prev.map((car) => (car._id === updatedCar._id ? updatedCar : car))
+    );
+    setSelectedCar(updatedCar);
+    toast.success('Car updated successfully');
+  };
+
   const handleDelete = async (carId: string) => {
     if (window.confirm('Are you sure you want to delete this car?')) {
       try {
@@ -71,7 +67,7 @@ const Cars: React.FC = () => {
         const updatedCars = cars.filter((car) => car._id !== carId);
         setCars(updatedCars);
         if (selectedCar?._id === carId) {
-          setSelectedCar(updatedCars[0] || null);
+          setSelectedCar(null);
         }
         toast.success('Car deleted successfully');
       } catch (err) {
@@ -80,15 +76,7 @@ const Cars: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  if (error) {
+  if (error && cars.length === 0) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100 text-red-600 text-lg">
         {error}
@@ -103,12 +91,20 @@ const Cars: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-bold text-gray-900">My Cars</h2>
-            <button
-              onClick={() => setModalOpen(true)}
-              className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-            >
-              Add Car
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={fetchCars}
+                className="px-5 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm cursor-pointer"
+              >
+                Refresh
+              </button>
+              <button
+                onClick={() => setAddCarModalOpen(true)}
+                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
+              >
+                Add Car
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-col lg:flex-row gap-6">
@@ -184,10 +180,10 @@ const Cars: React.FC = () => {
                     <div>
                       <span className="text-sm font-medium text-gray-700">Availability:</span>
                       <span
-                        className={`text-sm ml-2 font-medium ${selectedCar.availability ? 'text-green-600' : 'text-red-600'
+                        className={`text-sm ml-2 font-medium ${selectedCar.availability === 'Available' ? 'text-green-600' : 'text-red-600'
                           }`}
                       >
-                        {selectedCar.availability ? 'Enabled' : 'Disabled'}
+                        {selectedCar.availability}
                       </span>
                     </div>
                     <div>
@@ -195,7 +191,7 @@ const Cars: React.FC = () => {
                       <span className="text-sm ml-2 text-gray-600">{selectedCar.location?.address}</span>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-700">Maintenance:</span>
+                      <span className="text-sm font-medium text-gray-700">Maintenance Interval:</span>
                       <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full ml-2">
                         {selectedCar.maintenanceInterval}
                       </span>
@@ -206,7 +202,10 @@ const Cars: React.FC = () => {
                     <button className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
                       <Eye size={16} /> View
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors">
+                    <button
+                      className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"
+                      onClick={() => setEditCarModalOpen(true)}
+                    >
                       <Edit size={16} /> Edit
                     </button>
                     <button
@@ -229,7 +228,7 @@ const Cars: React.FC = () => {
                     <h4 className="font-semibold text-gray-900 mb-3">Document Analysis</h4>
                     <p className="text-sm text-gray-600 mb-1">
                       Last Maintenance:{' '}
-                      <span className="font-medium">{selectedCar.lastmaintenanceDate}</span>
+                      <span className="font-medium">{selectedCar.lastmaintenanceDate?.split('T')[0]}</span>
                     </p>
                     <p className="text-sm text-gray-600 mb-1">
                       Maintenance Interval:{' '}
@@ -260,7 +259,16 @@ const Cars: React.FC = () => {
             </div>
           </div>
         </div>
-        <CarModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+        <CarModal
+          isOpen={addCarModalOpen}
+          onClose={() => setAddCarModalOpen(false)}
+        />
+        <EditCarModal
+          carData={selectedCar}
+          isOpen={editCarModalOpen}
+          onClose={() => setEditCarModalOpen(false)}
+          onCarUpdated={handleCarUpdated}
+        />
       </div>
     </div>
   );

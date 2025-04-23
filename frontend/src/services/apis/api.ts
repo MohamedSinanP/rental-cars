@@ -87,7 +87,6 @@ api.interceptors.response.use(
       }
     }
 
-    // Handle 403: Forbidden – no permission
     if (error.response?.status === 403) {
       console.warn("Access denied (403): You do not have permission.");
     }

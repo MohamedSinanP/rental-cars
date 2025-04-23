@@ -4,6 +4,7 @@ export interface IBooking {
   _id?: string;
   userId: string;
   carId: string;
+  ownerId: string;
   userDetails: {
     address: string;
     email: string;
@@ -28,6 +29,7 @@ export interface IBooking {
 export interface IBookingModel extends Document {
   userId: ObjectId;
   carId: ObjectId;
+  ownerId: ObjectId;
   userDetails: {
     address: string;
     email: string;

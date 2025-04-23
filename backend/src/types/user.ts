@@ -6,6 +6,11 @@ export default interface IUser {
   email: string;
   password: string;
   role: string;
+  location?: {
+    type: 'Point';
+    coordinates: [number, number];
+    address: string;
+  };
   googleId?: string;
   otp?: string | null;
   otpExpiresAt?: Date | null;
@@ -15,7 +20,7 @@ export default interface IUser {
   resetTokenExpiresAt?: Date | null;
   isBlocked: boolean;
   isVerified: boolean;
-}
+};
 
 export interface IUserGoogle {
   userName: string;
@@ -24,16 +29,29 @@ export interface IUserGoogle {
   googleId?: string;
   isBlocked: boolean;
   isVerified: boolean;
-}
+};
 
 export interface userData {
   userName?: string;
   email?: string;
   password?: string;
   role?: string;
+  location?: {
+    type: 'Point';
+    coordinates: [number, number];
+    address: string;
+  };
   otp?: string;
   otpExpiresAt?: Date;
   isBlocked?: boolean;
   isVerified?: boolean;
-}
+};
+
+export interface IAdmin {
+  _id?: string;
+  email: string;
+  password: string;
+  role: string;
+  refreshToken: string | null;
+};
 

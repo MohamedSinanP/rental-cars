@@ -4,7 +4,6 @@ const Dashboars = () => {
   return (
     <>
       <div className="flex">
-
         <Sidebar />
         <div>
           <h1>This is dashboard</h1>

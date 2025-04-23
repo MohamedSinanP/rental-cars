@@ -1,16 +1,33 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { login } from '../../services/apis/authApi';
 import { useDispatch } from 'react-redux';
-import { removeAuth, setAuth } from '../../redux/slices/authSlice';
+import { setAuth } from '../../redux/slices/authSlice';
 import { toast } from 'react-toastify';
 import GoogleLoginButton from '../../components/GoogleLoginButton';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
+import { sendUserLocation } from '../../services/apis/userApis';
+import { getUserLocation } from '../../utils/getUserLocation';
 
 const LoginPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  const { user, accessToken } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    if (!accessToken || !user?.role) return;
+
+    if (user.role === "user") {
+      navigate('/');
+    } else if (user.role === "owner") {
+      navigate('/owner/dashboard');
+    }
+
+  }, [user, accessToken, navigate]);
 
   const validateForm = () => {
     const validationErrors: { email?: string; password?: string } = {};
@@ -51,12 +68,17 @@ const LoginPage = () => {
         },
         accessToken: result.data.userDetails.accessToken,
       }));
-      console.log(result.data, "this is reslult");
-
       if (result.data.userDetails.user.role === "owner") {
         navigate('/owner/dashboard');
       } else if (result.data.userDetails.user.role === "user") {
-        navigate('/');
+        try {
+          const { location } = await getUserLocation();
+          await sendUserLocation(location);
+        } catch (locationError) {
+          console.error("Could not fetch location:", locationError);
+        } finally {
+          navigate('/');
+        }
       }
       toast.success(result.message);
     } catch (error: any) {

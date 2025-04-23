@@ -18,8 +18,13 @@ export interface LoginResponse {
     password?: string;
     role: string;
     isVerified: boolean;
-  }
-}
+  };
+};
+export interface adminLoginResponse {
+  accessToken: string;
+  email: string;
+  role: string;
+};
 export interface LoginGoogleResponse {
   accessToken: string;
   refreshToken: string;
@@ -32,3 +37,17 @@ export interface LoginGoogleResponse {
     isVerified: boolean;
   };
 };
+
+export interface AuthCheck {
+  userName?: string;
+  email: string;
+  role: string;
+  isVerified?: boolean;
+  isBlocked?: boolean;
+};
+
+export interface PaginatedData<T> {
+  data: T[];
+  totalPages: number;
+  currentPage: number;
+}

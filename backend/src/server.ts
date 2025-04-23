@@ -19,6 +19,7 @@ import googleRoutes from "./routes/google.auth.routes";
 import ownerRoutes from "./routes/owner.routes";
 import userRoutes from "./routes/user.routes";
 import paymentRoutes from "./routes/payment.routes";
+import adminRoutes from "./routes/admin.routes";
 
 // Error middleware
 import { errorHandler } from "./middlewares/error.middleware";
@@ -46,6 +47,7 @@ app.use(passport.initialize());
 // Routes
 app.use("/auth", authRoutes);
 app.use("/auth", googleRoutes);
+app.use("/admin", adminRoutes);
 app.use("/owner", ownerRoutes);
 app.use("/user", userRoutes);
 app.use("/payment", paymentRoutes);

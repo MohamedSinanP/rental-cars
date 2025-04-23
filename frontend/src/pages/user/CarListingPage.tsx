@@ -5,8 +5,8 @@ import Footer from '../../layouts/users/Footer';
 import { CarFormData, ICar } from '../../types/types';
 import { getCars } from '../../services/apis/userApis';
 import { useNavigate } from 'react-router-dom';
+import Pagination from '../../components/Pagination';
 
-// Define interfaces
 interface Car {
   id: number;
   name: string;
@@ -60,6 +60,9 @@ export default function CarListingPage() {
   const [filteredCars, setFilteredCars] = useState<ICar[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 6;
 
   // State for expanded filter sections
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
@@ -76,19 +79,17 @@ export default function CarListingPage() {
   const fetchCars = async (): Promise<void> => {
     try {
       setLoading(true);
-      const result = await getCars();
-      console.log('API Response:', result); // Debug API response
-
-      // Handle array or object response
-      const data: ICar[] = Array.isArray(result) ? result : result.data || [];
-      console.log('Processed Cars:', data); // Debug processed data
+      const result = await getCars(currentPage, limit,);
+      const data: ICar[] = Array.isArray(result) ? result : result.data.data || [];
 
       if (!data.length) {
         console.warn('No cars found in response');
       }
 
       setCars(data);
-      setFilteredCars(data); // Initially, show all cars
+      setCurrentPage(result.data.currentPage);
+      setTotalPages(result.data.totalPages);
+      setFilteredCars(data);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       console.error('Fetch Error:', errorMessage);
@@ -98,12 +99,10 @@ export default function CarListingPage() {
     }
   };
 
-  // Fetch cars on component mount
   useEffect(() => {
     fetchCars();
   }, []);
 
-  // Handle filter changes
   const handleFilterChange = (
     filterKey: keyof Omit<Filters, 'priceRange'>,
     value: string,
@@ -193,7 +192,7 @@ export default function CarListingPage() {
 
   // Mock filter options (replace with dynamic data if available)
   const filterOptions: Omit<Filters, 'priceRange'> = {
-    carType: ['SUVs', 'Economy Cars', 'Sedans', 'Luxury Cars'],
+    carType: ['Hatchback', 'SUV', 'Pickup', 'Sedan', 'Luxury', 'Van'],
     transmission: ['Manual', 'Automatic'],
     fuelType: ['Petrol', 'Diesel', 'Electric', 'CNG'],
     seats: ['4/5 Seater', '6/7 Seater'],
@@ -372,21 +371,12 @@ export default function CarListingPage() {
               </div>
             ))}
           </div>
-
-          {/* Pagination (basic implementation) */}
-          <div className="flex justify-center mt-8 space-x-2">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200">
-              1
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-teal-400 text-white">
-              2
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200">
-              3
-            </button>
-          </div>
         </div>
       </div>
+      <Pagination currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
 
       <Footer />
     </div>

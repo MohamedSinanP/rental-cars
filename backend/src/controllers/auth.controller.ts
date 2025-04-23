@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
-import IAuthController from "../interfaces/auth.controller";
+import IAuthController from "../interfaces/controllers/auth.controller";
 import TYPES from "../di/types";
-import IAuthService from "../interfaces/auth.service";
+import IAuthService from "../interfaces/services/auth.service";
 import { NextFunction, Request, Response } from "express";
 import { Role } from "../types/types";
 import { HttpResponse } from "../utils/http.response";
@@ -31,6 +31,16 @@ export default class AuthController implements IAuthController {
       const owner = await this.authService.signupOwner(userName, email, password, role, commision);
       res.status(201).json(HttpResponse.success(owner, "OTP sended successfully"));
     } catch (error: any) {
+      next(error);
+    };
+  };
+
+  async adminLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      const user = await this.authService.adminLogin(email, password, res);
+      res.status(200).json(HttpResponse.success(user, "You are logged in successfully"));
+    } catch (error) {
       next(error);
     };
   };

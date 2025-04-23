@@ -2,7 +2,6 @@ import mongoose, { Schema, model, Document } from 'mongoose';
 import { IBooking, IBookingModel } from '../types/booking';
 
 
-// Define the schema
 const bookingSchema = new Schema<IBookingModel>({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -12,6 +11,11 @@ const bookingSchema = new Schema<IBookingModel>({
   carId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Car',
+    required: true,
+  },
+  ownerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Owner',
     required: true,
   },
   userDetails: {
@@ -47,7 +51,6 @@ const bookingSchema = new Schema<IBookingModel>({
   },
 }, { timestamps: true });
 
-// Define the model
 const Booking = model<IBookingModel>('Booking', bookingSchema);
 
 export default Booking;

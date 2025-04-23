@@ -12,7 +12,7 @@ const initialState: Auth = {
     isVerified: null
   },
   accessToken: null
-}
+};
 
 
 const authSlice = createSlice({

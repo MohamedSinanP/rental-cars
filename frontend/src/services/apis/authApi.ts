@@ -50,7 +50,20 @@ export const login = async ({ email, password }: { email: string, password: stri
       throw new Error("Network error or server not responding");
     };
   };
-}
+};
+
+export const adminLogin = async (formData: { email: string; password: string }) => {
+  try {
+    const response = await api.post('/auth/admin-login', formData);
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || "OTP failed");
+    } else {
+      throw new Error("Network error or server not responding");
+    };
+  }
+};
 
 export const verifyOtp = async (otpData: otpData) => {
   try {
@@ -123,7 +136,6 @@ export const logout = async (navigate: ReturnType<typeof useNavigate>) => {
     const response = await api.post('/auth/logout');
     await store.dispatch(removeAuth());
     return response.data;
-
   } catch (error: any) {
     if (error.response && error.response.data) {
       throw new Error(error.response.data.message || "OTP failed");

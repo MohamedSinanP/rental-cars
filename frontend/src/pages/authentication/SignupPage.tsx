@@ -1,25 +1,18 @@
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { signupUser } from '../../services/apis/authApi';
-import { IUserSignup } from '../../types/types';
+import { IUserSignup, UserInput } from '../../types/types';
 import { useDispatch } from 'react-redux';
 import { setAuth } from '../../redux/slices/authSlice';
 import { AppDispatch } from '../../redux/store';
 import { toast } from 'react-toastify';
 
 
-interface User {
-  userName: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-}
-
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const [formData, setFormData] = useState<User>({
+  const [formData, setFormData] = useState<UserInput>({
     userName: "",
     email: "",
     password: "",
@@ -35,7 +28,7 @@ const SignupPage = () => {
     });
   };
 
-  const validateForm = (data: User) => {
+  const validateForm = (data: UserInput) => {
     const errors: any = {};
     if (!data.userName.trim()) {
       errors.userName = "Username is required"

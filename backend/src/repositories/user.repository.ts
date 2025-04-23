@@ -3,7 +3,7 @@ import { BaseRepository } from "./base.repository";
 import IUser from "../types/user";
 import { IUserModel } from "../models/user.model";
 import TYPES from "../di/types";
-import IUserRepository from "../interfaces/user.repository";
+import IUserRepository from "../interfaces/repositories/user.repository";
 import { Model } from "mongoose";
 
 @injectable()
@@ -27,5 +27,13 @@ export default class UserRepository extends BaseRepository<IUserModel> implement
         $set: { otp: null, refreshToken, otpExpiresAt: null, isVerified: true }
       }
     ).exec();
+  };
+
+  async findPaginated(page: number, limit: number): Promise<{ data: IUserModel[]; total: number }> {
+    const skip = (page - 1) * limit;
+    const data = await this.userModel.find().skip(skip).limit(limit);
+    const total = await this.userModel.countDocuments();
+    return { data, total };
   }
+
 }

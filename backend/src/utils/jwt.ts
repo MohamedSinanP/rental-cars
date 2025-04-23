@@ -15,7 +15,7 @@ export class JwtService implements IJwtService {
   private readonly refreshTokenSecret = process.env.JWT_REFRESH_SECRET as string;
 
   generateAccessToken(userId: string, role: string): string {
-    return jwt.sign({ userId, role }, this.accessTokenSecret, { expiresIn: "1m" });
+    return jwt.sign({ userId, role }, this.accessTokenSecret, { expiresIn: "15m" });
   }
 
   generateRefreshToken(userId: string, role: string): string {

@@ -1,6 +1,6 @@
 import { Document, Model, UpdateQuery } from "mongoose";
 import { injectable } from "inversify";
-import IBaseRepository from "../interfaces/base.repository";
+import IBaseRepository from "../interfaces/repositories/base.repository";
 
 @injectable()
 export class BaseRepository<T extends Document> implements IBaseRepository<T> {

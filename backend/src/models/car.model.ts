@@ -20,6 +20,18 @@ const carSchema = new Schema<ICarModel>(
     rcDoc: { type: String, required: true },
     pucDoc: { type: String, required: true },
     insuranceDoc: { type: String, required: true },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationRejected: {
+      type: Boolean,
+      default: false,
+    },
+    rejectionReason: {
+      type: String,
+      default: '',
+    },
     location: {
       type: {
         type: String,

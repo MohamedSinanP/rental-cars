@@ -1,4 +1,4 @@
-import IPaymentService from "../interfaces/payment.service";
+import IPaymentService from "../interfaces/services/payment.service";
 import stripe from "../config/stripe";
 import { HttpError } from "../utils/http.error";
 

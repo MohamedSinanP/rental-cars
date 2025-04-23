@@ -41,6 +41,9 @@ export interface ICarModel extends Document {
   rcDoc: string;
   pucDoc: string;
   insuranceDoc: string;
+  isVerified: boolean;
+  verificationRejected: boolean;
+  rejectionReason: string;
   location: {
     type: 'Point';
     coordinates: [number, number];

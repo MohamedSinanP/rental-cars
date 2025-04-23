@@ -3,19 +3,30 @@ import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
 import { IBooking, IBookingWithPopulatedData } from '../../types/types';
 import { userRentals } from '../../services/apis/userApis';
+import RentalDetailsModal from '../../components/RentalDetailsModal';
+import Pagination from '../../components/Pagination';
 
 const CarRentalsPage: React.FC = () => {
   const [rentals, setRentals] = useState<IBookingWithPopulatedData[]>([]);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedRental, setSelectedRental] = useState<IBookingWithPopulatedData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 4;
 
   useEffect(() => {
     const fetchRentals = async (): Promise<void> => {
       try {
         setLoading(true);
-        const data: IBookingWithPopulatedData[] = await userRentals();
+        const result = await userRentals(currentPage, limit);;
+        const data: IBookingWithPopulatedData[] = result.data.data;
+        console.log(result, "this is data");
+
         setRentals(data);
+        setCurrentPage(result.data.currentPage);
+        setTotalPages(result.data.totalPages);
         setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -24,7 +35,7 @@ const CarRentalsPage: React.FC = () => {
     };
 
     fetchRentals();
-  }, []);
+  }, [currentPage]);
 
   const handleInvoiceDownload = (id: string): void => {
     console.log(`Downloading invoice for rental ${id}`);
@@ -32,8 +43,11 @@ const CarRentalsPage: React.FC = () => {
   };
 
   const handleViewDetails = (id: string): void => {
-    console.log(`Viewing details for rental ${id}`);
-    // Add navigation or modal logic here
+    const rental = rentals.find((r) => r._id === id);
+    if (rental) {
+      setSelectedRental(rental);
+      setIsModalOpen(true);
+    }
   };
 
   const handlePageChange = (page: number): void => {
@@ -43,7 +57,7 @@ const CarRentalsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400"></div>
       </div>
     );
   }
@@ -99,20 +113,20 @@ const CarRentalsPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-medium">Total Price</p>
-                    <p>$ {rental.totalPrice}</p>
+                    <p>$ {rental.totalPrice.toFixed(2)}</p>
                   </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                   <button
                     onClick={() => handleInvoiceDownload(rental._id!)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded text-sm w-full sm:w-auto text-center"
+                    className="bg-teal-400 text-white px-4 py-2 rounded text-sm w-full sm:w-auto text-center"
                   >
                     Invoice Down
                   </button>
                   <button
                     onClick={() => handleViewDetails(rental._id!)}
-                    className="border border-blue-500 text-blue-500 px-4 py-2 rounded text-sm w-full sm:w-auto text-center"
+                    className="border border-teal-400 text-teal-400 px-4 py-2 rounded text-sm w-full sm:w-auto text-center"
                   >
                     View Details
                   </button>
@@ -152,17 +166,17 @@ const CarRentalsPage: React.FC = () => {
                     <p>{rental.dropoffLocation}</p>
                   </div>
                   <div className="text-sm">{rental.status}</div>
-                  <div className="text-sm">$ {rental.totalPrice}</div>
+                  <div className="text-sm">$ {rental.totalPrice.toFixed(2)}</div>
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleInvoiceDownload(rental._id!)}
-                      className="bg-blue-500 text-white px-4 py-1 rounded text-sm"
+                      className="bg-teal-400 text-white px-4 py-1 rounded text-sm"
                     >
                       Invoice Down
                     </button>
                     <button
                       onClick={() => handleViewDetails(rental._id!)}
-                      className="border border-blue-500 text-blue-500 px-4 py-1 rounded text-sm"
+                      className="border border-teal-400 text-teal-400 px-4 py-1 rounded text-sm"
                     >
                       View Details
                     </button>
@@ -175,36 +189,20 @@ const CarRentalsPage: React.FC = () => {
           {/* Pagination */}
           <div className="flex justify-center py-4 mt-4 bg-white rounded-lg shadow">
             <div className="flex space-x-1">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 text-gray-600 disabled:opacity-50"
-              >
-                &lt;
-              </button>
-              {[1, 2].map((page) => (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === page
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-600'
-                    }`}
-                >
-                  {page}
-                </button>
-              ))}
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === 2}
-                className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 text-gray-600 disabled:opacity-50"
-              >
-                &gt;
-              </button>
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+              />
             </div>
           </div>
         </div>
       </div>
+      <RentalDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        rental={selectedRental}
+      />
       <Footer />
     </>
   );

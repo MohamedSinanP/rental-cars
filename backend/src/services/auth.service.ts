@@ -2,20 +2,23 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { inject, injectable } from "inversify";
-import IAuthService from "../interfaces/auth.service";
+import IAuthService from "../interfaces/services/auth.service";
 import TYPES from "../di/types";
-import IUserRepository from "../interfaces/user.repository";
+import IUserRepository from "../interfaces/repositories/user.repository";
 import IUser, { IUserGoogle, userData } from "../types/user";
-import { IJwtToken, LoginGoogleResponse, LoginResponse, Role } from "../types/types";
+import { adminLoginResponse, AuthCheck, IJwtToken, LoginGoogleResponse, LoginResponse, Role } from "../types/types";
 import { generateOtp, IOtpService } from "../utils/mail";
 import { HttpError } from "../utils/http.error";
 import { IJwtService } from "../utils/jwt";
 import { Request, Response } from "express";
 import IOwner from "../types/owner";
-import IOwnerRepository from "../interfaces/owner.repository";
+import IOwnerRepository from "../interfaces/repositories/owner.repository";
 import { Profile } from "passport-google-oauth20";
 import { IUserModel } from "../models/user.model";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
+import IAdminRepository from "../interfaces/repositories/admin.repository";
+import { IOwnerModel } from "../models/owner.model";
+import { IAdminModel } from "../models/admin.model";
 
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
@@ -26,6 +29,7 @@ export default class AuthService implements IAuthService {
   constructor(
     @inject(TYPES.IUserRepository) private userRepository: IUserRepository,
     @inject(TYPES.IOwnerRepository) private ownerRepository: IOwnerRepository,
+    @inject(TYPES.IAdminRepository) private adminRepository: IAdminRepository,
     @inject(TYPES.IOtpService) private otpService: IOtpService,
     @inject(TYPES.IJwtService) private jwtService: IJwtService
   ) {
@@ -109,8 +113,38 @@ export default class AuthService implements IAuthService {
       role: owner.role,
       commision: owner.commision,
       isVerified: owner.isVerified,
-    }
-  }
+    };
+  };
+
+  async adminLogin(email: string, password: string, res: Response): Promise<adminLoginResponse> {
+    const user = await this.adminRepository.findByEmail(email);
+    if (!user) {
+      throw new HttpError(400, "Invalid email or password");
+    };
+
+    const isPasswordValid = password === user.password;
+    if (!isPasswordValid) {
+      throw new HttpError(400, "Password is incorrect");
+    };
+
+    const accessToken = this.jwtService.generateAccessToken(user.id.toString(), user.role);
+    const refreshToken = this.jwtService.generateRefreshToken(user.id.toString(), user.role);
+
+    await this.adminRepository.update(String(user._id), { refreshToken: refreshToken });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    return {
+      accessToken,
+      email: user.email,
+      role: user.role
+    };
+  };
 
   async login(email: string, password: string, res: Response): Promise<LoginResponse> {
     let user = await this.userRepository.findByEmail(email);
@@ -135,6 +169,12 @@ export default class AuthService implements IAuthService {
     const accessToken = this.jwtService.generateAccessToken(user.id.toString(), user.role);
     const refreshToken = this.jwtService.generateRefreshToken(user.id.toString(), user.role);
 
+    if (user.role === Role.USER) {
+      await this.userRepository.update(String(user._id), { refreshToken: refreshToken });
+    } else {
+      await this.ownerRepository.update(String(user._id), { refreshToken: refreshToken });
+    };
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -152,7 +192,6 @@ export default class AuthService implements IAuthService {
         isVerified: user.isVerified,
       }
     };
-
   };
 
   async googleAuth(profile: Profile): Promise<LoginGoogleResponse> {
@@ -225,10 +264,7 @@ export default class AuthService implements IAuthService {
       sameSite: process.env.NODE_ENV === "production" ? 'none' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
-
-
     return { accessToken };
-
   };
 
   async resendOtp(email: string): Promise<void> {
@@ -295,8 +331,7 @@ export default class AuthService implements IAuthService {
     } else {
       await this.ownerRepository.update(String(user._id), { resetToken, resetTokenExpiresAt });
 
-    }
-
+    };
     this.otpService.sendEmail(email, resetToken, "passwordReset");
   };
 
@@ -318,7 +353,6 @@ export default class AuthService implements IAuthService {
 
   async rotateRefreshToken(refreshToken: string): Promise<{ newAccessToken: string; newRefreshToken: string; }> {
     if (!refreshToken) throw new HttpError(401, "No refresh token provided");
-
     let decoded: any;
     try {
       decoded = jwt.verify(refreshToken, REFRESH_SECRET!);
@@ -337,10 +371,16 @@ export default class AuthService implements IAuthService {
 
     const payload = decoded as { userId: string, role: string };
 
-    let user = await this.userRepository.findById(payload.userId);
-    if (!user) {
+    let user;
+
+    if (payload.role === Role.USER) {
+      user = await this.userRepository.findById(payload.userId);
+    } else if (payload.role === Role.OWNER) {
       user = await this.ownerRepository.findById(payload.userId);
+    } else if (payload.role === Role.ADMIN) {
+      user = await this.adminRepository.findById(payload.userId);
     }
+
     if (!user || user.refreshToken !== refreshToken) {
       throw new HttpError(403, "Invalid or expired refresh token");
     }
@@ -352,8 +392,10 @@ export default class AuthService implements IAuthService {
 
     if (role === Role.USER) {
       await this.userRepository.update(String(_id), { refreshToken: newRefreshToken });
-    } else {
+    } else if (role === Role.OWNER) {
       await this.ownerRepository.update(String(_id), { refreshToken: newRefreshToken });
+    } else if (role === Role.ADMIN) {
+      await this.adminRepository.update(String(_id), { refreshToken: newRefreshToken });
     }
 
     return {
@@ -372,10 +414,15 @@ export default class AuthService implements IAuthService {
 
     if (!refreshToken) throw new HttpError(204, "No token to logout");
 
-    let updatedUser = await this.userRepository.update(userId, { refreshToken: null });
+    let updatedUser: IUserModel | IOwnerModel | IAdminModel | null = null;
+    updatedUser = await this.userRepository.update(userId, { refreshToken: null });
     if (!updatedUser) {
       updatedUser = await this.ownerRepository.update(userId, { refreshToken: null });
-    };
+    }
+
+    if (!updatedUser) {
+      updatedUser = await this.adminRepository.update(userId, { refreshToken: null });
+    }
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -384,22 +431,37 @@ export default class AuthService implements IAuthService {
 
   };
 
-  async getCurrentUser(userId: string): Promise<IUser> {
-    let user = await this.userRepository.findById(userId);
+  async getCurrentUser(userId: string): Promise<AuthCheck> {
+    let user: IUserModel | IOwnerModel | IAdminModel | null = null;
+    user = await this.userRepository.findById(userId);
     if (!user) {
       user = await this.ownerRepository.findById(userId);
     };
     if (!user) {
+      user = await this.adminRepository.findById(userId);
+    }
+    if (!user) {
       throw new HttpError(400, "User not found");
     }
-    return {
-      userName: user.userName,
-      email: user.email,
-      password: user.password,
-      isBlocked: user.isBlocked,
-      role: user.role,
-      isVerified: user.isVerified,
-    };
+    if (user.role === Role.USER || user.role === Role.OWNER) {
+      // Narrow the type using a type assertion
+      const safeUser = user as IUserModel | IOwnerModel;
+
+      return {
+        userName: safeUser.userName,
+        email: safeUser.email,
+        isBlocked: safeUser.isBlocked,
+        role: safeUser.role,
+        isVerified: safeUser.isVerified,
+      };
+    } else {
+      // For Admin, return only what is safe to access
+      return {
+        email: user.email,
+        role: user.role,
+      };
+    }
+
   };
 };
 

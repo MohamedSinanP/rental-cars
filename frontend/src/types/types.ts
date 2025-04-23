@@ -13,12 +13,20 @@ export interface IOwnerSignup {
   commision: number;
 }
 
+export interface TableData {
+  userName: string;
+  email: string;
+  role: string;
+  isBlocked: boolean;
+  commision?: number;
+}
+
 export interface User {
-  userName: string | null;
+  userName?: string | null;
   email: string | null;
-  isVerified: boolean | null;
+  isVerified?: boolean | null;
   role: string | null;
-  isBlocked: boolean | null;
+  isBlocked?: boolean | null;
 }
 
 export interface Auth {
@@ -60,6 +68,7 @@ export interface CarFormData {
 }
 export interface ICar {
   _id: string;
+  ownerId: string;
   carName: string;
   carModel: string;
   carType: string;
@@ -81,7 +90,9 @@ export interface ICar {
   rcDoc: FileList;
   pucDoc: FileList;
   insuranceDoc: FileList;
-  carDoc: FileList;
+  isVerified: boolean;
+  verificationRejected: boolean;
+  rejectionReason: string;
   carImages: string[];
   review?: string[];
 };
@@ -90,6 +101,7 @@ export interface IBooking {
   _id?: string;
   userId?: string | User;
   carId: string | ICar;
+  ownerId: string | User;
   userDetails: {
     address: string;
     email: string;
@@ -115,4 +127,48 @@ export interface IBooking {
 export interface IBookingWithPopulatedData extends Omit<IBooking, 'userId' | 'carId'> {
   userId: User;
   carId: ICar;
+  ownerId: User;
+}
+
+export interface CarDocument {
+  _id: string;
+  carName: string;
+  carModel: string;
+  registrationNumber: string;
+  rcDoc: string;
+  pucDoc: string;
+  insuranceDoc: string;
+  ownerId: {
+    name: string;
+    email: string;
+  };
+  isVerified: boolean;
+  verificationRejected?: boolean;
+  rejectionReason?: string;
+};
+
+export type IUsers = {
+  _id: string;
+  userName: string;
+  email: string;
+  role: string;
+  isBlocked: boolean;
+  commission?: number;
+};
+
+
+export interface Owner {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  commission: string;
+};
+
+
+export interface UserInput {
+  userName: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
 }

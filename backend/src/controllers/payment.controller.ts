@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import IPaymentController from "../interfaces/payment.contoller";
+import IPaymentController from "../interfaces/controllers/payment.contoller";
 import { inject, injectable } from "inversify";
 import TYPES from "../di/types";
-import IPaymentService from "../interfaces/payment.service";
+import IPaymentService from "../interfaces/services/payment.service";
 import { HttpResponse } from "../utils/http.response";
 
 @injectable()

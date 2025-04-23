@@ -26,6 +26,18 @@ const userSchema = new Schema<IUserModel>(
       type: String,
       default: "user",
     },
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
+      address: { type: String, required: true },
+    },
     googleId: {
       type: String,
       required: false
@@ -68,4 +80,5 @@ const userSchema = new Schema<IUserModel>(
   }
 );
 
+userSchema.index({ location: "2dsphere" });
 export const User = model<IUserModel>("User", userSchema);

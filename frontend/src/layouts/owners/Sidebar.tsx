@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { CalendarCheck, Car, LayoutDashboard, Menu, X, Settings, LogOut } from 'lucide-react';
+import { CalendarCheck, Car, LayoutDashboard, Menu, X, Settings, LogOut, History } from 'lucide-react';
 import Logo from '../../components/Logo';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { removeAuth } from '../../redux/slices/authSlice';
+import { logout } from '../../services/apis/authApi';
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -15,8 +16,8 @@ const Sidebar = () => {
       setIsOpen(false);
     }
   };
-  const logout = () => {
-    dispatch(removeAuth());
+  const handleLogout = async () => {
+    const result = await logout(navigate);
     navigate('/login');
   }
 
@@ -62,10 +63,18 @@ const Sidebar = () => {
               </NavLink>
             </li>
             <li className='m-4'>
-              <NavLink to={'/'} onClick={handleLinkClick}>
+              <NavLink to={'/owner/rentals'} onClick={handleLinkClick}>
                 <div className="flex items-center gap-x-2">
                   <CalendarCheck className="w-5 h-5" />
                   <span>Bookings</span>
+                </div>
+              </NavLink>
+            </li>
+            <li className='m-4'>
+              <NavLink to={'/owner/car-history'} onClick={handleLinkClick}>
+                <div className="flex items-center gap-x-2">
+                  <History className="w-5 h-5" />
+                  <span>Added History</span>
                 </div>
               </NavLink>
             </li>
@@ -78,10 +87,10 @@ const Sidebar = () => {
               </NavLink>
             </li>
             <li className='m-4'>
-              <div className="flex items-center gap-x-2">
+              <button className="flex items-center gap-x-2 cursor-pointer">
                 <LogOut className="w-5 h-5" />
-                <span onClick={logout} >LogOut</span>
-              </div>
+                <span onClick={handleLogout} >LogOut</span>
+              </button>
             </li>
           </ul>
         </div>

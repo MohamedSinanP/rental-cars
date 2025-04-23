@@ -1,18 +1,12 @@
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import { toast } from 'react-toastify';
 import { signupOwner } from '../../services/apis/authApi';
-import { IOwnerSignup } from '../../types/types';
+import { IOwnerSignup, Owner } from '../../types/types';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setAuth } from '../../redux/slices/authSlice';
 
-interface Owner {
-  fullName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  commission: string;
-}
+
 
 const SignupOwner = () => {
   const dispatch = useDispatch();
