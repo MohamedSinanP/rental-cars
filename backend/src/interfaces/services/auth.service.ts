@@ -1,8 +1,8 @@
-import IUser, { IUserGoogle } from "../types/user";
-import { adminLoginResponse, AuthCheck, IJwtToken, LoginGoogleResponse, LoginResponse } from "../types/types";
+import IUser from "../../types/user";
+import { adminLoginResponse, AuthCheck, IJwtToken, LoginGoogleResponse, LoginResponse } from "../../types/types";
 import { Request, Response } from "express";
 import { Profile as GoogleProfile } from "passport-google-oauth20";
-import IOwner from "../types/owner";
+import IOwner from "../../types/owner";
 
 export default interface IAuthService {
   signupConsumer(userName: string, email: string, password: string, role: string): Promise<IUser>;

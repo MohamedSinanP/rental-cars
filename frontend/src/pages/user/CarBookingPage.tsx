@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, CheckCircle, Wallet as WalletIcon } from 'lucide-react';
+import { ArrowLeft, Calendar, CheckCircle, Wallet as WalletIcon, Tag, Gift, MapPin } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
 import stripe_logo from '../../assets/stripe-logo.png.png';
-import { carBookingApi, carDetails, paymentIntent } from '../../services/apis/userApis';
+import { carBookingApi, carDetails, paymentIntent, getUserSubscription, getUserAddresses } from '../../services/apis/userApis';
 import { toast } from 'react-toastify';
 import { IBooking, ICar } from '../../types/types';
-import { formatINR } from '../../utils/commonUtilities';
+import { extractFeatureValue, formatINR } from '../../utils/commonUtilities';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
@@ -25,10 +25,54 @@ interface BookingFormData {
   address: string;
   paymentMethod: 'wallet' | 'stripe';
   allowGPS: boolean;
+  selectedAddressId?: string;
 }
 
 interface ICarExtended extends ICar {
   pricePerHour?: number;
+}
+
+interface IUserSubscription {
+  userId: string;
+  subscriptionId: ISubscription;
+  stripeSubscriptionId: string;
+  status: 'active' | 'inactive';
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+  cancelAtPeriodEnd: boolean;
+  plan?: string;
+  discountPercentage?: number;
+  freeHours?: number;
+}
+
+interface ISubscription {
+  name: string;
+  description: string;
+  features: string[];
+  stripeProductId: string;
+  stripePriceId: string;
+  price: number;
+  billingCycle: 'monthly' | 'yearly';
+  isActive: boolean;
+}
+
+interface IUserAddress {
+  _id: string;
+  userId: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface IUserDetails {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address?: string;
 }
 
 const CarBookingPage: React.FC = () => {
@@ -41,8 +85,12 @@ const CarBookingPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<IUserSubscription | null>(null);
+  const [discount, setDiscount] = useState<number | null>(null);
+  const [freeHours, setFreeHours] = useState<number>(0);
+  const [userAddresses, setUserAddresses] = useState<IUserAddress[]>([]);
 
-  const { register, handleSubmit, control, formState: { errors }, watch, setValue } = useForm<BookingFormData>({
+  const { register, handleSubmit, control, formState: { errors }, watch, setValue, reset } = useForm<BookingFormData>({
     defaultValues: {
       pickupDateTime: '',
       dropoffDateTime: '',
@@ -54,12 +102,14 @@ const CarBookingPage: React.FC = () => {
       address: '',
       paymentMethod: 'wallet',
       allowGPS: true,
+      selectedAddressId: '',
     },
   });
 
   const paymentMethod = watch('paymentMethod');
   const pickupDateTime = watch('pickupDateTime');
   const dropoffDateTime = watch('dropoffDateTime');
+  const selectedAddressId = watch('selectedAddressId');
 
   useEffect(() => {
     const fetchCarData = async () => {
@@ -71,15 +121,27 @@ const CarBookingPage: React.FC = () => {
 
       try {
         setLoading(true);
+
+        // Fetch car details
         const result = await carDetails(id);
         const data: ICarExtended = await result.data;
-        // Derive pricePerHour if not provided
         if (!data.pricePerHour) {
-          data.pricePerHour = data.pricePerDay / 24; // e.g., ₹2400/day → ₹100/hour
+          data.pricePerHour = data.pricePerDay / 24;
         }
         setCar(data);
         setValue('pickupLocation', data.location.address);
         setValue('dropoffLocation', data.location.address);
+
+        // Fetch user subscription status
+        const subscriptionResult = await getUserSubscription();
+        setSubscription(subscriptionResult.data);
+
+
+
+        // Fetch user addresses
+        const addressesResult = await getUserAddresses();
+        setUserAddresses(addressesResult.data || []);
+
       } catch (err: any) {
         toast.error(err.message);
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -91,19 +153,73 @@ const CarBookingPage: React.FC = () => {
     fetchCarData();
   }, [id, setValue]);
 
+  useEffect(() => {
+    if (subscription?.subscriptionId?.features) {
+      try {
+        if (subscription.subscriptionId.features[1]) {
+          const discountValue = extractFeatureValue(subscription.subscriptionId.features[1]);
+          setDiscount(Number(discountValue));
+        }
+        if (subscription.subscriptionId.features[2]) {
+          const freeHours = extractFeatureValue(subscription.subscriptionId.features[2]);
+          setFreeHours(Number(freeHours));
+        }
+      } catch (err: any) {
+        console.error('Failed to extract subscription benefits:', err.message);
+        toast.error('Failed to process subscription benefits');
+      }
+    }
+  }, [subscription]);
+
+  // Handle address selection change
+  useEffect(() => {
+    if (selectedAddressId && selectedAddressId !== 'new') {
+      const selectedAddress = userAddresses.find(addr => addr._id === selectedAddressId);
+      if (selectedAddress) {
+        setValue('fullName', selectedAddress.name);
+        setValue('email', selectedAddress.email);
+        setValue('phone', selectedAddress.phoneNumber);
+        setValue('address', selectedAddress.address);
+      }
+    }
+  }, [selectedAddressId, userAddresses, setValue]);
+
   const calculateTotalCost = () => {
     if (!car) {
-      return { rentalCost: 0, tax: 0, total: 0, hours: 0 };
+      return { rentalCost: 0, tax: 0, total: 0, hours: 0, discount: 0, discountedTotal: 0, freeHours: 0, chargeableHours: 0 };
     } else if (!pickupDateTime || !dropoffDateTime) {
-      return { rentalCost: 0, tax: 0, total: car.deposit, hours: 0 };
+      return { rentalCost: 0, tax: 0, total: car.deposit, hours: 0, discount: 0, discountedTotal: car.deposit, freeHours: 0, chargeableHours: 0 };
     }
 
     const start = new Date(pickupDateTime);
     const end = new Date(dropoffDateTime);
     const hours = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600)));
-    const rentalCost = (car.pricePerHour || 100) * hours;
+
+    const appliedFreeHours = subscription?.status === 'active' ? freeHours : 0;
+
+    const chargeableHours = Math.max(0, hours - appliedFreeHours);
+
+    const rentalCost = (car.pricePerHour || 100) * chargeableHours;
     const taxAmount = rentalCost * 0.1;
-    return { rentalCost, tax: taxAmount, total: rentalCost + taxAmount + car.deposit, hours };
+    const subtotal = rentalCost + taxAmount;
+
+    const discountPercentage = subscription?.status === 'active' ? (subscription.discountPercentage || 10) : 0;
+    const discountAmount = subtotal * (discountPercentage / 100);
+
+    const discountedTotal = subtotal - discountAmount + car.deposit;
+    const total = subtotal + car.deposit;
+
+    return {
+      rentalCost,
+      tax: taxAmount,
+      total,
+      hours,
+      discount: discountAmount,
+      discountPercentage,
+      discountedTotal,
+      freeHours: appliedFreeHours,
+      chargeableHours
+    };
   };
 
   const onSubmit = async (data: BookingFormData) => {
@@ -113,14 +229,14 @@ const CarBookingPage: React.FC = () => {
     }
 
     const cost = calculateTotalCost();
+    const finalAmount = subscription?.status === 'active' ? cost.discountedTotal : cost.total;
 
     let currentClientSecret = clientSecret;
     let currentPaymentId = paymentIntentId;
 
-    // Step 1: Create PaymentIntent if needed
     if (data.paymentMethod === 'stripe' && !currentClientSecret) {
       try {
-        const result = await paymentIntent(cost.total);
+        const result = await paymentIntent(finalAmount);
         const { clientSecret: newSecret, paymentId } = result.data;
         setClientSecret(newSecret);
         setPaymentIntentId(paymentId);
@@ -132,7 +248,6 @@ const CarBookingPage: React.FC = () => {
       }
     }
 
-    // Step 2: Confirm Stripe Payment
     if (data.paymentMethod === 'stripe' && currentClientSecret) {
       try {
         const cardElement = elements.getElement(CardElement);
@@ -158,7 +273,6 @@ const CarBookingPage: React.FC = () => {
       }
     }
 
-    // Step 3: Create booking
     try {
       const bookingData: IBooking = {
         carId: id,
@@ -173,9 +287,12 @@ const CarBookingPage: React.FC = () => {
         dropoffDateTime: new Date(data.dropoffDateTime),
         pickupLocation: data.pickupLocation,
         dropoffLocation: data.dropoffLocation,
-        totalPrice: cost.total,
+        totalPrice: finalAmount,
         paymentMethod: data.paymentMethod,
         paymentId: currentPaymentId!,
+        isPremiumBooking: subscription?.status === 'active',
+        discountPercentage: subscription?.status === 'active' ? subscription.discountPercentage || 10 : 0,
+        discountAmount: cost.total - finalAmount,
       };
 
       const result = await carBookingApi(bookingData);
@@ -253,6 +370,33 @@ const CarBookingPage: React.FC = () => {
                 <p className="text-gray-600">◆ Deposit Amount: {formatINR(car.deposit)}</p>
               </div>
             </div>
+
+            {/* Subscription Badge */}
+            {subscription?.status === 'active' && (
+              <div className="mt-4 bg-teal-50 border border-teal-200 rounded-lg p-3">
+                <div className="flex items-center mb-1">
+                  <Tag size={16} className="text-teal-600 mr-1" />
+                  <h3 className="text-teal-700 font-semibold">
+                    {subscription.subscriptionId.name || 'Premium'} Member Benefits
+                  </h3>
+                </div>
+                <div className="flex items-center mb-1 text-teal-600 text-sm">
+                  <span className="flex items-center">
+                    <Tag size={14} className="mr-1" />
+                    {discount}% off on rental cost
+                  </span>
+                </div>
+                <div className="flex items-center text-teal-600 text-sm">
+                  <Gift size={14} className="mr-1" />
+                  {freeHours} free hours included
+                </div>
+                {subscription.currentPeriodEnd && (
+                  <p className="text-xs text-teal-500 mt-1">
+                    Valid until: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="w-full md:w-2/3 p-6 border rounded-lg">
@@ -337,7 +481,7 @@ const CarBookingPage: React.FC = () => {
                       render={({ field }) => (
                         <button
                           type="button"
-                          className={`w - 5 h - 5 rounded ${field.value ? 'text-teal-500' : 'text-gray-300'} `}
+                          className={`w-5 h-5 rounded ${field.value ? 'text-teal-500' : 'text-gray-300'} `}
                           onClick={() => field.onChange(!field.value)}
                         >
                           <CheckCircle size={20} className={field.value ? 'fill-teal-500' : ''} />
@@ -350,6 +494,28 @@ const CarBookingPage: React.FC = () => {
 
               <div className="mb-6">
                 <h2 className="text-lg font-semibold mb-4">User Details</h2>
+
+                {/* Saved Addresses Selector */}
+                <div className="mb-4">
+                  <label className="block mb-2 text-sm">Select Address</label>
+                  <div className="relative">
+                    <select
+                      {...register('selectedAddressId')}
+                      className="w-full border rounded p-2 pr-8 outline-none appearance-none"
+                    >
+                      <option value="new">Use New Address</option>
+                      {userAddresses.map(address => (
+                        <option key={address._id} value={address._id}>
+                          {address.name} - {address.address.substring(0, 30)}...
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <MapPin size={18} className="text-gray-500" />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <input
@@ -457,20 +623,62 @@ const CarBookingPage: React.FC = () => {
               <div className="mb-6">
                 <h2 className="text-lg font-semibold mb-4">Price Breakdown</h2>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600">Rental Cost ({cost.hours} hour{cost.hours !== 1 ? 's' : ''}):</span>
+                  <span className="text-gray-600">Deposit:</span>
                   <span>{formatINR(car.deposit)}</span>
                 </div>
+
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600">Rental Cost ({cost.hours} hour{cost.hours !== 1 ? 's' : ''}):</span>
+                  <span className="text-gray-600">Total Rental Duration:</span>
+                  <span>{cost.hours} hour{cost.hours !== 1 ? 's' : ''}</span>
+                </div>
+
+                {subscription?.status === 'active' && cost.freeHours > 0 && (
+                  <div className="flex justify-between items-center mb-2 text-teal-600">
+                    <span className="flex items-center">
+                      <Gift size={16} className="mr-1" />
+                      Free Hours:
+                    </span>
+                    <span>{cost.freeHours} hour{cost.freeHours !== 1 ? 's' : ''}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600">Chargeable Hours:</span>
+                  <span>{cost.chargeableHours} hour{cost.chargeableHours !== 1 ? 's' : ''}</span>
+                </div>
+
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600">Rental Cost:</span>
                   <span>{formatINR(cost.rentalCost)}</span>
                 </div>
+
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-600">Tax (10%):</span>
                   <span>{formatINR(cost.tax)}</span>
                 </div>
-                <div className="flex justify-between items-center font-bold">
+
+                {subscription?.status === 'active' && cost.discount > 0 && (
+                  <div className="flex justify-between items-center mb-2 text-teal-600">
+                    <span className="flex items-center">
+                      <Tag size={16} className="mr-1" />
+                      Subscription Discount ({cost.discountPercentage}%):
+                    </span>
+                    <span>-{formatINR(cost.discount)}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center font-bold border-t pt-2 mt-2">
                   <span>Total Cost:</span>
-                  <span>{formatINR(cost.total)}</span>
+                  <span>
+                    {subscription?.status === 'active' && (cost.discount > 0 || cost.freeHours > 0) ? (
+                      <>
+                        <span className="text-sm text-gray-500 line-through mr-2">{formatINR(cost.total)}</span>
+                        <span className="text-teal-600">{formatINR(cost.discountedTotal)}</span>
+                      </>
+                    ) : (
+                      formatINR(cost.total)
+                    )}
+                  </span>
                 </div>
               </div>
 

@@ -7,6 +7,9 @@ import { toast } from 'react-toastify';
 import { getCars } from '../../services/apis/ownerApi';
 import { ICar } from '../../types/types';
 import EditCarModal from '../../components/EditCarModal';
+import { formatINR } from '../../utils/commonUtilities';
+import Pagination from '../../components/Pagination';
+import DocumentSearch from '../../components/DocumentSearch'; // Import the new component
 
 const CarListItem: React.FC<{
   car: ICar;
@@ -35,17 +38,22 @@ const Cars: React.FC = () => {
   const [addCarModalOpen, setAddCarModalOpen] = useState<boolean>(false);
   const [editCarModalOpen, setEditCarModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 4;
 
   const fetchCars = useCallback(async () => {
     try {
-      const response = await getCars();
-      const fetchedCars = Array.isArray(response.data.cars) ? response.data.cars : [];
+      const result = await getCars(currentPage, limit);
+      const fetchedCars = Array.isArray(result.data.data) ? result.data.data : [];
       setCars(fetchedCars);
+      setCurrentPage(result.data.currentPage);
+      setTotalPages(result.data.totalPages);
     } catch (err) {
       setError('Failed to fetch cars. Please try again.');
       toast.error('Error fetching cars');
     }
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     fetchCars();
@@ -100,7 +108,7 @@ const Cars: React.FC = () => {
               </button>
               <button
                 onClick={() => setAddCarModalOpen(true)}
-                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
+                className="px-5 py-2 bg-teal-400 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-sm cursor-pointer"
               >
                 Add Car
               </button>
@@ -127,6 +135,11 @@ const Cars: React.FC = () => {
                   </li>
                 )}
               </ul>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </div>
 
             {/* Car Info */}
@@ -152,7 +165,7 @@ const Cars: React.FC = () => {
                         {selectedCar.transmission} & {selectedCar.fuelType}
                       </p>
                       <p className="text-lg font-medium text-gray-800 mt-2">
-                        ${selectedCar.pricePerDay}/Day
+                        {formatINR(selectedCar.pricePerDay)}/Hour
                       </p>
                     </div>
                   </div>
@@ -216,30 +229,8 @@ const Cars: React.FC = () => {
                     </button>
                   </div>
 
-                  <div className="mb-6">
-                    <input
-                      type="text"
-                      placeholder="Search for car documents..."
-                      className="w-full border border-gray-300 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                    />
-                  </div>
-
-                  <div className="bg-gray-50 p-5 rounded-lg mb-6">
-                    <h4 className="font-semibold text-gray-900 mb-3">Document Analysis</h4>
-                    <p className="text-sm text-gray-600 mb-1">
-                      Last Maintenance:{' '}
-                      <span className="font-medium">{selectedCar.lastmaintenanceDate?.split('T')[0]}</span>
-                    </p>
-                    <p className="text-sm text-gray-600 mb-1">
-                      Maintenance Interval:{' '}
-                      <span className="font-medium">{selectedCar.maintenanceInterval}</span>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Document Expiry:{' '}
-                      <span className="font-medium">2027</span>
-                    </p>
-                  </div>
-
+                  {/* Replace the input with the DocumentSearch component */}
+                  <DocumentSearch carId={selectedCar._id} />
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3">Live Location</h4>
                     <div className="w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
@@ -270,7 +261,7 @@ const Cars: React.FC = () => {
           onCarUpdated={handleCarUpdated}
         />
       </div>
-    </div>
+    </div >
   );
 };
 

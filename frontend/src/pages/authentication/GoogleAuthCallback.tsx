@@ -1,8 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { setAccessToken, setAuth } from '../../redux/slices/authSlice';
 import { useDispatch } from 'react-redux';
 import { getUser } from '../../services/apis/userApis';
+import { sendUserLocation } from '../../services/apis/userApis';
+import { getUserLocation } from '../../utils/getUserLocation';
 
 const GoogleAuthCallback = () => {
   const navigate = useNavigate();
@@ -11,11 +13,14 @@ const GoogleAuthCallback = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
+
     if (token) {
       dispatch(setAccessToken(token));
-      const fetchUser = async () => {
+
+      const fetchUserAndHandleLocation = async () => {
         try {
           const result = await getUser(token);
+
           dispatch(setAuth({
             user: {
               userName: result.data.userName,
@@ -26,6 +31,13 @@ const GoogleAuthCallback = () => {
             },
             accessToken: token
           }));
+          try {
+            const { location } = await getUserLocation();
+            await sendUserLocation(location);
+          } catch (locationError) {
+            console.error("Could not handle user location:", locationError);
+          }
+
           navigate("/");
         } catch (error) {
           console.error("Failed to fetch user", error);
@@ -33,14 +45,13 @@ const GoogleAuthCallback = () => {
         }
       };
 
-      fetchUser();
+      fetchUserAndHandleLocation();
     } else {
       navigate("/login");
     }
-  }, [navigate]);
+  }, [navigate, dispatch]);
 
-  return null;
+  return null; // Or a loading indicator if preferred
 }
 
 export default GoogleAuthCallback
-

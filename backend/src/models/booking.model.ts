@@ -1,20 +1,20 @@
-import mongoose, { Schema, model, Document } from 'mongoose';
-import { IBooking, IBookingModel } from '../types/booking';
+import { Schema, model } from 'mongoose';
+import { IBookingModel } from '../types/booking';
 
 
 const bookingSchema = new Schema<IBookingModel>({
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
   carId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'Car',
     required: true,
   },
   ownerId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'Owner',
     required: true,
   },
@@ -45,6 +45,18 @@ const bookingSchema = new Schema<IBookingModel>({
     required: true,
   },
   paymentId: { type: String, required: false },
+  isPremiumBooking: {
+    type: Boolean,
+    required: false
+  },
+  discountAmount: {
+    type: Number,
+    required: false
+  },
+  discountPercentage: {
+    type: Number,
+    required: false
+  },
   status: {
     type: String,
     enum: ['active', 'cancelled', 'completed'],

@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import IUserController from "../interfaces/controllers/user.controller";
-import { LoginResponse } from "../types/types";
+import { LoginResponse, StatusCode } from "../types/types";
 import { Request, Response, NextFunction } from "express";
 import TYPES from "../di/types";
 import IUserService from "../interfaces/services/user.service";
@@ -15,7 +15,7 @@ export default class UserConroller implements IUserController {
       const userId = user?.userId;
       if (userId) {
         const userDetails = await this.userService.fetchUser(userId);
-        res.status(200).json(HttpResponse.success(userDetails));
+        res.status(StatusCode.OK).json(HttpResponse.success(userDetails));
       }
     } catch (error) {
       next(error);
@@ -26,7 +26,7 @@ export default class UserConroller implements IUserController {
     try {
       const { lng, lat } = req.query;
       const address = await this.userService.fetchUserLocationAddresss(Number(lng), Number(lat));
-      res.status(200).json(HttpResponse.success(address));
+      res.status(StatusCode.OK).json(HttpResponse.success(address));
     } catch (error) {
       next(error);
     };
@@ -38,9 +38,20 @@ export default class UserConroller implements IUserController {
       const userId = user?.userId!;
       const { location } = req.body;
       const updatedUser = await this.userService.setUserLocation(userId, location);
-      res.status(200).json(HttpResponse.success(updatedUser));
+      res.status(StatusCode.OK).json(HttpResponse.success(updatedUser));
     } catch (error) {
       next(error);
     };
   };
+
+  async fetchUserAddresses(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { user } = req as AuthenticatedRequest;
+      const userId = user?.userId!;
+      const addresses = await this.userService.getUserAddresses(userId);
+      res.status(200).json(HttpResponse.success(addresses))
+    } catch (error) {
+      next(error);
+    }
+  }
 };

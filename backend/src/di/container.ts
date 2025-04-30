@@ -35,6 +35,18 @@ import { Admin } from "../models/admin.model";
 import AdminController from "../controllers/admin.controller";
 import IOwnerService from "../interfaces/services/owner.service";
 import OwnerService from "../services/owner.service";
+import { Subscription } from "../models/subscription.model";
+import ISubscriptionRepository from "../interfaces/repositories/subscription.repository";
+import SubscriptionRepository from "../repositories/subscription.repository";
+import ISubscriptionService from "../interfaces/services/subscription.service";
+import SubscriptionService from "../services/subscription.service";
+import SubscriptionController from "../controllers/subscription.controller";
+import { UserSubscription } from "../models/user.subscription.model";
+import IUserSubsRepository from "../interfaces/repositories/user.subscription.repository";
+import UserSubsRepository from "../repositories/user.subscription.repository";
+import { Address } from "../models/address.model";
+import IAddressRepository from "../interfaces/repositories/address.repository";
+import AddressRepository from "../repositories/address.repository";
 
 
 const container = new Container();
@@ -46,6 +58,7 @@ container.bind<UserConroller>(TYPES.IUserConroller).to(UserConroller).inSingleto
 container.bind<PaymentController>(TYPES.IPaymentController).to(PaymentController).inSingletonScope();
 container.bind<BookingController>(TYPES.IBookingController).to(BookingController).inSingletonScope();
 container.bind<AdminController>(TYPES.IAdminController).to(AdminController).inSingletonScope();
+container.bind<SubscriptionController>(TYPES.ISubscriptionController).to(SubscriptionController).inSingletonScope();
 
 
 // repositories
@@ -54,6 +67,9 @@ container.bind<IOwnerRepository>(TYPES.IOwnerRepository).to(OwnerRepository).inS
 container.bind<ICarRepository>(TYPES.ICarRepository).to(CarRepository).inSingletonScope();
 container.bind<IBookingRepository>(TYPES.IBookingRepository).to(BookingRepository).inSingletonScope();
 container.bind<IAdminRepository>(TYPES.IAdminRepository).to(AdminRepository).inSingletonScope();
+container.bind<ISubscriptionRepository>(TYPES.ISubscriptionRepository).to(SubscriptionRepository).inSingletonScope();
+container.bind<IUserSubsRepository>(TYPES.IUserSubsRepository).to(UserSubsRepository).inSingletonScope();
+container.bind<IAddressRepository>(TYPES.IAddressRepository).to(AddressRepository).inSingletonScope();
 
 
 
@@ -66,6 +82,7 @@ container.bind<IUserService>(TYPES.IUserService).to(UserService).inSingletonScop
 container.bind<IPaymentService>(TYPES.IPaymentService).to(PaymentService).inSingletonScope();
 container.bind<IBookingService>(TYPES.IBookingService).to(BookingService).inSingletonScope();
 container.bind<IOwnerService>(TYPES.IOwnerService).to(OwnerService).inSingletonScope();
+container.bind<ISubscriptionService>(TYPES.ISubscriptionService).to(SubscriptionService).inSingletonScope();
 
 
 
@@ -75,6 +92,9 @@ container.bind<typeof Owner>(TYPES.OwnerModel).toConstantValue(Owner);
 container.bind<typeof Car>(TYPES.CarModel).toConstantValue(Car);
 container.bind<typeof Booking>(TYPES.BookingModel).toConstantValue(Booking);
 container.bind<typeof Admin>(TYPES.AdminModel).toConstantValue(Admin);
+container.bind<typeof Subscription>(TYPES.SubscriptionModel).toConstantValue(Subscription);
+container.bind<typeof UserSubscription>(TYPES.UserSubsModel).toConstantValue(UserSubscription);
+container.bind<typeof Address>(TYPES.AddressModel).toConstantValue(Address);
 
 
 export const authController = container.get<AuthController>(TYPES.IAuthController);
@@ -83,3 +103,4 @@ export const userController = container.get<UserConroller>(TYPES.IUserConroller)
 export const paymentController = container.get<PaymentController>(TYPES.IPaymentController);
 export const bookingController = container.get<BookingController>(TYPES.IBookingController);
 export const adminController = container.get<AdminController>(TYPES.IAdminController);
+export const subscriptionController = container.get<SubscriptionController>(TYPES.ISubscriptionController);

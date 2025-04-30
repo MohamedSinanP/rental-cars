@@ -1,6 +1,7 @@
 import IPaymentService from "../interfaces/services/payment.service";
 import stripe from "../config/stripe";
 import { HttpError } from "../utils/http.error";
+import { StatusCode } from "../types/types";
 
 export default class PaymentService implements IPaymentService {
   constructor() { };
@@ -10,7 +11,7 @@ export default class PaymentService implements IPaymentService {
     paymentId: string
   }> {
     if (!amount) {
-      throw new HttpError(400, 'Amount is required');
+      throw new HttpError(StatusCode.BAD_REQUEST, 'Amount is required');
     }
 
     const paymentIntent = await stripe.paymentIntents.create({

@@ -1,14 +1,22 @@
 import express from "express";
-import { adminController } from "../di/container";
+import { adminController, subscriptionController } from "../di/container";
 import { authenticate } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
 router.get('/fetch-users', authenticate(["admin"]), adminController.fetchUsers.bind(adminController));
+router.patch('/block-user/:id', authenticate(["admin"]), adminController.blockOrUnblockUser.bind(adminController));
 router.get('/fetch-owners', authenticate(["admin"]), adminController.fethcOwners.bind(adminController));
+router.patch('/block-owner/:id', authenticate(["admin"]), adminController.blockOrUnblockOwner.bind(adminController));
 router.get('/pending-cars', authenticate(["admin"]), adminController.getPendingCars.bind(adminController));
 router.patch('/verify-car/:id', authenticate(["admin"]), adminController.verifyCar.bind(adminController));
 router.patch('/reject-car/:id', authenticate(["admin"]), adminController.rejectCar.bind(adminController));
+
+// subscription routes
+router.post('/add-subscription', authenticate(["admin"]), subscriptionController.createSubscription.bind(subscriptionController));
+router.get('/get-subscriptions', authenticate(["admin"]), subscriptionController.getSubscriptions.bind(subscriptionController));
+router.put('/edit-subscription/:id', authenticate(["admin"]), subscriptionController.editSubscription.bind(subscriptionController));
+
 
 
 export default router;

@@ -8,4 +8,6 @@ export default interface IAdminController {
   getPendingCars(req: Request, res: Response, next: NextFunction): Promise<void>;
   verifyCar(req: Request, res: Response, next: NextFunction): Promise<void>;
   rejectCar(req: Request, res: Response, next: NextFunction): Promise<void>;
+  blockOrUnblockUser(req: Request, res: Response, next: NextFunction): Promise<void>;
+  blockOrUnblockOwner(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

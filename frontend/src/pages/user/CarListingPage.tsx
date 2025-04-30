@@ -2,25 +2,13 @@ import { useEffect, useState } from 'react';
 import { Search, MapPin, Heart, Star, ChevronDown } from 'lucide-react';
 import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
-import { CarFormData, ICar } from '../../types/types';
+import { ICar } from '../../types/types';
 import { getCars } from '../../services/apis/userApis';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../../components/Pagination';
 
-interface Car {
-  id: number;
-  name: string;
-  image?: string;
-  rating?: number;
-  reviews?: number;
-  pricePerDay: number;
-  location: string;
-  type: string;
-  transmission: string;
-  fuelType: string;
-  seats: string;
-  fuelOption: string;
-}
+
+
 
 interface Filters {
   carType: string[];
@@ -349,12 +337,17 @@ export default function CarListingPage() {
                     <h3 className="font-semibold">{car.carName}</h3>
                     <div className="flex items-center">
                       <Star size={16} className="text-teal-400 fill-current" />
-                      {/* <span className="ml-1 text-sm">{car.rating ?? 'N/A'}</span> */}
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    {/* {car.location || 'Unknown'} • {car.reviews ?? 0} Reviews */}
-                  </p>
+
+                  {/* Display only distance with icon */}
+                  {car.distance && (
+                    <p className="text-sm text-gray-600 mt-1 flex items-center">
+                      <MapPin size={14} className="mr-1 text-teal-500" />
+                      <span className="font-medium">{car.distance.toFixed(2)} km away</span>
+                    </p>
+                  )}
+
                   <div className="mt-2">
                     <span className="font-bold text-lg">${car.pricePerDay}</span>
                     <span className="text-sm text-gray-600">/Day</span>
@@ -379,6 +372,6 @@ export default function CarListingPage() {
       />
 
       <Footer />
-    </div>
+    </div >
   );
 }

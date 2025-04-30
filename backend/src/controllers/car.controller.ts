@@ -7,11 +7,12 @@ import { HttpResponse } from "../utils/http.response";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 import ICar from "../types/car";
 import { UploadedFile } from "express-fileupload";
+import { StatusCode } from "../types/types";
 
 @injectable()
 export default class CarController implements ICarController {
   constructor(
-    @inject(TYPES.ICarService) private carService: ICarService,
+    @inject(TYPES.ICarService) private _carService: ICarService,
   ) { };
 
   async createCar(req: FileUploadRequest, res: Response, next: NextFunction): Promise<void> {
@@ -46,8 +47,8 @@ export default class CarController implements ICarController {
         pucDoc: req.files.pucDoc,
         insuranceDoc: req.files.insuranceDoc,
       };
-      const newCar = await this.carService.createCar(carData);
-      res.status(201).json(HttpResponse.created(newCar, "New car added successfully.Your car will be hosted after verification"));
+      const newCar = await this._carService.createCar(carData);
+      res.status(StatusCode.CREATED).json(HttpResponse.created(newCar, "New car added successfully.Your car will be hosted after verification"));
     } catch (error) {
       next(error);
     };
@@ -55,8 +56,6 @@ export default class CarController implements ICarController {
 
   async editCar(req: FileUploadRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      console.log("i am working", req.body);
-
       const carId = req.body.carId;
       const ownerId = req.user?.userId!;
       const parsedLocation = JSON.parse(req.body.location);
@@ -95,8 +94,27 @@ export default class CarController implements ICarController {
         }
       };
 
-      const updatedCar = await this.carService.editCar(carId, carData);
-      res.status(200).json(HttpResponse.success(updatedCar));
+      const updatedCar = await this._carService.editCar(carId, carData);
+      res.status(StatusCode.OK).json(HttpResponse.success(updatedCar));
+    } catch (error) {
+      next(error);
+    };
+  };
+
+  async reuploadCarDocs(req: FileUploadRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const carId = req.params.id;
+      const carDocs: {
+        rcDoc: UploadedFile;
+        insuranceDoc: UploadedFile;
+        pucDoc: UploadedFile
+      } = {
+        rcDoc: req.files.rcDoc,
+        pucDoc: req.files.pucDoc,
+        insuranceDoc: req.files.insuranceDoc
+      };
+      const updatedCar = await this._carService.reuploadCarDocs(carId, carDocs);
+      res.status(200).json(HttpResponse.success(updatedCar, "Your documents will verified in 24 hours"));
     } catch (error) {
       next(error);
     };
@@ -105,8 +123,8 @@ export default class CarController implements ICarController {
   async getAddressFromCoordinates(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { lng, lat } = req.query;
-      const address = await this.carService.fetchCarLocationAddresss(Number(lng), Number(lat));
-      res.status(200).json({ address });
+      const address = await this._carService.fetchCarLocationAddresss(Number(lng), Number(lat));
+      res.status(StatusCode.OK).json({ address });
     } catch (error) {
       next(error);
     };
@@ -116,9 +134,11 @@ export default class CarController implements ICarController {
     try {
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 6;
       if (userId) {
-        const cars = await this.carService.fetchOwnerVerifedCars(userId);
-        res.status(200).json(HttpResponse.success({ cars }));
+        const cars = await this._carService.fetchOwnerVerifedCars(userId, page, limit);
+        res.status(StatusCode.OK).json(HttpResponse.success(cars));
       }
     } catch (error) {
       next(error);
@@ -130,8 +150,8 @@ export default class CarController implements ICarController {
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId;
       if (userId) {
-        const cars = await this.carService.fetchOwnerCars(userId);
-        res.status(200).json(HttpResponse.success({ cars }));
+        const cars = await this._carService.fetchOwnerCars(userId);
+        res.status(StatusCode.OK).json(HttpResponse.success({ cars }));
       }
     } catch (error) {
       next(error);
@@ -142,8 +162,15 @@ export default class CarController implements ICarController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 6;
-      const cars = await this.carService.fetchAllCars(page, limit);
-      res.status(200).json(HttpResponse.success(cars));
+      const { user } = req as AuthenticatedRequest;
+
+      let result;
+      if (user) {
+        result = await this._carService.fetchCarsWithDistance(user.userId, page, limit);
+      } else {
+        result = await this._carService.fetchCarsWithoutDistance(page, limit);
+      }
+      res.status(StatusCode.OK).json(HttpResponse.success(result));
     } catch (error) {
       next(error);
     };
@@ -152,8 +179,8 @@ export default class CarController implements ICarController {
   async carDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = req.params.id;
-      const car = await this.carService.fetchCarDetails(id);
-      res.status(200).json(HttpResponse.success(car));
+      const car = await this._carService.fetchCarDetails(id);
+      res.status(StatusCode.OK).json(HttpResponse.success(car));
     } catch (error) {
       next(error);
     };
@@ -162,8 +189,19 @@ export default class CarController implements ICarController {
   async similarCars(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = req.params.id;
-      const cars = await this.carService.fetchSimilarCars(id);
-      res.status(200).json(HttpResponse.success(cars));
+      const cars = await this._carService.fetchSimilarCars(id);
+      res.status(StatusCode.OK).json(HttpResponse.success(cars));
+    } catch (error) {
+      next(error);
+    };
+  };
+
+  async getCarDocsDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const carId = req.params.id;
+      const { userMessage } = req.body;
+      const result = await this._carService.getCarDocsDetails(carId, userMessage);
+      res.status(200).json(HttpResponse.success({ answer: result }));
     } catch (error) {
       next(error);
     };

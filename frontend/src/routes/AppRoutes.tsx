@@ -31,6 +31,9 @@ import UsersPage from "../pages/admin/UsersPage";
 import OwnersPage from "../pages/admin/OwnersPage";
 import CarVerification from "../pages/admin/CarVerification";
 import BookingSuccessPage from "../pages/user/BookingSuccessPage";
+import SubscriptionPage from "../pages/admin/SubscriptionPage";
+import SubscriptionCheckout from "../pages/user/SubscriptionCheckoutPage";
+import SubscriptionSuccessPage from "../pages/user/SubscriptionSuccessPage";
 
 // Fallback / Errors
 // import Unauthorized from "../pages/Unauthorized";
@@ -67,6 +70,8 @@ const AppRoutes = () => {
       { /* Routes for the user */}
       <Route path="/car-details/:id" element={<CarDetailsPage />} />
       <Route path="/cars" element={<CarListingPage />} />
+      <Route path='/subscription' element={<SubscriptionCheckout />} />
+      <Route path='/subscription/success' element={<SubscriptionSuccessPage />} />
       { /* Routes for the admin */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
       < Route element={<PrivateRoute allowedRoles={['admin']} />}>
@@ -74,6 +79,7 @@ const AppRoutes = () => {
         <Route path="/admin/users" element={<UsersPage />} />
         <Route path="/admin/owners" element={<OwnersPage />} />
         <Route path="/admin/approvals" element={<CarVerification />} />
+        <Route path="/admin/subscription" element={<SubscriptionPage />} />
       </Route>
 
     </Routes>

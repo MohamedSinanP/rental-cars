@@ -9,8 +9,12 @@ interface PrivateRouteProps {
 
 
 const PrivateRoute = ({ allowedRoles }: PrivateRouteProps) => {
-
   const { accessToken, user } = useSelector((state: RootState) => state.auth);
+  // useEffect(() => {
+  //   if (user?.isBlocked) {
+  //     toast.error("You are blocked");
+  //   }
+  // }, [user?.isBlocked]);
   const cheking = useAuthCheck();
   if (cheking) {
     return (
@@ -20,13 +24,17 @@ const PrivateRoute = ({ allowedRoles }: PrivateRouteProps) => {
     );
   };
 
+
   if (!accessToken) {
     return <Navigate to="/login" replace />;
-  };
+  }
+  // else if (user.isBlocked) {
+  //   toast.error("You are blocked");
+  //   return <Navigate to="/login" replace />;
+  // }
   if (!allowedRoles.includes(user?.role as string)) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/login" replace />;
   };
-
   return <Outlet />;
 };
 

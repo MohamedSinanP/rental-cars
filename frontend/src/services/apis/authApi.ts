@@ -1,8 +1,8 @@
 import api from './api';
 import { IOwnerSignup, IUserSignup, otpData } from '../../types/types';
-import { useNavigate } from 'react-router-dom';
 import { store } from '../../redux/store';
 import { removeAuth } from '../../redux/slices/authSlice';
+import { getApiErrorMessage } from '../../utils/handleApiError';
 
 
 
@@ -12,12 +12,8 @@ export const signupUser = async (userData: IUserSignup) => {
     console.log(response.data);
     return response.data.data;
 
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "Signup failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 
@@ -27,12 +23,8 @@ export const signupOwner = async (ownerData: IOwnerSignup) => {
     console.log(response.data);
     return response.data.data;
 
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "Signup failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   }
 }
 
@@ -43,12 +35,8 @@ export const login = async ({ email, password }: { email: string, password: stri
 
     return response.data;
 
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "Signup failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 
@@ -56,12 +44,8 @@ export const adminLogin = async (formData: { email: string; password: string }) 
   try {
     const response = await api.post('/auth/admin-login', formData);
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "OTP failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   }
 };
 
@@ -70,12 +54,8 @@ export const verifyOtp = async (otpData: otpData) => {
     const response = await api.post("/auth/verify-otp", otpData);
     return response.data;
 
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "OTP failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 
@@ -83,12 +63,8 @@ export const resendOtp = async (email: string) => {
   try {
     const response = await api.post('/auth/resend-otp', { email });
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "OTP failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 
@@ -96,12 +72,8 @@ export const verifyEmail = async (email: string | undefined) => {
   try {
     const response = await api.post('/auth/verify-email', { email });
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "OTP failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 
@@ -109,12 +81,8 @@ export const verifyResetOtp = async (otpData: otpData) => {
   try {
     const response = await api.post('/auth/verify-reset-otp', { otpData });
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "OTP failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 
@@ -122,25 +90,17 @@ export const resetPwd = async (token: string, newPwd: string) => {
   try {
     const response = await api.patch('/auth/reset-pwd', { token, newPwd });
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "OTP failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   }
 }
 
-export const logout = async (navigate: ReturnType<typeof useNavigate>) => {
+export const logout = async () => {
   try {
     const response = await api.post('/auth/logout');
     await store.dispatch(removeAuth());
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "OTP failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   }
 }

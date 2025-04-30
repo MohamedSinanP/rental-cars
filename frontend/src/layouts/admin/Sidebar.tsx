@@ -1,14 +1,11 @@
 import { useState } from 'react';
-import { Users, UserCog, LayoutDashboard, Menu, X, ClipboardCheck, LogOut, } from 'lucide-react';
+import { Users, UserCog, LayoutDashboard, Menu, X, ClipboardCheck, LogOut, BadgeCheck, } from 'lucide-react';
 import Logo from '../../components/Logo';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { removeAuth } from '../../redux/slices/authSlice';
 import { logout } from '../../services/apis/authApi';
 import { toast } from 'react-toastify';
 
 const Sidebar = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -19,7 +16,7 @@ const Sidebar = () => {
   };
   const handleLogout = async () => {
     try {
-      const result = await logout(navigate);
+      const result = await logout();
       toast.success(result.message);
       navigate('/admin/login');
     } catch (error: any) {
@@ -83,6 +80,14 @@ const Sidebar = () => {
                 <div className="flex items-center gap-x-2">
                   <ClipboardCheck className="w-5 h-5" />
                   <span>Approval</span>
+                </div>
+              </NavLink>
+            </li>
+            <li className='m-4'>
+              <NavLink to={'/admin/subscription'} onClick={handleLinkClick}>
+                <div className="flex items-center gap-x-2">
+                  <BadgeCheck className="w-5 h-5" />
+                  <span>Subscription</span>
                 </div>
               </NavLink>
             </li>

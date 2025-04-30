@@ -7,6 +7,7 @@ import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 import { IBooking } from "../types/booking";
 import { HttpResponse } from "../utils/http.response";
 import { stat } from "fs";
+import { StatusCode } from "../types/types";
 
 
 
@@ -34,7 +35,7 @@ export default class BookingController implements IBookingController {
         status: 'active',
       };
       const booking = await this.bookingService.createBooking(bookingData);
-      res.status(201).json(HttpResponse.created(booking, "Your Booking confirmed"));
+      res.status(StatusCode.CREATED).json(HttpResponse.created(booking, "Your Booking confirmed"));
     } catch (error) {
       next(error);
     };
@@ -48,7 +49,7 @@ export default class BookingController implements IBookingController {
       const userId = user?.userId!;
       const userRentals = await this.bookingService.fetchUserRentals(userId, page, limit);
       console.log(userRentals);
-      res.status(200).json(HttpResponse.success(userRentals));
+      res.status(StatusCode.OK).json(HttpResponse.success(userRentals));
     } catch (error) {
       next(error);
     };
@@ -56,10 +57,12 @@ export default class BookingController implements IBookingController {
 
   async fetchOwnerAllBookings(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 8;
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId!;
-      const userRentals = await this.bookingService.getCarBookingsOfOwner(userId);
-      res.status(200).json(HttpResponse.success(userRentals));
+      const userRentals = await this.bookingService.getCarBookingsOfOwner(userId, page, limit);
+      res.status(StatusCode.OK).json(HttpResponse.success(userRentals));
     } catch (error) {
       next(error);
     };
@@ -70,7 +73,7 @@ export default class BookingController implements IBookingController {
       const bookingId = req.params.id;
       const { status } = req.body;
       const updatedBooking = await this.bookingService.changeBookingStatus(bookingId, status);
-      res.status(200).json(HttpResponse.success(updatedBooking));
+      res.status(StatusCode.OK).json(HttpResponse.success(updatedBooking));
     } catch (error) {
       next(error);
     };
@@ -80,7 +83,7 @@ export default class BookingController implements IBookingController {
     try {
       const bookingId = req.params.id;
       const latestBooking = await this.bookingService.getLatestBooking(bookingId);
-      res.status(200).json(HttpResponse.success(latestBooking));
+      res.status(StatusCode.OK).json(HttpResponse.success(latestBooking));
     } catch (error) {
       next(error)
     };

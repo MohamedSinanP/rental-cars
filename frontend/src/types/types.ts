@@ -95,6 +95,7 @@ export interface ICar {
   rejectionReason: string;
   carImages: string[];
   review?: string[];
+  distance?: number;
 };
 
 export interface IBooking {
@@ -120,8 +121,11 @@ export interface IBooking {
   totalPrice: number;
   paymentStatus?: 'pending' | 'completed' | 'failed' | 'refunded';
   paymentMethod: 'wallet' | 'stripe';
-  paymentId: string;
+  paymentId: string | undefined;
   status?: 'active' | 'cancelled' | 'completed';
+  isPremiumBooking: boolean,
+  discountPercentage: number | undefined,
+  discountAmount: number | undefined,
 };
 
 export interface IBookingWithPopulatedData extends Omit<IBooking, 'userId' | 'carId'> {
@@ -171,4 +175,16 @@ export interface UserInput {
   email: "",
   password: "",
   confirmPassword: "",
+};
+
+export interface ISubscription {
+  _id?: string;
+  name: string;
+  description: string;
+  features: string[];
+  stripeProductId: string;
+  stripePriceId: string;
+  price: number;
+  billingCycle: 'monthly' | 'yearly';
+  isActive: boolean;
 }

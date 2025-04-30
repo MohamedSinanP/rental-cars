@@ -1,6 +1,6 @@
 import { IUserModel } from "../../models/user.model";
 import { PaginatedData } from "../../types/types";
-import IUser, { userData } from "../../types/user";
+import IUser, { IAddressModel, userData } from "../../types/user";
 
 
 
@@ -13,4 +13,7 @@ export default interface IUserService {
     coordinates: [number, number];
     address: string;
   }): Promise<userData>;
+  getUserLocation(userId: string): Promise<[number, number] | undefined>;
+  blockOrUnblockUser(userId: string): Promise<IUserModel>;
+  getUserAddresses(userId: string): Promise<IAddressModel[]>;
 }

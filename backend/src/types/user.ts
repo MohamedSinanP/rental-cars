@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import mongoose, { Document } from "mongoose";
 
 export default interface IUser {
   _id?: string;
@@ -20,6 +20,7 @@ export default interface IUser {
   resetTokenExpiresAt?: Date | null;
   isBlocked: boolean;
   isVerified: boolean;
+  subscriptionId?: string
 };
 
 export interface IUserGoogle {
@@ -54,4 +55,53 @@ export interface IAdmin {
   role: string;
   refreshToken: string | null;
 };
+
+export interface ISubscription {
+  name: string;
+  description: string;
+  features: string[];
+  stripeProductId: string;
+  stripePriceId: string;
+  price: number;
+  billingCycle: 'monthly' | 'yearly';
+  isActive: boolean;
+}
+
+export interface ISubscriptionModel extends ISubscription, Document { };
+
+export interface IUserSubscription {
+  userId: string;
+  subscriptionId: string;
+  stripeSubscriptionId: string;
+  status: string;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+  cancelAtPeriodEnd: boolean;
+};
+
+export interface IUserSubscriptionModel extends Document {
+  userId: mongoose.Types.ObjectId;
+  subscriptionId: mongoose.Types.ObjectId;
+  stripeSubscriptionId: string;
+  status: string;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+  cancelAtPeriodEnd: boolean;
+};
+
+export interface IAddress {
+  userId: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+};
+
+export interface IAddressModel extends Document {
+  userId: mongoose.Types.ObjectId;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+}
 

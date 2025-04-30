@@ -180,6 +180,10 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ isOpen, onClose, carData, o
     }
   };
 
+  const openPdfInNewTab = (url: string) => {
+    window.open(url, '_blank');
+  };
+
   if (!isOpen) return null;
 
   const featuresList = ['GPS', 'AC', 'Bluetooth', 'Parking Sensors', 'Airbags'];
@@ -362,59 +366,110 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ isOpen, onClose, carData, o
 
           {/* --- Document Uploads --- */}
           <div>
-            <label>RC Document {carData?.rcDoc ? "(Current document exists)" : ""}</label>
-            <input
-              type="file"
-              accept="application/pdf"
-              {...register('rcDoc', {
-                validate: {
-                  isPDF: (file) => {
-                    if (!file || !file[0]) return true;
-                    const fileName = file[0]?.name || '';
-                    return fileName.toLowerCase().endsWith('.pdf') || 'Only PDF files are allowed';
+            <label>RC Document</label>
+            <div className="flex flex-col">
+              <input
+                type="file"
+                accept="application/pdf"
+                {...register('rcDoc', {
+                  validate: {
+                    isPDF: (file) => {
+                      if (!file || !file[0]) return true;
+                      const fileName = file[0]?.name || '';
+                      return fileName.toLowerCase().endsWith('.pdf') || 'Only PDF files are allowed';
+                    },
                   },
-                },
-              })}
-              className="w-full border p-2 rounded"
-            />
+                })}
+                className="w-full border p-2 rounded"
+              />
+              {carData?.rcDoc && (
+                <div className="mt-2 flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => openPdfInNewTab(carData.rcDoc)}
+                    className="text-blue-500 hover:underline flex items-center text-sm"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View Current RC Document
+                  </button>
+                </div>
+              )}
+            </div>
             {errors.rcDoc && <p className="text-red-500 text-sm">{errors.rcDoc.message}</p>}
           </div>
 
           <div>
-            <label>PUC Certificate {carData?.pucDoc ? "(Current document exists)" : ""}</label>
-            <input
-              type="file"
-              accept="application/pdf"
-              {...register('pucDoc', {
-                validate: {
-                  isPDF: (file) => {
-                    if (!file || !file[0]) return true;
-                    const fileName = file[0]?.name || '';
-                    return fileName.toLowerCase().endsWith('.pdf') || 'Only PDF files are allowed';
+            <label>PUC Certificate</label>
+            <div className="flex flex-col">
+              <input
+                type="file"
+                accept="application/pdf"
+                {...register('pucDoc', {
+                  validate: {
+                    isPDF: (file) => {
+                      if (!file || !file[0]) return true;
+                      const fileName = file[0]?.name || '';
+                      return fileName.toLowerCase().endsWith('.pdf') || 'Only PDF files are allowed';
+                    },
                   },
-                },
-              })}
-              className="w-full border p-2 rounded"
-            />
+                })}
+                className="w-full border p-2 rounded"
+              />
+              {carData?.pucDoc && (
+                <div className="mt-2 flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => openPdfInNewTab(carData.pucDoc)}
+                    className="text-blue-500 hover:underline flex items-center text-sm"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View Current PUC Document
+                  </button>
+                </div>
+              )}
+            </div>
             {errors.pucDoc && <p className="text-red-500 text-sm">{errors.pucDoc.message}</p>}
           </div>
 
           <div>
-            <label>Insurance Document {carData?.insuranceDoc ? "(Current document exists)" : ""}</label>
-            <input
-              type="file"
-              accept="application/pdf"
-              {...register('insuranceDoc', {
-                validate: {
-                  isPDF: (file) => {
-                    if (!file || !file[0]) return true;
-                    const fileName = file[0]?.name || '';
-                    return fileName.toLowerCase().endsWith('.pdf') || 'Only PDF files are allowed';
+            <label>Insurance Document</label>
+            <div className="flex flex-col">
+              <input
+                type="file"
+                accept="application/pdf"
+                {...register('insuranceDoc', {
+                  validate: {
+                    isPDF: (file) => {
+                      if (!file || !file[0]) return true;
+                      const fileName = file[0]?.name || '';
+                      return fileName.toLowerCase().endsWith('.pdf') || 'Only PDF files are allowed';
+                    },
                   },
-                },
-              })}
-              className="w-full border p-2 rounded"
-            />
+                })}
+                className="w-full border p-2 rounded"
+              />
+              {carData?.insuranceDoc && (
+                <div className="mt-2 flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => openPdfInNewTab(carData.insuranceDoc)}
+                    className="text-blue-500 hover:underline flex items-center text-sm"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View Current Insurance Document
+                  </button>
+                </div>
+              )}
+            </div>
             {errors.insuranceDoc && <p className="text-red-500 text-sm">{errors.insuranceDoc.message}</p>}
           </div>
 

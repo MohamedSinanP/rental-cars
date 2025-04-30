@@ -156,8 +156,6 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
             </select>
             {errors.type && <p className="text-red-500 text-sm">{errors.type.message}</p>}
           </div>
-
-          {/* === Seats Dropdown === */}
           <div>
             <label>Seats</label>
             <select {...register('seats', { required: 'Seats is required' })} className="w-full border p-2 rounded">
@@ -239,13 +237,19 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
           </div>
           <div>
             <label>Car Price Per Hour</label>
-            <input type="number" {...register('pricePerDay', { required: 'Price is required', valueAsNumber: true })} className="w-full border p-2 rounded" />
+            <input type="number"  {...register('pricePerDay', {
+              required: 'Price is required',
+              valueAsNumber: true,
+              validate: value => value > 0 || 'Price must be greater than 0',
+            })} className="w-full border p-2 rounded" />
             {errors.pricePerDay && <p className="text-red-500 text-sm">{errors.pricePerDay.message}</p>}
           </div>
 
           <div>
             <label>Total Deposit Amount</label>
-            <input type="number" {...register('deposit', { required: 'Deposit is required', valueAsNumber: true })} className="w-full border p-2 rounded" />
+            <input type="number" {...register('deposit',
+              { required: 'Deposit is required', valueAsNumber: true, validate: value => value > 0 || 'Deposit amount must a valid price' })}
+              className="w-full border p-2 rounded" />
             {errors.deposit && <p className="text-red-500 text-sm">{errors.deposit.message}</p>}
           </div>
           <div>
@@ -275,7 +279,7 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
           </div>
           <div>
             <label>Maintenance Interval (days)</label>
-            <input type="number" {...register('maintenanceInterval', { required: 'Interval is required', valueAsNumber: true })} className="w-full border p-2 rounded" />
+            <input type="number" {...register('maintenanceInterval', { required: 'Interval is required', valueAsNumber: true, validate: value => value > 0 || 'Interval days must be a valid number' })} className="w-full border p-2 rounded" />
             {errors.maintenanceInterval && <p className="text-red-500 text-sm">{errors.maintenanceInterval.message}</p>}
           </div>
 

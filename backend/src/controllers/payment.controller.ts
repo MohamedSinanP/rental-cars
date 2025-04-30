@@ -4,6 +4,7 @@ import { inject, injectable } from "inversify";
 import TYPES from "../di/types";
 import IPaymentService from "../interfaces/services/payment.service";
 import { HttpResponse } from "../utils/http.response";
+import { StatusCode } from "../types/types";
 
 @injectable()
 export default class PaymentController implements IPaymentController {
@@ -13,7 +14,7 @@ export default class PaymentController implements IPaymentController {
     try {
       const { amount } = req.body;
       const { clientSecret, paymentId } = await this.paymentService.createPaymentIntentService(amount);
-      res.status(200).json(HttpResponse.success({ clientSecret, paymentId }));
+      res.status(StatusCode.OK).json(HttpResponse.success({ clientSecret, paymentId }));
     } catch (error) {
       next(error);
     };

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, RequestHandler } from "express";
+import { Request, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { HttpError } from "../utils/http.error";
 
@@ -43,16 +43,13 @@ export const authenticate = (allowedRoles: string[] = []): RequestHandler => {
         return next();
       }
 
-      // Invalid structure of token payload
       return next(new HttpError(403, "Invalid token payload"));
 
     } catch (err: any) {
-      // 👇 Use 401 if token is **expired**
       if (err.name === "TokenExpiredError") {
         return next(new HttpError(401, "Access token expired"));
       }
 
-      // 👇 Use 403 for all other errors (e.g., tampered, invalid signature)
       return next(new HttpError(403, "Invalid access token"));
     }
   };

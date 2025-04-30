@@ -2,12 +2,10 @@ import { useState } from 'react';
 import { CalendarCheck, Car, LayoutDashboard, Menu, X, Settings, LogOut, History } from 'lucide-react';
 import Logo from '../../components/Logo';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { removeAuth } from '../../redux/slices/authSlice';
 import { logout } from '../../services/apis/authApi';
+import { toast } from 'react-toastify';
 
 const Sidebar = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -17,9 +15,19 @@ const Sidebar = () => {
     }
   };
   const handleLogout = async () => {
-    const result = await logout(navigate);
-    navigate('/login');
-  }
+    try {
+      const result = await logout();
+      toast.success(result.message);
+      navigate('/login');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('An unexpected error occurred');
+      };
+    };
+
+  };
 
   return (
     <div className="h-full relative min-h-screen flex">

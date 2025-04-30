@@ -10,18 +10,15 @@ export const uploadPDFToCloudinary = async (
 
   const result = await cloudinary.uploader.upload(file.tempFilePath, {
     folder,
-    resource_type: "raw", // important for PDFs
-    public_id: originalName, // use clean file name
-    format: "pdf", // force .pdf
+    resource_type: "raw",
+    public_id: originalName,
+    format: "pdf",
     use_filename: true,
-    unique_filename: false, // keep exact name
+    unique_filename: false,
     type: "upload",
-    overwrite: true, // optional: replace if same name exists
+    overwrite: true,
   });
 
-  // Browser viewable URL
   const rawUrl = result.secure_url;
-  // const previewUrl = `https://docs.google.com/gview?url=${encodeURIComponent(rawUrl)}&embedded=true`;
-
   return rawUrl;
 };

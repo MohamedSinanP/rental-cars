@@ -34,6 +34,6 @@ export default class UserRepository extends BaseRepository<IUserModel> implement
     const data = await this.userModel.find().skip(skip).limit(limit);
     const total = await this.userModel.countDocuments();
     return { data, total };
-  }
+  };
 
-}
+};

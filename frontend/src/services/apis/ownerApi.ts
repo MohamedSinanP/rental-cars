@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from "../../utils/handleApiError";
 import api from "./api";
 
 
@@ -5,26 +6,29 @@ export const addCar = async (data: FormData) => {
   try {
     const response = await api.post('/owner/cars/add-car', data);
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "Signup failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 export const updateCar = async (data: FormData) => {
   try {
     const response = await api.put('/owner/cars/update', data);
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "Signup failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
+
+export const reuploadCarDocs = async (carId: string, data: FormData) => {
+  try {
+    const response = await api.patch(`/owner/cars/reupload-docs/${carId}`, data)
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+
+
 
 export const fetchLocationAddress = async (lat: number, lng: number) => {
   try {
@@ -36,25 +40,22 @@ export const fetchLocationAddress = async (lat: number, lng: number) => {
     }
     );
     return response.data
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "Signup failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 
-export const getCars = async () => {
+export const getCars = async (page: number, limit: number) => {
   try {
-    const response = await api.get('/owner/get-cars');
+    const response = await api.get('/owner/get-cars', {
+      params: {
+        page,
+        limit
+      }
+    });
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "Signup failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 
@@ -63,25 +64,22 @@ export const fetchAllOwnerCars = async () => {
   try {
     const response = await api.get('/owner/all-cars');
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "Signup failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 
-export const fetchAllOwnerBookings = async () => {
+export const fetchAllOwnerBookings = async (page: number, limit: number) => {
   try {
-    const response = await api.get('/owner/bookings');
+    const response = await api.get('/owner/bookings', {
+      params: {
+        page,
+        limit
+      }
+    });
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "Signup failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
   };
 };
 
@@ -89,12 +87,16 @@ export const changeBookingStatus = async (bookingId: string, status: string) => 
   try {
     const response = await api.patch(`/owner/bookings/${bookingId}`, { status });
     return response.data;
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || "Signup failed");
-    } else {
-      throw new Error("Network error or server not responding");
-    };
-  }
-}
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
 
+export const getCarDocsDetails = async (carId: string, userMessage: string) => {
+  try {
+    const response = await api.post(`/owner/get-car-details/${carId}`, { userMessage });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};

@@ -1,12 +1,12 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { inject, injectable } from "inversify";
 import IAuthService from "../interfaces/services/auth.service";
 import TYPES from "../di/types";
 import IUserRepository from "../interfaces/repositories/user.repository";
-import IUser, { IUserGoogle, userData } from "../types/user";
-import { adminLoginResponse, AuthCheck, IJwtToken, LoginGoogleResponse, LoginResponse, Role } from "../types/types";
+import IUser from "../types/user";
+import { adminLoginResponse, AuthCheck, IJwtToken, LoginGoogleResponse, LoginResponse, Role, StatusCode } from "../types/types";
 import { generateOtp, IOtpService } from "../utils/mail";
 import { HttpError } from "../utils/http.error";
 import { IJwtService } from "../utils/jwt";
@@ -20,25 +20,24 @@ import IAdminRepository from "../interfaces/repositories/admin.repository";
 import { IOwnerModel } from "../models/owner.model";
 import { IAdminModel } from "../models/admin.model";
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const RESEND_OTP_COOLDOWN = 60 * 1000;
 
 @injectable()
 export default class AuthService implements IAuthService {
   constructor(
-    @inject(TYPES.IUserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.IOwnerRepository) private ownerRepository: IOwnerRepository,
-    @inject(TYPES.IAdminRepository) private adminRepository: IAdminRepository,
-    @inject(TYPES.IOtpService) private otpService: IOtpService,
-    @inject(TYPES.IJwtService) private jwtService: IJwtService
+    @inject(TYPES.IUserRepository) private _userRepository: IUserRepository,
+    @inject(TYPES.IOwnerRepository) private _ownerRepository: IOwnerRepository,
+    @inject(TYPES.IAdminRepository) private _adminRepository: IAdminRepository,
+    @inject(TYPES.IOtpService) private _otpService: IOtpService,
+    @inject(TYPES.IJwtService) private _jwtService: IJwtService
   ) {
   };
 
   async signupConsumer(userName: string, email: string, password: string, role: Role.USER): Promise<IUser> {
-    const existingUser = await this.userRepository.findByEmail(email);
+    const existingUser = await this._userRepository.findByEmail(email);
     if (existingUser) {
-      throw new HttpError(409, "The user with this email already exist");
+      throw new HttpError(StatusCode.CONFLICT, "The user with this email already exist");
     };
 
     const hashedPwd = await bcrypt.hash(password, 10);
@@ -48,7 +47,7 @@ export default class AuthService implements IAuthService {
 
     console.log(otp, "cosumer");
 
-    const user = await this.userRepository.register({
+    const user = await this._userRepository.register({
       userName,
       email,
       password: hashedPwd,
@@ -62,7 +61,7 @@ export default class AuthService implements IAuthService {
     })
 
     if (user) {
-      this.otpService.sendEmail(user.email, otp, "emailVerification")
+      this._otpService.sendEmail(user.email, otp, "emailVerification")
     };
     return {
       userName: user.userName,
@@ -75,9 +74,9 @@ export default class AuthService implements IAuthService {
   };
 
   async signupOwner(userName: string, email: string, password: string, role: string, commision: number): Promise<IOwner> {
-    const existingUser = await this.ownerRepository.findByEmail(email);
+    const existingUser = await this._ownerRepository.findByEmail(email);
     if (existingUser) {
-      throw new HttpError(409, "The user with this email already exist");
+      throw new HttpError(StatusCode.CONFLICT, "The user with this email already exist");
     };
 
     const hashedPwd = await bcrypt.hash(password, 10);
@@ -87,7 +86,7 @@ export default class AuthService implements IAuthService {
     const otpExpiresAt = new Date(Date.now() + 60 * 1000);
     const otpLastSentAt = new Date();
 
-    const owner = await this.ownerRepository.register({
+    const owner = await this._ownerRepository.register({
       userName,
       email,
       password: hashedPwd,
@@ -102,7 +101,7 @@ export default class AuthService implements IAuthService {
     })
 
     if (owner) {
-      this.otpService.sendEmail(owner.email, otp, "emailVerification")
+      this._otpService.sendEmail(owner.email, otp, "emailVerification")
     };
 
     return {
@@ -117,20 +116,20 @@ export default class AuthService implements IAuthService {
   };
 
   async adminLogin(email: string, password: string, res: Response): Promise<adminLoginResponse> {
-    const user = await this.adminRepository.findByEmail(email);
+    const user = await this._adminRepository.findByEmail(email);
     if (!user) {
-      throw new HttpError(400, "Invalid email or password");
+      throw new HttpError(StatusCode.BAD_REQUEST, "Invalid email or password");
     };
 
     const isPasswordValid = password === user.password;
     if (!isPasswordValid) {
-      throw new HttpError(400, "Password is incorrect");
+      throw new HttpError(StatusCode.BAD_REQUEST, "Password is incorrect");
     };
 
-    const accessToken = this.jwtService.generateAccessToken(user.id.toString(), user.role);
-    const refreshToken = this.jwtService.generateRefreshToken(user.id.toString(), user.role);
+    const accessToken = this._jwtService.generateAccessToken(user.id.toString(), user.role);
+    const refreshToken = this._jwtService.generateRefreshToken(user.id.toString(), user.role);
 
-    await this.adminRepository.update(String(user._id), { refreshToken: refreshToken });
+    await this._adminRepository.update(String(user._id), { refreshToken: refreshToken });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -147,32 +146,32 @@ export default class AuthService implements IAuthService {
   };
 
   async login(email: string, password: string, res: Response): Promise<LoginResponse> {
-    let user = await this.userRepository.findByEmail(email);
+    let user = await this._userRepository.findByEmail(email);
     if (!user) {
-      user = await this.ownerRepository.findByEmail(email);
+      user = await this._ownerRepository.findByEmail(email);
     };
     if (!user) {
-      throw new HttpError(400, "Invalid email or password");
+      throw new HttpError(StatusCode.BAD_REQUEST, "Invalid email or password");
     };
 
     const isPasswordValid = await bcrypt.compare(password, user?.password);
     if (!isPasswordValid) {
-      throw new HttpError(400, "Invalid email or password");
+      throw new HttpError(StatusCode.BAD_REQUEST, "Invalid email or password");
     };
     if (user.isBlocked) {
-      throw new HttpError(403, "Your account has been blocked");
+      throw new HttpError(StatusCode.FORBIDDEN, "Your account has been blocked");
     };
     if (!user.isVerified) {
-      throw new HttpError(403, "Please verify your email before logging in");
+      throw new HttpError(StatusCode.FORBIDDEN, "Please verify your email before logging in");
     };
 
-    const accessToken = this.jwtService.generateAccessToken(user.id.toString(), user.role);
-    const refreshToken = this.jwtService.generateRefreshToken(user.id.toString(), user.role);
+    const accessToken = this._jwtService.generateAccessToken(user.id.toString(), user.role);
+    const refreshToken = this._jwtService.generateRefreshToken(user.id.toString(), user.role);
 
     if (user.role === Role.USER) {
-      await this.userRepository.update(String(user._id), { refreshToken: refreshToken });
+      await this._userRepository.update(String(user._id), { refreshToken: refreshToken });
     } else {
-      await this.ownerRepository.update(String(user._id), { refreshToken: refreshToken });
+      await this._ownerRepository.update(String(user._id), { refreshToken: refreshToken });
     };
 
     res.cookie("refreshToken", refreshToken, {
@@ -196,13 +195,13 @@ export default class AuthService implements IAuthService {
 
   async googleAuth(profile: Profile): Promise<LoginGoogleResponse> {
     if (!profile.emails || !profile.emails[0]?.value) {
-      throw new HttpError(400, "Email not available from Google profile");
+      throw new HttpError(StatusCode.BAD_REQUEST, "Email not available from Google profile");
     }
 
     const email = profile.emails[0].value;
-    let user = await this.userRepository.findByEmail(email);
+    let user = await this._userRepository.findByEmail(email);
     if (!user) {
-      user = await this.userRepository.register({
+      user = await this._userRepository.register({
         userName: profile.displayName,
         email,
         googleId: profile.id,
@@ -212,10 +211,10 @@ export default class AuthService implements IAuthService {
       });
     };
 
-    const accessToken = this.jwtService.generateAccessToken(user.id.toString(), user.role);
-    const refreshToken = this.jwtService.generateRefreshToken(user.id.toString(), user.role);
+    const accessToken = this._jwtService.generateAccessToken(user.id.toString(), user.role);
+    const refreshToken = this._jwtService.generateRefreshToken(user.id.toString(), user.role);
 
-    await this.userRepository.update(String(user._id), { refreshToken: refreshToken });
+    await this._userRepository.update(String(user._id), { refreshToken: refreshToken });
 
     return {
       accessToken,
@@ -232,29 +231,29 @@ export default class AuthService implements IAuthService {
 
 
   async verifyOtp(email: string, otp: string, res: Response): Promise<IJwtToken> {
-    let user = await this.userRepository.findByEmail(email);
+    let user = await this._userRepository.findByEmail(email);
     if (!user) {
-      user = await this.ownerRepository.findByEmail(email);
+      user = await this._ownerRepository.findByEmail(email);
     }
     if (!user) {
-      throw new HttpError(404, "User not found");
+      throw new HttpError(StatusCode.NOT_FOUND, "User not found");
     };
 
     if (!user.otp || !user.otpExpiresAt || new Date() > user.otpExpiresAt) {
-      throw new HttpError(400, "OTP has expired. Please request once again");
+      throw new HttpError(StatusCode.BAD_REQUEST, "OTP has expired. Please request once again");
     };
 
     if (user.otp !== otp) {
-      throw new HttpError(400, "Invlid OTP. Please try again");
+      throw new HttpError(StatusCode.BAD_REQUEST, "Invlid OTP. Please try again");
     };
 
-    const accessToken = this.jwtService.generateAccessToken(String(user._id), user.role);
-    const refreshToken = this.jwtService.generateRefreshToken(String(user._id), user.role);
+    const accessToken = this._jwtService.generateAccessToken(String(user._id), user.role);
+    const refreshToken = this._jwtService.generateRefreshToken(String(user._id), user.role);
 
     if (user.role === Role.USER) {
-      await this.userRepository.findByEmailAndUpdate(user.email, refreshToken);
+      await this._userRepository.findByEmailAndUpdate(user.email, refreshToken);
     } else {
-      await this.ownerRepository.findByEmailAndUpdate(user.email, refreshToken);
+      await this._ownerRepository.findByEmailAndUpdate(user.email, refreshToken);
     }
 
 
@@ -268,16 +267,16 @@ export default class AuthService implements IAuthService {
   };
 
   async resendOtp(email: string): Promise<void> {
-    let user = await this.userRepository.findByEmail(email);
+    let user = await this._userRepository.findByEmail(email);
     if (!user) {
-      user = await this.ownerRepository.findByEmail(email);
+      user = await this._ownerRepository.findByEmail(email);
     };
     if (!user) {
-      throw new HttpError(404, "User not found");
+      throw new HttpError(StatusCode.NOT_FOUND, "User not found");
     };
 
     if (user.isVerified) {
-      throw new HttpError(400, "User is already verified");
+      throw new HttpError(StatusCode.BAD_REQUEST, "User is already verified");
     };
 
     const now = Date.now();
@@ -293,62 +292,62 @@ export default class AuthService implements IAuthService {
     console.log("this is your otp", otp);
 
     if (user.role === Role.USER) {
-      await this.userRepository.update(String(user._id), {
+      await this._userRepository.update(String(user._id), {
         otp,
         otpExpiresAt,
         otpLastSentAt
       })
     } else {
-      await this.ownerRepository.update(String(user._id), {
+      await this._ownerRepository.update(String(user._id), {
         otp,
         otpExpiresAt,
         otpLastSentAt
       })
     };
 
-    await this.otpService.sendEmail(user.email, otp, "emailVerification");
+    await this._otpService.sendEmail(user.email, otp, "emailVerification");
   };
 
   async verifyEmail(email: string): Promise<void> {
 
     if (email === "") {
-      throw new HttpError(400, "Invalid email");
+      throw new HttpError(StatusCode.BAD_REQUEST, "Invalid email");
     };
 
-    let user = await this.userRepository.findByEmail(email);
+    let user = await this._userRepository.findByEmail(email);
     if (!user) {
-      user = await this.ownerRepository.findByEmail(email);
+      user = await this._ownerRepository.findByEmail(email);
     };
 
     if (!user) {
-      throw new HttpError(404, "User not found")
+      throw new HttpError(StatusCode.NOT_FOUND, "User not found")
     };
 
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenExpiresAt = new Date(Date.now() + 10 * 60 * 60 * 1000);
     if (user.role === Role.USER) {
-      await this.userRepository.update(String(user._id), { resetToken, resetTokenExpiresAt });
+      await this._userRepository.update(String(user._id), { resetToken, resetTokenExpiresAt });
     } else {
-      await this.ownerRepository.update(String(user._id), { resetToken, resetTokenExpiresAt });
+      await this._ownerRepository.update(String(user._id), { resetToken, resetTokenExpiresAt });
 
     };
-    this.otpService.sendEmail(email, resetToken, "passwordReset");
+    this._otpService.sendEmail(email, resetToken, "passwordReset");
   };
 
 
   async resetPassword(token: string, newPwd: string): Promise<void> {
-    let user = await this.userRepository.findOne({ resetToken: token });
+    let user = await this._userRepository.findOne({ resetToken: token });
     if (!user) {
-      user = await this.ownerRepository.findOne({ resetToken: token });
+      user = await this._ownerRepository.findOne({ resetToken: token });
     };
 
     if (!user || !user.resetTokenExpiresAt || new Date() > user.resetTokenExpiresAt) {
-      throw new HttpError(404, "Invalid or expired token");
+      throw new HttpError(StatusCode.NOT_FOUND, "Invalid or expired token");
     };
 
     const hashedPwd = await bcrypt.hash(newPwd, 10);
 
-    await this.userRepository.update(String(user._id), { password: hashedPwd, resetToken: null, resetTokenExpiresAt: null });
+    await this._userRepository.update(String(user._id), { password: hashedPwd, resetToken: null, resetTokenExpiresAt: null });
   };
 
   async rotateRefreshToken(refreshToken: string): Promise<{ newAccessToken: string; newRefreshToken: string; }> {
@@ -357,7 +356,7 @@ export default class AuthService implements IAuthService {
     try {
       decoded = jwt.verify(refreshToken, REFRESH_SECRET!);
     } catch (err) {
-      throw new HttpError(403, "Invalid or malformed refresh token");
+      throw new HttpError(StatusCode.FORBIDDEN, "Invalid or malformed refresh token");
     }
 
     if (
@@ -366,7 +365,7 @@ export default class AuthService implements IAuthService {
       !("userId" in decoded) ||
       typeof decoded.userId !== "string"
     ) {
-      throw new HttpError(403, "Invalid or malformed refresh token");
+      throw new HttpError(StatusCode.FORBIDDEN, "Invalid or malformed refresh token");
     }
 
     const payload = decoded as { userId: string, role: string };
@@ -374,28 +373,28 @@ export default class AuthService implements IAuthService {
     let user;
 
     if (payload.role === Role.USER) {
-      user = await this.userRepository.findById(payload.userId);
+      user = await this._userRepository.findById(payload.userId);
     } else if (payload.role === Role.OWNER) {
-      user = await this.ownerRepository.findById(payload.userId);
+      user = await this._ownerRepository.findById(payload.userId);
     } else if (payload.role === Role.ADMIN) {
-      user = await this.adminRepository.findById(payload.userId);
+      user = await this._adminRepository.findById(payload.userId);
     }
 
     if (!user || user.refreshToken !== refreshToken) {
-      throw new HttpError(403, "Invalid or expired refresh token");
+      throw new HttpError(StatusCode.FORBIDDEN, "Invalid or expired refresh token");
     }
 
     const { _id, role } = user;
 
-    const newAccessToken = this.jwtService.generateAccessToken(String(_id), role);
-    const newRefreshToken = this.jwtService.generateRefreshToken(String(_id), role);
+    const newAccessToken = this._jwtService.generateAccessToken(String(_id), role);
+    const newRefreshToken = this._jwtService.generateRefreshToken(String(_id), role);
 
     if (role === Role.USER) {
-      await this.userRepository.update(String(_id), { refreshToken: newRefreshToken });
+      await this._userRepository.update(String(_id), { refreshToken: newRefreshToken });
     } else if (role === Role.OWNER) {
-      await this.ownerRepository.update(String(_id), { refreshToken: newRefreshToken });
+      await this._ownerRepository.update(String(_id), { refreshToken: newRefreshToken });
     } else if (role === Role.ADMIN) {
-      await this.adminRepository.update(String(_id), { refreshToken: newRefreshToken });
+      await this._adminRepository.update(String(_id), { refreshToken: newRefreshToken });
     }
 
     return {
@@ -415,13 +414,13 @@ export default class AuthService implements IAuthService {
     if (!refreshToken) throw new HttpError(204, "No token to logout");
 
     let updatedUser: IUserModel | IOwnerModel | IAdminModel | null = null;
-    updatedUser = await this.userRepository.update(userId, { refreshToken: null });
+    updatedUser = await this._userRepository.update(userId, { refreshToken: null });
     if (!updatedUser) {
-      updatedUser = await this.ownerRepository.update(userId, { refreshToken: null });
+      updatedUser = await this._ownerRepository.update(userId, { refreshToken: null });
     }
 
     if (!updatedUser) {
-      updatedUser = await this.adminRepository.update(userId, { refreshToken: null });
+      updatedUser = await this._adminRepository.update(userId, { refreshToken: null });
     }
     res.clearCookie("refreshToken", {
       httpOnly: true,
@@ -433,20 +432,18 @@ export default class AuthService implements IAuthService {
 
   async getCurrentUser(userId: string): Promise<AuthCheck> {
     let user: IUserModel | IOwnerModel | IAdminModel | null = null;
-    user = await this.userRepository.findById(userId);
+    user = await this._userRepository.findById(userId);
     if (!user) {
-      user = await this.ownerRepository.findById(userId);
+      user = await this._ownerRepository.findById(userId);
     };
     if (!user) {
-      user = await this.adminRepository.findById(userId);
+      user = await this._adminRepository.findById(userId);
     }
     if (!user) {
-      throw new HttpError(400, "User not found");
+      throw new HttpError(StatusCode.BAD_REQUEST, "User not found");
     }
     if (user.role === Role.USER || user.role === Role.OWNER) {
-      // Narrow the type using a type assertion
       const safeUser = user as IUserModel | IOwnerModel;
-
       return {
         userName: safeUser.userName,
         email: safeUser.email,
@@ -455,7 +452,6 @@ export default class AuthService implements IAuthService {
         isVerified: safeUser.isVerified,
       };
     } else {
-      // For Admin, return only what is safe to access
       return {
         email: user.email,
         role: user.role,

@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, model, Document } from "mongoose";
 import IUser from "../types/user";
 
 export interface IUserModel extends Document, Omit<IUser, '_id'> {
@@ -30,13 +30,13 @@ const userSchema = new Schema<IUserModel>(
       type: {
         type: String,
         enum: ["Point"],
-        required: true,
+        required: false,
       },
       coordinates: {
         type: [Number],
-        required: true,
+        required: false,
       },
-      address: { type: String, required: true },
+      address: { type: String, required: false },
     },
     googleId: {
       type: String,
@@ -74,6 +74,11 @@ const userSchema = new Schema<IUserModel>(
       type: Date,
       default: null,
     },
+    subscriptionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'UserSubscription',
+      required: false
+    }
   },
   {
     timestamps: true,

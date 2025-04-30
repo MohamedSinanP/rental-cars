@@ -1,4 +1,4 @@
-import { Document, ObjectId } from "mongoose";
+import mongoose, { Document } from "mongoose";
 
 export interface IBooking {
   _id?: string;
@@ -25,11 +25,14 @@ export interface IBooking {
   paymentMethod: 'wallet' | 'stripe';
   paymentId: string;
   status?: 'active' | 'cancelled' | 'completed';
+  isPremiumBooking?: boolean;
+  discountAmount?: number;
+  discountPercentage?: number;
 };
 export interface IBookingModel extends Document {
-  userId: ObjectId;
-  carId: ObjectId;
-  ownerId: ObjectId;
+  userId: mongoose.Types.ObjectId;
+  carId: mongoose.Types.ObjectId;
+  ownerId: mongoose.Types.ObjectId;
   userDetails: {
     address: string;
     email: string;
@@ -50,4 +53,7 @@ export interface IBookingModel extends Document {
   paymentMethod: 'wallet' | 'stripe';
   paymentId: string;
   status?: 'active' | 'cancelled' | 'completed';
+  isPremiumBooking?: boolean;
+  discountAmount?: number;
+  discountPercentage?: number;
 };

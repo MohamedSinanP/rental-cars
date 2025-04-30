@@ -7,6 +7,7 @@ const TYPES = {
   IPaymentController: Symbol.for("IPaymentController"),
   IBookingController: Symbol.for("IBookingController"),
   IAdminController: Symbol.for("IAdminController"),
+  ISubscriptionController: Symbol.for("ISubscriptionController"),
 
   // repositories
   IUserRepository: Symbol.for("IUserRepository"),
@@ -14,6 +15,9 @@ const TYPES = {
   ICarRepository: Symbol.for("ICarRepository"),
   IBookingRepository: Symbol.for("IBookingRepository"),
   IAdminRepository: Symbol.for("IAdminRepository"),
+  ISubscriptionRepository: Symbol.for("ISubscriptionRepository"),
+  IUserSubsRepository: Symbol.for("IUserSubsRepository"),
+  IAddressRepository: Symbol.for("IAddressRepository"),
 
 
   // services 
@@ -25,6 +29,7 @@ const TYPES = {
   IPaymentService: Symbol.for("IPaymentService"),
   IBookingService: Symbol.for("IBookingService"),
   IOwnerService: Symbol.for("IOwnerService"),
+  ISubscriptionService: Symbol.for("ISubscriptionService"),
 
   // models
   UserModel: Symbol.for("UserModel"),
@@ -32,6 +37,9 @@ const TYPES = {
   CarModel: Symbol.for("CarModel"),
   BookingModel: Symbol.for("BookingModel"),
   AdminModel: Symbol.for("AdminModel"),
+  SubscriptionModel: Symbol.for("SubscriptionModel"),
+  UserSubsModel: Symbol.for("UserSubsModel"),
+  AddressModel: Symbol.for("AddressModel"),
 }
 
 export default TYPES;

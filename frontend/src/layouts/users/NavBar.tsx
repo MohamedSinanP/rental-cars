@@ -1,12 +1,10 @@
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
+import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
 import Logo from '../../components/Logo'
 import { logout } from '../../services/apis/authApi'
-import { useDispatch } from 'react-redux'
-import { removeAuth } from '../../redux/slices/authSlice'
 import profile_icon from '../../assets/icons8-customer-48.png';
 import { toast } from 'react-toastify'
 
@@ -16,8 +14,8 @@ import { toast } from 'react-toastify'
 const navigation = [
   { name: 'Home', href: '/', current: false },
   { name: 'Cars', href: '/cars', current: false },
-  { name: 'About Us', href: '/about', current: false },
-  { name: 'Contact Us', href: '/contact', current: false },
+  { name: 'Pricing', href: '/subscription', current: false },
+  { name: 'About Us', href: '/contact', current: false },
 ]
 
 function classNames(...classes: any) {
@@ -27,11 +25,10 @@ function classNames(...classes: any) {
 
 const NavBar = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth?.user?.userName);
   const handleLogout = async () => {
     try {
-      const result = await logout(navigate);
+      const result = await logout();
       console.log(result, "6666666666666");
 
       toast.success(result.message);
