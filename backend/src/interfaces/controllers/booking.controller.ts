@@ -7,4 +7,5 @@ export default interface IBookingController {
   fetchOwnerAllBookings(req: Request, res: Response, next: NextFunction): Promise<void>;
   changeBookingStatus(req: Request, res: Response, next: NextFunction): Promise<void>;
   getLatestBooking(req: Request, res: Response, next: NextFunction): Promise<void>;
+  cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void>;
 };

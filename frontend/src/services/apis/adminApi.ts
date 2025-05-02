@@ -103,3 +103,20 @@ export const updateSubscription = async (subId: string, data: FormData) => {
     throw new Error(getApiErrorMessage(error));
   };
 };
+export const fetchUserSubscriptions = async () => {
+  try {
+    const response = await api.get('/admin/users-subscriptions');
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+export const updateSubscriptionStatus = async (subId: string, status: string) => {
+  try {
+    const response = await api.patch(`/admin/change-user-subscription-status/${subId}`, { status });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+

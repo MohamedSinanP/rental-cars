@@ -8,4 +8,6 @@ export default interface ISubscriptionController {
   makeSubscription(req: Request, res: Response, next: NextFunction): Promise<void>;
   handleWebhook(req: Request, res: Response, next: NextFunction): Promise<void>;
   getUserSubscription(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getUsersSubscriptions(req: Request, res: Response, next: NextFunction): Promise<void>;
+  changeUserSubscriptionStatus(req: Request, res: Response, next: NextFunction): Promise<void>;
 };

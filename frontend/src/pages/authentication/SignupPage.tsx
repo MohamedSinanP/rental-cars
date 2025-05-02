@@ -6,6 +6,9 @@ import { useDispatch } from 'react-redux';
 import { setAuth } from '../../redux/slices/authSlice';
 import { AppDispatch } from '../../redux/store';
 import { toast } from 'react-toastify';
+import { getUserLocation } from '../../utils/getUserLocation';
+import { sendUserLocation } from '../../services/apis/userApis';
+import GoogleLoginButton from '../../components/GoogleLoginButton';
 
 
 
@@ -83,8 +86,11 @@ const SignupPage = () => {
             isVerified: result.isVerified
           }
         }))
+        const { location } = await getUserLocation();
+        await sendUserLocation(result._id, location);
         navigate('/verify-otp')
-      }
+      };
+
 
       setFormData({
         userName: "",
@@ -93,12 +99,14 @@ const SignupPage = () => {
         confirmPassword: "",
       });
 
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-
-
-  }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    };
+  };
 
   return (
     <>
@@ -185,12 +193,8 @@ const SignupPage = () => {
               <div className="w-1/3 border-t border-gray-300"></div>
             </div>
 
-            <div className="flex justify-center gap-4 border border-gray-300 cursor-pointer">
-              <img
-                src="/images/Google.jpg"
-                alt="Google"
-                className="w-8 h-8"
-              />
+            <div className="flex items-center justify-center border border-gray-300 rounded-md px-4 py-2">
+              <GoogleLoginButton />
             </div>
           </div>
         </div>

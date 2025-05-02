@@ -47,6 +47,9 @@ import UserSubsRepository from "../repositories/user.subscription.repository";
 import { Address } from "../models/address.model";
 import IAddressRepository from "../interfaces/repositories/address.repository";
 import AddressRepository from "../repositories/address.repository";
+import { Wallet } from "../models/wallet.model";
+import IWalletRepository from "../interfaces/repositories/wallet.repository";
+import WalletRepository from "../repositories/wallet.repository";
 
 
 const container = new Container();
@@ -70,6 +73,7 @@ container.bind<IAdminRepository>(TYPES.IAdminRepository).to(AdminRepository).inS
 container.bind<ISubscriptionRepository>(TYPES.ISubscriptionRepository).to(SubscriptionRepository).inSingletonScope();
 container.bind<IUserSubsRepository>(TYPES.IUserSubsRepository).to(UserSubsRepository).inSingletonScope();
 container.bind<IAddressRepository>(TYPES.IAddressRepository).to(AddressRepository).inSingletonScope();
+container.bind<IWalletRepository>(TYPES.IWalletRepository).to(WalletRepository).inSingletonScope();
 
 
 
@@ -95,6 +99,7 @@ container.bind<typeof Admin>(TYPES.AdminModel).toConstantValue(Admin);
 container.bind<typeof Subscription>(TYPES.SubscriptionModel).toConstantValue(Subscription);
 container.bind<typeof UserSubscription>(TYPES.UserSubsModel).toConstantValue(UserSubscription);
 container.bind<typeof Address>(TYPES.AddressModel).toConstantValue(Address);
+container.bind<typeof Wallet>(TYPES.WalletModel).toConstantValue(Wallet);
 
 
 export const authController = container.get<AuthController>(TYPES.IAuthController);

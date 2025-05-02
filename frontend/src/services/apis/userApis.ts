@@ -91,6 +91,14 @@ export const getLatestBooking = async (bookingId: string | undefined) => {
   };
 };
 
+export const cancelBooking = async (bookingId: string | undefined) => {
+  try {
+    const response = await api.patch(`/user/cancel-booking/${bookingId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
 export const fetchUserLocationAddress = async (lat: number, lng: number) => {
   try {
     const response = await api.get('/user/reverse-geocode', {
@@ -106,13 +114,13 @@ export const fetchUserLocationAddress = async (lat: number, lng: number) => {
   };
 };
 
-export const sendUserLocation = async (location: {
+export const sendUserLocation = async (userId: string, location: {
   type: "Point";
   coordinates: [number, number];
   address: string;
 }) => {
   try {
-    const response = await api.patch('/user/location', { location: location });
+    const response = await api.patch(`/user/location/${userId}`, { location: location });
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
@@ -148,6 +156,28 @@ export const getUserSubscription = async () => {
 export const getUserAddresses = async () => {
   try {
     const response = await api.get('/user/addresses');
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+
+export const getUserProfile = async () => {
+  try {
+    const response = await api.get('/user/details');
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+export const getUserWallet = async (page: number, limit: number) => {
+  try {
+    const response = await api.get('/user/wallet', {
+      params: {
+        page,
+        limit
+      }
+    });
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));

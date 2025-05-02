@@ -4,6 +4,7 @@ import { fetchAllOwnerCars } from '../../services/apis/ownerApi';
 import { ICar } from '../../types/types';
 import DataTable, { Column, Action } from '../../components/DataTable';
 import ReuploadDocsModal from '../../components/ReuploadDocsModal';
+import { toast } from 'react-toastify';
 
 const CarAddedHistoryPage: React.FC = () => {
   const [carData, setCarData] = useState<ICar[]>([]);
@@ -21,9 +22,12 @@ const CarAddedHistoryPage: React.FC = () => {
       setLoading(true);
       const result = await fetchAllOwnerCars();
       setCarData(result.data.cars);
-    } catch (err: any) {
-      console.error(err);
-      setError('Failed to fetch car data');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -92,8 +96,8 @@ const CarAddedHistoryPage: React.FC = () => {
       render: (car) => (
         <span
           className={`px-3 py-1 text-xs font-semibold rounded-full ${car.isVerified
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
+            ? 'bg-green-100 text-green-700'
+            : 'bg-red-100 text-red-700'
             }`}
         >
           {car.isVerified ? 'Verified' : 'Rejected'}

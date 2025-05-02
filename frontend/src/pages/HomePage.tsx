@@ -10,8 +10,10 @@ import {
   TruckIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/solid'
+import { useNavigate } from 'react-router-dom'
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <>
       <div className='min-h-screen'>
@@ -30,7 +32,10 @@ const HomePage: React.FC = () => {
               <br />
               need it with your iOS and Android devices
             </p>
-            <button className='bg-white text-teal-400 text-md px-4 py-2 border rounded-lg hover:bg-teal-400 hover:text-white transition'>
+            <button
+              className='bg-white text-teal-400 text-md px-4 py-2 border rounded-lg hover:bg-teal-400 hover:text-white transition cursor-pointer'
+              onClick={() => navigate('/cars')}
+            >
               Explore Now
             </button>
           </div>

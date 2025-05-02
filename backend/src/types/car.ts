@@ -19,7 +19,7 @@ export default interface ICar {
     coordinates: [number, number];
     address: string;
   };
-  availability: 'Available' | 'Unavailable';
+  status: "Available" | "Booked" | "Unavailable" | "UnderMaintenance" | "PendingApproval" | "Archived";
   features?: string[];
   pricePerDay: number;
   deposit: number;
@@ -49,7 +49,7 @@ export interface ICarModel extends Document {
     coordinates: [number, number];
     address: string;
   };
-  availability: 'Available' | 'Unavailable';
+  status: "Available" | "Booked" | "Unavailable" | "UnderMaintenance" | "PendingApproval" | "Archived";
   features?: string[];
   pricePerDay: number;
   deposit: number;

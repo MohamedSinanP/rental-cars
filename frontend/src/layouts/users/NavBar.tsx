@@ -33,9 +33,13 @@ const NavBar = () => {
 
       toast.success(result.message);
       navigate('/login');
-    } catch (error: any) {
-      toast.error(error)
-    }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    };
   }
 
   return (
@@ -57,17 +61,6 @@ const NavBar = () => {
               <div className="hidden sm:ml-6 sm:block">
                 <div className="flex space-x-4">
                   {navigation.map((item) => (
-                    // <a
-                    //   key={item.name}
-                    //   href={item.href}
-                    //   aria-current={item.current ? 'page' : undefined}
-                    //   className={classNames(
-                    //     item.current ? 'bg-red-500 text-white' : 'text-black hover:bg-gray-700 hover:text-white',
-                    //     'rounded-md px-3 py-2 text-sm font-medium',
-                    //   )}
-                    // >
-                    //   {item.name}
-                    // </a>
                     <ul key={item.name}>
                       <NavLink
                         to={item.href}
@@ -84,7 +77,7 @@ const NavBar = () => {
             {user ? <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
               <button
                 type="button"
-                className="relative rounded-full bg-white-800 p-1 text-gray-400  cursor-pointer hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden"
+                className="relative flex rounded-full bg-none text-sm cursor-pointer"
                 onClick={() => navigate('/rentals')}
               >
                 <img src="/images/rentals.png" alt="" className='size-14 rounded-full' />
@@ -95,7 +88,7 @@ const NavBar = () => {
                 <div>
                   <button
                     onClick={() => navigate('/profile')}
-                    className="relative flex rounded-full bg-none text-sm"
+                    className="relative flex rounded-full bg-none text-sm cursor-pointer"
                   >
                     <img
                       alt="profile"
@@ -108,7 +101,7 @@ const NavBar = () => {
                 {/* Show dropdown only when user hovers */}
                 <MenuItems
                   static
-                  className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5"
+                  className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute right-0 z-10 mt w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5"
                 >
                   <MenuItem>
                     <button

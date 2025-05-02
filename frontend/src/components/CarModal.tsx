@@ -40,9 +40,12 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
         coordinates: [lng, lat],
         address: result.address,
       });
-    } catch (error: any) {
-      console.error("Error fetching address:", error);
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
 
@@ -72,7 +75,7 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
       formData.append("location", JSON.stringify(data.location));
       formData.append("pricePerDay", data.pricePerDay.toString());
       formData.append("deposit", data.deposit.toString());
-      formData.append("availability", data.availability);
+      formData.append("status", data.status);
       formData.append("lastmaintenanceDate", data.maintenanceDate);
       formData.append("maintenanceInterval", data.maintenanceInterval.toString());
       formData.append("carImages", JSON.stringify(carImageUrls));
@@ -96,10 +99,12 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
       setSelectedLocation(null);
       toast.success(result.message);
       onClose();
-    } catch (error: any) {
-      console.log(error);
-
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
     console.log('Submitted:', data);
   };
@@ -265,12 +270,12 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
           </div>
           <div>
             <label>Availability Status</label>
-            <select {...register('availability', { required: 'Availability is required' })} className="w-full border p-2 rounded">
+            <select {...register('status', { required: 'Availability is required' })} className="w-full border p-2 rounded">
               <option value="">Select Availability</option>
               <option value="Available">Available</option>
               <option value="Unavailable">Unavailable</option>
             </select>
-            {errors.availability && <p className="text-red-500 text-sm">{errors.availability.message}</p>}
+            {errors.status && <p className="text-red-500 text-sm">{errors.status.message}</p>}
           </div>
           <div>
             <label>Last Maintenance Date</label>

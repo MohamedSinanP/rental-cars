@@ -14,10 +14,10 @@ import { Request, Response } from "express";
 import IOwner from "../types/owner";
 import IOwnerRepository from "../interfaces/repositories/owner.repository";
 import { Profile } from "passport-google-oauth20";
-import { IUserModel } from "../models/user.model";
+import { IUserModel } from "../types/user";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 import IAdminRepository from "../interfaces/repositories/admin.repository";
-import { IOwnerModel } from "../models/owner.model";
+import { IOwnerModel } from "../types/owner";
 import { IAdminModel } from "../models/admin.model";
 
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
@@ -35,9 +35,12 @@ export default class AuthService implements IAuthService {
   };
 
   async signupConsumer(userName: string, email: string, password: string, role: Role.USER): Promise<IUser> {
-    const existingUser = await this._userRepository.findByEmail(email);
+    const existingUser =
+      (await this._userRepository.findByEmail(email)) ||
+      (await this._ownerRepository.findByEmail(email));
+
     if (existingUser) {
-      throw new HttpError(StatusCode.CONFLICT, "The user with this email already exist");
+      throw new HttpError(StatusCode.CONFLICT, "The user with this email already exists");
     };
 
     const hashedPwd = await bcrypt.hash(password, 10);
@@ -64,6 +67,7 @@ export default class AuthService implements IAuthService {
       this._otpService.sendEmail(user.email, otp, "emailVerification")
     };
     return {
+      _id: user._id.toString(),
       userName: user.userName,
       email: user.email,
       password: user.password,
@@ -74,10 +78,13 @@ export default class AuthService implements IAuthService {
   };
 
   async signupOwner(userName: string, email: string, password: string, role: string, commision: number): Promise<IOwner> {
-    const existingUser = await this._ownerRepository.findByEmail(email);
+    const existingUser =
+      (await this._ownerRepository.findByEmail(email)) ||
+      (await this._userRepository.findByEmail(email));
+
     if (existingUser) {
-      throw new HttpError(StatusCode.CONFLICT, "The user with this email already exist");
-    };
+      throw new HttpError(StatusCode.CONFLICT, "The user with this email already exists");
+    }
 
     const hashedPwd = await bcrypt.hash(password, 10);
     const otp = await generateOtp();
@@ -184,6 +191,7 @@ export default class AuthService implements IAuthService {
     return {
       accessToken,
       user: {
+        _id: user._id.toString(),
         userName: user.userName,
         email: user.email,
         isBlocked: user.isBlocked,

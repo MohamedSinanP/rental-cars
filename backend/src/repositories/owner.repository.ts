@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 import { BaseRepository } from "./base.repository";
 import TYPES from "../di/types";
 import { Model } from "mongoose";
-import { IOwnerModel } from "../models/owner.model";
+import { IOwnerModel } from "../types/owner";
 import IOwnerRepository from "../interfaces/repositories/owner.repository";
 import IOwner from "../types/owner";
 

@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import LoadingSpinner from './LoadingSpinner';
 
 export type DataItem = {
   _id: string;
@@ -18,6 +19,7 @@ export type Action<T extends DataItem> = {
   onClick: (item: T) => void;
   className?: string | ((item: T) => string);
   isVisible?: (item: T) => boolean;
+  render?: (item: T) => ReactNode;
 };
 
 interface DataTableProps<T extends DataItem> {
@@ -59,9 +61,7 @@ const DataTable = <T extends DataItem>({
       )}
 
       {loading ? (
-        <div className="flex justify-center items-center h-32">
-          <div className="text-gray-500">Loading data...</div>
-        </div>
+        <LoadingSpinner />
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white">
@@ -102,6 +102,15 @@ const DataTable = <T extends DataItem>({
                           // Check if action should be visible
                           if (action.isVisible && !action.isVisible(item)) {
                             return null;
+                          }
+
+                          // Use render if provided
+                          if (action.render) {
+                            return (
+                              <div key={index} className="inline-block">
+                                {action.render(item)}
+                              </div>
+                            );
                           }
 
                           const actionLabel = typeof action.label === 'function'

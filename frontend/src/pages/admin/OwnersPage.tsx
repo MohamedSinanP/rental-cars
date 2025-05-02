@@ -25,9 +25,13 @@ const OwnersPage = () => {
           u._id === user._id ? { ...u, ...updatedUser } : u
         )
       );
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    };
   };
   useEffect(() => {
     const fetchUserData = async () => {

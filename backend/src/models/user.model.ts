@@ -1,8 +1,6 @@
-import mongoose, { Schema, model, Document } from "mongoose";
-import IUser from "../types/user";
+import { Schema, model } from "mongoose";
+import { IUserModel } from "../types/user";
 
-export interface IUserModel extends Document, Omit<IUser, '_id'> {
-}
 
 const userSchema = new Schema<IUserModel>(
   {
@@ -73,11 +71,6 @@ const userSchema = new Schema<IUserModel>(
     resetTokenExpiresAt: {
       type: Date,
       default: null,
-    },
-    subscriptionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'UserSubscription',
-      required: false
     }
   },
   {

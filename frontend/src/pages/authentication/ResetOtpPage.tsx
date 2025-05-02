@@ -1,15 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
-import { verifyOtp, verifyResetOtp } from '../../services/apis/authApi';
+import { verifyResetOtp } from '../../services/apis/authApi';
 import { otpData } from '../../types/types';
 import { toast } from 'react-toastify';
-import { useDispatch } from 'react-redux';
-import { setAccessToken } from '../../redux/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const ResetOtpPage: React.FC = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const email = useSelector((state: RootState) => state.auth.user.email as string);
   const [otp, setOtp] = useState<string>('');
@@ -38,9 +35,13 @@ const ResetOtpPage: React.FC = () => {
       toast.success(result.message);
       navigate('/reset-password');
 
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    };
 
   };
 

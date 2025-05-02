@@ -50,8 +50,12 @@ const OtpPage: React.FC = () => {
       toast.success(result.message || "OTP resent successfully");
       setSeconds(59);
       startTimer();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to resend OTP");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     } finally {
       setResending(false);
     }
@@ -78,9 +82,13 @@ const OtpPage: React.FC = () => {
       } else {
         navigate('/');
       }
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    };
   };
   return (
     <>

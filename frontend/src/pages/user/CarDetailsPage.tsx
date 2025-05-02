@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Star, MapPin, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ICar } from '../../types/types';
-import { carDetails, similarCarsApi } from '../../services/apis/userApis';
+import { carDetails, similarCarsApi, getUserSubscription } from '../../services/apis/userApis';
 import { toast } from 'react-toastify';
 import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
-
-
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 interface SimilarCar {
   _id: string;
@@ -15,8 +14,9 @@ interface SimilarCar {
   seats: string;
   pricePerDay: number;
   rating: number;
-  carImages: string;
+  carImages: string[];
 }
+
 
 const CarDetailsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,6 +27,7 @@ const CarDetailsPage: React.FC = () => {
   const [rating, setRating] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [userLoading, setUserLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchCarData = async () => {
@@ -37,13 +38,16 @@ const CarDetailsPage: React.FC = () => {
         const data: ICar = result.data;
         setCar(data);
 
-        // Fetch similar cars (assuming API endpoint exists)
+        // Fetch similar cars
         const outcome = await similarCarsApi(id);
         const similarData: SimilarCar[] = outcome.data;
         setSimilarCars(similarData);
-      } catch (err: any) {
-        toast.error(err.message);
-        setError(err instanceof Error ? err.message : 'An error occurred');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Something went wrong");
+        }
       } finally {
         setLoading(false);
       }
@@ -52,8 +56,55 @@ const CarDetailsPage: React.FC = () => {
     fetchCarData();
   }, [id]);
 
+  // Fetch user profile separately - will only be used when needed
+  const checkUserSubscription = async () => {
+    try {
+      setUserLoading(true);
+      const result = await getUserSubscription();
+      return result.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+        return false
+      } else {
+        toast.error("Something went wrong");
+        return false
+      }
+    } finally {
+      setUserLoading(false);
+    }
+  };
+
+  const handleBooking = async () => {
+    if (!car) return;
+    const isLuxuryCar = car.carType === 'Luxury';
+
+    if (isLuxuryCar) {
+      const userSub = await checkUserSubscription();
+      console.log(userSub, "yes yo do");
+
+      if (!userSub) {
+        toast.error("This is a premium car. You need a subscription to book it.");
+        navigate('/subscription', { state: { from: `/car/${id}` } });
+        return;
+      }
+
+      if (userSub.status !== 'active') {
+        toast.error("Your subscription is cancelled or completed. Please renew to book premium cars.");
+        navigate('/subscription', { state: { from: `/car/${id}` } });
+        return;
+      };
+
+      if (userSub.subscriptionId.name === 'DrivePlus') {
+        toast.error("This premium car is only available for Elite plan users.");
+        return;
+      }
+    }
+    navigate(`/car/booking/${car._id}`);
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (error || !car) {
@@ -116,12 +167,12 @@ const CarDetailsPage: React.FC = () => {
                 </h1>
                 <div className="flex items-center text-sm text-gray-600">
                   <span
-                    className={`px-2 py-1 rounded ${car.availability === 'booked'
+                    className={`px-2 py-1 rounded ${car.status === 'booked'
                       ? 'bg-red-100 text-red-600'
                       : 'bg-green-100 text-green-600'
                       }`}
                   >
-                    {car.availability.charAt(0).toUpperCase() + car.availability.slice(1)}
+                    {car.status.charAt(0).toUpperCase() + car.status.slice(1)}
                   </span>
                 </div>
               </div>
@@ -159,11 +210,12 @@ const CarDetailsPage: React.FC = () => {
                 </ul>
               </div>
               <div className="flex justify-end mt-3">
-                <button className="bg-teal-400 text-white font-medium px-6 py-2 rounded-lg"
-                  onClick={() => {
-                    navigate(`/car/booking/${car._id}`)
-                  }}>
-                  Rent this Car
+                <button
+                  className="bg-teal-400 text-white font-medium px-6 py-2 rounded-lg"
+                  onClick={handleBooking}
+                  disabled={userLoading || car.status === 'booked'}
+                >
+                  {userLoading ? 'Checking...' : 'Rent this Car'}
                 </button>
               </div>
             </div>
@@ -277,7 +329,7 @@ const CarDetailsPage: React.FC = () => {
                     <div>
                       <h3 className="font-medium">{similarCar.carName}</h3>
                       <p className="text-xs text-gray-500">{similarCar.seats}</p>
-                      <p className="font-bold mt-1">{similarCar.pricePerDay}</p>
+                      <p className="font-bold mt-1">${similarCar.pricePerDay}/day</p>
                     </div>
                     <div className="flex items-center text-xs">
                       <span className="mr-1">{similarCar.rating}</span>
@@ -288,7 +340,10 @@ const CarDetailsPage: React.FC = () => {
                     <span>•</span>
                     <span>{similarCar.pricePerDay}</span>
                   </div>
-                  <button className="w-full bg-teal-400 text-white text-sm py-1 rounded mt-2">
+                  <button
+                    className="w-full bg-teal-400 text-white text-sm py-1 rounded mt-2"
+                    onClick={() => navigate(`/car/${similarCar._id}`)}
+                  >
                     View More
                   </button>
                 </div>

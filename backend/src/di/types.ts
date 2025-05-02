@@ -18,6 +18,7 @@ const TYPES = {
   ISubscriptionRepository: Symbol.for("ISubscriptionRepository"),
   IUserSubsRepository: Symbol.for("IUserSubsRepository"),
   IAddressRepository: Symbol.for("IAddressRepository"),
+  IWalletRepository: Symbol.for("IWalletRepository"),
 
 
   // services 
@@ -40,6 +41,7 @@ const TYPES = {
   SubscriptionModel: Symbol.for("SubscriptionModel"),
   UserSubsModel: Symbol.for("UserSubsModel"),
   AddressModel: Symbol.for("AddressModel"),
+  WalletModel: Symbol.for("WalletModel"),
 }
 
 export default TYPES;

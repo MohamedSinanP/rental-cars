@@ -161,9 +161,12 @@ const SubscriptionModal = ({
       // Reset and close modal
       reset();
       onClose();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to save subscription');
-      console.error('Error saving subscription:', error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     };
   };
 

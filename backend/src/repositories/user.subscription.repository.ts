@@ -16,7 +16,27 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
   };
 
   async findUserSubscription(userId: string): Promise<IUserSubscriptionModel | null> {
-    return await this._userSubsModel.findOne({ userId: userId, status: 'active' })
-      .populate('subscriptionId');
+    return await this._userSubsModel.findOne({
+      userId,
+      status: 'active',
+      cancelAtPeriodEnd: false,
+    })
+      .sort({ currentPeriodEnd: -1 })
+      .populate('subscriptionId')
+      .populate('userId')
+      .lean();
+  };
+
+  async findUsersSubscriptions(): Promise<IUserSubscriptionModel[]> {
+    return await this._userSubsModel.find()
+      .populate('subscriptionId')
+      .populate('userId');
+  };
+  async findLatestActiveByUserId(userId: string): Promise<IUserSubscriptionModel | null> {
+    return await this._userSubsModel.findOne({
+      userId,
+      status: 'active',
+      cancelAtPeriodEnd: false,
+    }).sort({ currentPeriodEnd: -1 });
   };
 };

@@ -44,10 +44,10 @@ const carSchema = new Schema<ICarModel>(
       },
       address: { type: String, required: true },
     },
-    availability: {
+    status: {
       type: String,
-      enum: ["Available", "Unavailable"],
-      required: true,
+      enum: ["Available", "Booked", "Unavailable", "UnderMaintenance", "PendingApproval", "Archived"],
+      default: "PendingApproval",
     },
     features: [{ type: String }],
     pricePerDay: { type: Number, required: true },

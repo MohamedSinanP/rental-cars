@@ -16,9 +16,12 @@ const SubscriptionCheckout = () => {
         setLoading(true);
         const result = await getValidSubscriptions();
         setPlans(result.data);
-      } catch (err: any) {
-        setError(err.message);
-        console.error('Error fetching plans:', err);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Something went wrong");
+        }
       } finally {
         setLoading(false);
       }
@@ -37,8 +40,12 @@ const SubscriptionCheckout = () => {
       window.location.href = result.url;
       toast.success(result);
 
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     };
 
   };

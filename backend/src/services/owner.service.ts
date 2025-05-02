@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import IOwnerService from "../interfaces/services/owner.service";
 import TYPES from "../di/types";
 import IOwnerRepository from "../interfaces/repositories/owner.repository";
-import { IOwnerModel } from "../models/owner.model";
+import { IOwnerModel } from "../types/owner";
 import { HttpError } from "../utils/http.error";
 import { PaginatedData, StatusCode } from "../types/types";
 

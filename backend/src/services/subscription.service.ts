@@ -11,13 +11,15 @@ import Stripe from "stripe";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 import IUserSubsRepository from "../interfaces/repositories/user.subscription.repository";
 import IUserRepository from "../interfaces/repositories/user.repository";
+import { Types } from "mongoose";
 
 @injectable()
 export default class SubscriptionService implements ISubscriptionService {
   constructor(
     @inject(TYPES.ISubscriptionRepository) private _subscriptionRepository: ISubscriptionRepository,
     @inject(TYPES.IUserSubsRepository) private _userSubsRepository: IUserSubsRepository,
-    @inject(TYPES.IUserRepository) private _userRepository: IUserRepository
+    @inject(TYPES.IUserRepository) private _userRepository: IUserRepository,
+    @inject(TYPES.IUserSubsRepository) private _userSubscriptionRepository: IUserSubsRepository
   ) { };
   async createSubscription(data: ISubscription): Promise<ISubscriptionModel> {
     const subscription = await this._subscriptionRepository.addSubscription(data);
@@ -55,6 +57,14 @@ export default class SubscriptionService implements ISubscriptionService {
   async makeSubscription(req: Request, priceId: string, subId: string): Promise<string> {
     const { user } = req as AuthenticatedRequest;
     const userId = user?.userId!;
+    const userObjId = new Types.ObjectId(user?.userId);
+
+    const existingActiveSub = await this._userSubscriptionRepository.findOne({ userId: userObjId, status: 'active' })
+
+    if (existingActiveSub) {
+      throw new HttpError(StatusCode.BAD_REQUEST, 'You already have an active subscription');
+    }
+
 
     const subscription = await this._subscriptionRepository.findOne({ stripePriceId: priceId });
     if (!subscription) {
@@ -70,7 +80,7 @@ export default class SubscriptionService implements ISubscriptionService {
       ],
       mode: 'subscription',
       success_url: `${process.env.CLIENT_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/subscription/cancel`,
+      cancel_url: `${process.env.CLIENT_URL}/subscription`,
       client_reference_id: userId,
       metadata: {
         userId,
@@ -104,39 +114,71 @@ export default class SubscriptionService implements ISubscriptionService {
   };
 
   async handleCheckoutSessionCompleted(event: Stripe.Event): Promise<void> {
+    interface ExtendedStripeSubscription extends Stripe.Subscription {
+      current_period_start: number;
+      current_period_end: number;
+    }
+    console.log(event.data);
+
     const session = event.data.object as Stripe.Checkout.Session;
     const { userId, subscriptionId } = session.metadata!;
 
     if (session.subscription) {
       const stripeSubscription = await stripe.subscriptions.retrieve(
         session.subscription as string,
-        { expand: ['latest_invoice', 'customer'] }
+        {
+          expand: ['items.data.price.product']
+        }
       ) as Stripe.Subscription;
 
+
+      const firstItem = stripeSubscription.items.data[0];
+      const currentPeriodStartUnix = firstItem.current_period_start;
+      const currentPeriodEndUnix = firstItem.current_period_end;
       await this._userSubsRepository.createSub({
         userId,
         subscriptionId,
         stripeSubscriptionId: stripeSubscription.id,
         status: stripeSubscription.status,
-        currentPeriodStart: new Date(((stripeSubscription as any).current_period_start ?? Date.now() / 1000) * 1000),
-        currentPeriodEnd: new Date(((stripeSubscription as any).current_period_end ?? Date.now() / 1000) * 1000),
+        currentPeriodStart: new Date(currentPeriodStartUnix * 1000),
+        currentPeriodEnd: new Date(currentPeriodEndUnix * 1000),
         cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end
       });
 
-      await this._userRepository.update(userId, {
-        subscriptionId
-      });
     };
   };
 
-  async getUserSubscription(req: Request): Promise<IUserSubscriptionModel> {
+  async getUserSubscription(req: Request): Promise<IUserSubscriptionModel | null> {
     const { user } = req as AuthenticatedRequest;
     const userId = user?.userId!;
-    const userSub = await this._userSubsRepository.findUserSubscription(userId);
+    let userSub;
+    userSub = await this._userSubsRepository.findUserSubscription(userId);
+
     if (!userSub) {
-      throw new HttpError(StatusCode.BAD_REQUEST, "Can't find your subscription");
+      return null;
     }
+    if (userSub.currentPeriodEnd <= new Date()) {
+      userSub = await this._userSubsRepository.update(
+        userSub._id.toString(),
+        { cancelAtPeriodEnd: true, status: 'completed' },
+      );
+    };
     return userSub;
   };
 
+  async getUsersSubscriptions(): Promise<IUserSubscriptionModel[]> {
+    const usersSubs = await this._userSubsRepository.findUsersSubscriptions();
+    if (!usersSubs) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Can't find your subscription");
+    };
+    return usersSubs;
+  };
+
+  async updateUserSubStatus(subId: string, status: string): Promise<IUserSubscriptionModel> {
+    const updatedUseSub = await this._userSubsRepository.update(subId, { status: status });
+    if (!updatedUseSub) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Can't update user subscription status");
+    };
+    return updatedUseSub;
+  };
 };

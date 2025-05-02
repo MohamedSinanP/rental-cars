@@ -1,14 +1,57 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { IBookingWithPopulatedData } from '../types/types';
+import { cancelBooking } from '../services/apis/userApis';
+import { toast } from 'react-toastify';
 
 interface RentalDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   rental: IBookingWithPopulatedData | null;
+  onRentalUpdate?: (updatedRental: IBookingWithPopulatedData) => void;
 }
 
-const RentalDetailsModal: React.FC<RentalDetailsModalProps> = ({ isOpen, onClose, rental }) => {
+const RentalDetailsModal: React.FC<RentalDetailsModalProps> = ({
+  isOpen,
+  onClose,
+  rental,
+  onRentalUpdate
+}) => {
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
   if (!isOpen || !rental) return null;
+
+  const handleCancelClick = () => {
+    setShowConfirmation(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    if (!rental) return;
+
+    try {
+      setIsCancelling(true);
+      setCancelError(null);
+
+      const result = await cancelBooking(rental._id);
+      const updatedRental = result.data;
+      if (onRentalUpdate) {
+        onRentalUpdate(updatedRental);
+      }
+
+      setShowConfirmation(false);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const canCancel = rental.status !== 'cancelled' && rental.status !== 'completed';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 backdrop-blur-sm">
@@ -184,8 +227,81 @@ const RentalDetailsModal: React.FC<RentalDetailsModalProps> = ({ isOpen, onClose
               </div>
             </div>
           </div>
+
+          {/* Cancel Booking Button */}
+          {canCancel && (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={handleCancelClick}
+                className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg shadow-md transition-colors flex items-center"
+                disabled={isCancelling}
+              >
+                {isCancelling ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    Cancel Booking
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
+          {cancelError && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-center">
+              {cancelError}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Cancel Booking</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to cancel this booking? This action cannot be undone.
+            </p>
+
+            <div className="flex space-x-3 justify-end">
+              <button
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={() => setShowConfirmation(false)}
+                disabled={isCancelling}
+              >
+                No, Keep Booking
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center"
+                onClick={handleCancelConfirm}
+                disabled={isCancelling}
+              >
+                {isCancelling ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  "Yes, Cancel Booking"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

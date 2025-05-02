@@ -10,7 +10,7 @@ const AccountSidebar: React.FC = () => {
     { id: 'profile', icon: '👤', text: 'My Profile', path: '/profile' },
     { id: 'wishlist', icon: '❤️', text: 'Wishlist', path: '/' },
     { id: 'rentals', icon: '🚗', text: 'My Rentals', path: '/rentals' },
-    { id: 'wallet', icon: '💳', text: 'Wallet', path: '/' },
+    { id: 'wallet', icon: '💳', text: 'Wallet', path: '/wallet' },
   ];
 
   const toggleMobileMenu = () => {

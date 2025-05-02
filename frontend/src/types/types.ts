@@ -57,7 +57,7 @@ export interface CarFormData {
   pricePerDay: number;
   deposit: number;
   features: string[];
-  availability: string;
+  status: string;
   maintenanceDate: string;
   maintenanceInterval: number;
   rcDoc: FileList;
@@ -84,12 +84,12 @@ export interface ICar {
   pricePerDay: number;
   deposit: number;
   features: string[];
-  availability: string;
+  status: string;
   lastmaintenanceDate: string;
   maintenanceInterval: number;
-  rcDoc: FileList;
-  pucDoc: FileList;
-  insuranceDoc: FileList;
+  rcDoc: string;
+  pucDoc: string;
+  insuranceDoc: string;
   isVerified: boolean;
   verificationRejected: boolean;
   rejectionReason: string;

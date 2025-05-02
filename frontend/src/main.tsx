@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistStore } from 'redux-persist';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { BrowserRouter as Router } from 'react-router-dom'; // ✅ Import this
+import { BrowserRouter as Router } from 'react-router-dom';
 
 const persistor = persistStore(store);
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;

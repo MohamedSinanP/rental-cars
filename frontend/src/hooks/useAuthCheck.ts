@@ -16,7 +16,10 @@ export const useAuthCheck = () => {
 
       try {
         await api.get("/auth/me");
-      } catch (err) {
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+        } else {
+        }
       } finally {
         setChecking(false);
       }

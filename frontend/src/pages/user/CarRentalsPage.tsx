@@ -49,6 +49,16 @@ const CarRentalsPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleRentalUpdate = (updatedRental: IBookingWithPopulatedData): void => {
+    setRentals(rentals.map(rental =>
+      rental._id === updatedRental._id ? updatedRental : rental
+    ));
+
+    if (selectedRental && selectedRental._id === updatedRental._id) {
+      setSelectedRental(updatedRental);
+    }
+  };
+
   type BookingDataItem = IBookingWithPopulatedData & DataItem;
 
   const columns: Column<BookingDataItem>[] = [
@@ -251,6 +261,7 @@ const CarRentalsPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         rental={selectedRental}
+        onRentalUpdate={handleRentalUpdate}
       />
       <Footer />
     </>

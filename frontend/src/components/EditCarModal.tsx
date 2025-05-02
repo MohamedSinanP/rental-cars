@@ -42,7 +42,7 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ isOpen, onClose, carData, o
       setValue('fuelOption', carData.fuelOption);
       setValue('pricePerDay', carData.pricePerDay);
       setValue('deposit', carData.deposit);
-      setValue('availability', carData.availability);
+      setValue('status', carData.status);
       setValue('maintenanceDate', carData.lastmaintenanceDate?.split('T')[0]);
       setValue('maintenanceInterval', carData.maintenanceInterval);
       setValue('features', carData.features || []);
@@ -114,7 +114,7 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ isOpen, onClose, carData, o
       formData.append("location", JSON.stringify(data.location));
       formData.append("pricePerDay", data.pricePerDay.toString());
       formData.append("deposit", data.deposit.toString());
-      formData.append("availability", data.availability);
+      formData.append("status", data.status);
       formData.append("lastmaintenanceDate", data.maintenanceDate);
       formData.append("maintenanceInterval", data.maintenanceInterval.toString());
       formData.append("carImages", JSON.stringify(finalCarImages));
@@ -344,12 +344,12 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ isOpen, onClose, carData, o
 
           <div>
             <label>Availability Status</label>
-            <select {...register('availability', { required: 'Availability is required' })} className="w-full border p-2 rounded">
+            <select {...register('status', { required: 'Availability is required' })} className="w-full border p-2 rounded">
               <option value="">Select Availability</option>
               <option value="Available">Available</option>
               <option value="Unavailable">Unavailable</option>
             </select>
-            {errors.availability && <p className="text-red-500 text-sm">{errors.availability.message}</p>}
+            {errors.status && <p className="text-red-500 text-sm">{errors.status.message}</p>}
           </div>
 
           <div>

@@ -6,13 +6,18 @@ import IBookingRepository from "../interfaces/repositories/booking.repository";
 import { HttpError } from "../utils/http.error";
 import { PaginatedData, StatusCode } from "../types/types";
 import IAddressRepository from "../interfaces/repositories/address.repository";
+import ICarRepository from "../interfaces/repositories/car.repository";
+import IWalletRepository from "../interfaces/repositories/wallet.repository";
+import { Types } from "mongoose";
 
 
 @injectable()
 export default class BookingService implements IBookingService {
   constructor(
     @inject(TYPES.IBookingRepository) private _bookingRepository: IBookingRepository,
-    @inject(TYPES.IAddressRepository) private _addressRepository: IAddressRepository
+    @inject(TYPES.IAddressRepository) private _addressRepository: IAddressRepository,
+    @inject(TYPES.ICarRepository) private _carRepository: ICarRepository,
+    @inject(TYPES.IWalletRepository) private _walletRepository: IWalletRepository
   ) { };
 
   async createBooking(data: IBooking): Promise<IBookingModel> {
@@ -21,9 +26,24 @@ export default class BookingService implements IBookingService {
     const isBooked = await this._bookingRepository.isBooked(carId, pickupDateTime, dropoffDateTime);
     if (isBooked) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Car is already booked for the selected time period");
-    }
-    const booking = await this._bookingRepository.bookCar(data);
-    await this._addressRepository.addNewAddress({ userId, name, email, phoneNumber, address });
+    };
+    let booking;
+    if (data.paymentMethod === 'wallet') {
+      const userObjId = new Types.ObjectId(userId)
+      const userWallet = await this._walletRepository.findOne({ userId: userObjId });
+
+      if (!userWallet || userWallet.balance < data.totalPrice) {
+        throw new HttpError(StatusCode.BAD_REQUEST, "Insufficient wallet balance");
+      }
+
+      await this._walletRepository.refundToWallet(userId, data.totalPrice);
+    };
+    booking = await this._bookingRepository.bookCar(data);
+    await this._carRepository.update(carId, { status: "Booked" });
+    const existingAddress = await this._addressRepository.findOne({ name, email, phoneNumber, address });
+    if (!existingAddress) {
+      await this._addressRepository.addNewAddress({ userId, name, email, phoneNumber, address });
+    };
     if (!booking) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't add your booking");
     }
@@ -73,4 +93,39 @@ export default class BookingService implements IBookingService {
     return latestBooking;
   };
 
+  async cancelBooking(bookingId: string): Promise<IBookingModel> {
+    const booking = await this._bookingRepository.findById(bookingId);
+    if (!booking) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Booking not found.");
+    }
+
+    // Check if pickupDateTime is in the past
+    const currentTime = new Date();
+    if (currentTime >= new Date(booking.pickupDateTime)) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Cannot cancel booking after the scheduled pickup time.");
+    }
+
+    const updatedBooking = await this._bookingRepository.update(bookingId, { status: 'cancelled' });
+    if (!updatedBooking) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Cannot cancel your booking..");
+    };
+
+    // Refund to wallet using repository logic
+    const refundAmount = booking.totalPrice;
+    const transactionId = `refund-${booking._id}`;
+
+    await this._walletRepository.refundToWallet(
+      booking.userId.toString(),
+      refundAmount,
+      transactionId
+    );
+
+    const populatedBooking = await this._bookingRepository.findById(bookingId, [
+      { path: 'userId' },
+      { path: 'carId' }]);
+    if (!populatedBooking) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Cannot cancel your booking..");
+    };
+    return populatedBooking;
+  };
 };

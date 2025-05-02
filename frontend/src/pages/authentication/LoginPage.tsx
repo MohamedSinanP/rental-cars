@@ -73,7 +73,7 @@ const LoginPage = () => {
       } else if (result.data.userDetails.user.role === "user") {
         try {
           const { location } = await getUserLocation();
-          await sendUserLocation(location);
+          await sendUserLocation(result.data.userDetails._id, location);
         } catch (locationError) {
           console.error("Could not fetch location:", locationError);
         } finally {
@@ -81,9 +81,13 @@ const LoginPage = () => {
         }
       }
       toast.success(result.message);
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    };
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

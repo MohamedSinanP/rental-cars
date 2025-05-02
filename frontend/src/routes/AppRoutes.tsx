@@ -34,6 +34,8 @@ import BookingSuccessPage from "../pages/user/BookingSuccessPage";
 import SubscriptionPage from "../pages/admin/SubscriptionPage";
 import SubscriptionCheckout from "../pages/user/SubscriptionCheckoutPage";
 import SubscriptionSuccessPage from "../pages/user/SubscriptionSuccessPage";
+import UserSubscriptionsPage from "../pages/admin/UsersSubscriptionsPage";
+import WalletPage from "../pages/user/WalletPage";
 
 // Fallback / Errors
 // import Unauthorized from "../pages/Unauthorized";
@@ -60,18 +62,22 @@ const AppRoutes = () => {
         <Route path="/owner/car-history" element={<CarAddedHistoryPage />} />
         <Route path="/owner/rentals" element={<OwnerBookingsPage />} />
       </Route>
+
       {/* Private routes for user */}
       < Route element={<PrivateRoute allowedRoles={['user']} />}>
         <Route path="/car/booking/:id" element={<CarBookingPage />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/rentals" element={<CarRentalsPage />} />
+        <Route path="/wallet" element={<WalletPage />} />
         <Route path="/greetings/:id" element={<BookingSuccessPage />} />
       </Route>
+
       { /* Routes for the user */}
       <Route path="/car-details/:id" element={<CarDetailsPage />} />
       <Route path="/cars" element={<CarListingPage />} />
       <Route path='/subscription' element={<SubscriptionCheckout />} />
       <Route path='/subscription/success' element={<SubscriptionSuccessPage />} />
+
       { /* Routes for the admin */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
       < Route element={<PrivateRoute allowedRoles={['admin']} />}>
@@ -80,6 +86,7 @@ const AppRoutes = () => {
         <Route path="/admin/owners" element={<OwnersPage />} />
         <Route path="/admin/approvals" element={<CarVerification />} />
         <Route path="/admin/subscription" element={<SubscriptionPage />} />
+        <Route path="/admin/user-subscription" element={<UserSubscriptionsPage />} />
       </Route>
 
     </Routes>

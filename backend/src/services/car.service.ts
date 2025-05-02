@@ -160,7 +160,10 @@ export default class CarService implements ICarService {
       throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.");
     }
     const type = car?.carType;
-    const cars = await this._carRepository.findAll({ carType: type });
+    const cars = await this._carRepository.findAll({
+      carType: type,
+      _id: { $ne: id }
+    });
     return cars
   };
 

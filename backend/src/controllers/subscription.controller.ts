@@ -112,4 +112,25 @@ export default class SubscriptionController implements ISubscriptionController {
     };
   };
 
+  async getUsersSubscriptions(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const usersSubs = await this._subscriptionService.getUsersSubscriptions();
+      res.status(StatusCode.OK).json(HttpResponse.success(usersSubs));
+    } catch (error) {
+      next(error);
+    };
+  };
+
+  async changeUserSubscriptionStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const subId = req.params.id;
+      const { status } = req.body;
+
+      const updatedUserSub = await this._subscriptionService.updateUserSubStatus(subId, status);
+      res.status(StatusCode.OK).json(HttpResponse.success(updatedUserSub));
+    } catch (error) {
+      next(error);
+    };
+  };
+
 };

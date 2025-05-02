@@ -88,4 +88,16 @@ export default class BookingController implements IBookingController {
       next(error)
     };
   };
+
+  async cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      console.log("hehehe");
+
+      const bookingId = req.params.id;
+      const updatedBooking = await this.bookingService.cancelBooking(bookingId);
+      res.status(StatusCode.OK).json(HttpResponse.success(updatedBooking));
+    } catch (error) {
+      next(error)
+    };
+  }
 };

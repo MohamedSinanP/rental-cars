@@ -1,7 +1,6 @@
-import { Schema, model, Document } from "mongoose";
-import IOwner from "../types/owner";
+import { Schema, model } from "mongoose";
+import { IOwnerModel } from "../types/owner";
 
-export interface IOwnerModel extends Document, Omit<IOwner, '_id'> { }
 
 const ownerSchema = new Schema<IOwnerModel>(
   {

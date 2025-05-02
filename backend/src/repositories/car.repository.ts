@@ -29,7 +29,7 @@ export class CarRepository extends BaseRepository<ICarModel> implements ICarRepo
 
   async findByOwner(ownerId: string, page: number, limit: number): Promise<{ data: ICarModel[]; total: number; }> {
     const skip = (page - 1) * limit;
-    const data = await this.carModel.find({ ownerId: ownerId, isVerified: true, verificationRejected: false })
+    const data = await this.carModel.find({ ownerId: ownerId })
       .skip(skip)
       .limit(limit)
       .lean()

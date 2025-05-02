@@ -1,4 +1,4 @@
-import { IOwnerModel } from "../../models/owner.model";
+import { IOwnerModel } from "../../types/owner";
 import IBaseRepository from "./base.repository";
 import IOwner from "../../types/owner";
 

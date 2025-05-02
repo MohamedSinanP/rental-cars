@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Edit, Trash2, Eye } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import Sidebar from '../../layouts/owners/Sidebar';
 import CarModal from '../../components/CarModal';
@@ -9,7 +9,7 @@ import { ICar } from '../../types/types';
 import EditCarModal from '../../components/EditCarModal';
 import { formatINR } from '../../utils/commonUtilities';
 import Pagination from '../../components/Pagination';
-import DocumentSearch from '../../components/DocumentSearch'; // Import the new component
+import DocumentSearch from '../../components/DocumentSearch';
 
 const CarListItem: React.FC<{
   car: ICar;
@@ -58,7 +58,6 @@ const Cars: React.FC = () => {
   useEffect(() => {
     fetchCars();
   }, [fetchCars]);
-
 
   const handleCarUpdated = (updatedCar: ICar) => {
     setCars((prev) =>
@@ -150,6 +149,22 @@ const Cars: React.FC = () => {
                     Car Information
                   </h3>
 
+                  {/* Verification Alert - Only shown when conditions are met */}
+                  {!selectedCar.isVerified && !selectedCar.verificationRejected && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <h4 className="text-red-700 font-semibold mb-1">Your car is not verified</h4>
+                          <p className="text-red-600 text-sm">
+                            We did not show your car to the users.
+                            Please re-upload your docs to verify on the added history page
+                            {selectedCar.rejectionReason && ` Reason: ${selectedCar.rejectionReason}`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-6 mb-6">
                     <img
                       src={selectedCar.carImages[0] || '/car-thumb.png'}
@@ -193,10 +208,10 @@ const Cars: React.FC = () => {
                     <div>
                       <span className="text-sm font-medium text-gray-700">Availability:</span>
                       <span
-                        className={`text-sm ml-2 font-medium ${selectedCar.availability === 'Available' ? 'text-green-600' : 'text-red-600'
+                        className={`text-sm ml-2 font-medium ${selectedCar.status === 'Available' ? 'text-green-600' : 'text-red-600'
                           }`}
                       >
-                        {selectedCar.availability}
+                        {selectedCar.status}
                       </span>
                     </div>
                     <div>
@@ -212,11 +227,8 @@ const Cars: React.FC = () => {
                   </div>
 
                   <div className="flex gap-3 mb-6">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
-                      <Eye size={16} /> View
-                    </button>
                     <button
-                      className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors cursor-pointer"
                       onClick={() => setEditCarModalOpen(true)}
                     >
                       <Edit size={16} /> Edit
@@ -225,12 +237,12 @@ const Cars: React.FC = () => {
                       onClick={() => handleDelete(selectedCar._id)}
                       className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
                     >
-                      <Trash2 size={16} /> Delete
+                      <Trash2 size={16} /> List/Unlist
                     </button>
                   </div>
 
-                  {/* Replace the input with the DocumentSearch component */}
                   <DocumentSearch carId={selectedCar._id} />
+
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3">Live Location</h4>
                     <div className="w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
@@ -261,7 +273,7 @@ const Cars: React.FC = () => {
           onCarUpdated={handleCarUpdated}
         />
       </div>
-    </div >
+    </div>
   );
 };
 

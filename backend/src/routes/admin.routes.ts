@@ -16,6 +16,8 @@ router.patch('/reject-car/:id', authenticate(["admin"]), adminController.rejectC
 router.post('/add-subscription', authenticate(["admin"]), subscriptionController.createSubscription.bind(subscriptionController));
 router.get('/get-subscriptions', authenticate(["admin"]), subscriptionController.getSubscriptions.bind(subscriptionController));
 router.put('/edit-subscription/:id', authenticate(["admin"]), subscriptionController.editSubscription.bind(subscriptionController));
+router.get('/users-subscriptions', authenticate(["admin"]), subscriptionController.getUsersSubscriptions.bind(subscriptionController));
+router.patch('/change-user-subscription-status/:id', authenticate(["admin"]), subscriptionController.changeUserSubscriptionStatus.bind(subscriptionController));
 
 
 

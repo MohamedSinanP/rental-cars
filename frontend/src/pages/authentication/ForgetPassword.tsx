@@ -22,9 +22,13 @@ const ForgetPassword = () => {
 
       toast.success(result.message);
       navigate('/login')
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    };
   }
 
   return (

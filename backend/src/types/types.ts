@@ -25,6 +25,7 @@ export interface IJwtToken {
 export interface LoginResponse {
   accessToken: string;
   user: {
+    _id: string
     userName: string;
     email: string;
     isBlocked: boolean;

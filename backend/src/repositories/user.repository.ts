@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
 import { BaseRepository } from "./base.repository";
 import IUser from "../types/user";
-import { IUserModel } from "../models/user.model";
+import { IUserModel } from "../types/user";
 import TYPES from "../di/types";
 import IUserRepository from "../interfaces/repositories/user.repository";
 import { Model } from "mongoose";
@@ -10,15 +10,25 @@ import { Model } from "mongoose";
 export default class UserRepository extends BaseRepository<IUserModel> implements IUserRepository {
   constructor(@inject(TYPES.UserModel) private userModel: Model<IUserModel>) {
     super(userModel);
-  }
+  };
 
   async register(data: IUser): Promise<IUserModel> {
     return await this.userModel.create(data);
-  }
+  };
+
+  async getUserDetails(userId: string): Promise<IUserModel | null> {
+    return await this.userModel.findById(userId)
+      .populate({
+        path: 'userSubscriptionId',
+        populate: {
+          path: 'subscriptionId',
+        },
+      });
+  };
 
   async findByEmail(email: string): Promise<IUserModel | null> {
     return await this.userModel.findOne({ email }).exec();
-  }
+  };
 
   async findByEmailAndUpdate(email: string, refreshToken: string): Promise<void> {
     await this.userModel.updateOne(

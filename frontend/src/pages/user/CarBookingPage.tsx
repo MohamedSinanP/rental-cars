@@ -11,6 +11,7 @@ import { IBooking, ICar } from '../../types/types';
 import { extractFeatureValue, formatINR } from '../../utils/commonUtilities';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY as string);
 
@@ -67,14 +68,6 @@ interface IUserAddress {
   updatedAt: Date;
 }
 
-interface IUserDetails {
-  _id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address?: string;
-}
-
 const CarBookingPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -90,7 +83,7 @@ const CarBookingPage: React.FC = () => {
   const [freeHours, setFreeHours] = useState<number>(0);
   const [userAddresses, setUserAddresses] = useState<IUserAddress[]>([]);
 
-  const { register, handleSubmit, control, formState: { errors }, watch, setValue, reset } = useForm<BookingFormData>({
+  const { register, handleSubmit, control, formState: { errors }, watch, setValue } = useForm<BookingFormData>({
     defaultValues: {
       pickupDateTime: '',
       dropoffDateTime: '',
@@ -310,9 +303,7 @@ const CarBookingPage: React.FC = () => {
   if (loading) {
     return (
       <>
-        <NavBar />
-        <div className="max-w-6xl mx-auto p-6">Loading...</div>
-        <Footer />
+        <LoadingSpinner />
       </>
     );
   }
@@ -503,7 +494,6 @@ const CarBookingPage: React.FC = () => {
                       {...register('selectedAddressId')}
                       className="w-full border rounded p-2 pr-8 outline-none appearance-none"
                     >
-                      <option value="new">Use New Address</option>
                       {userAddresses.map(address => (
                         <option key={address._id} value={address._id}>
                           {address.name} - {address.address.substring(0, 30)}...
@@ -691,8 +681,8 @@ const CarBookingPage: React.FC = () => {
               </button>
             </form>
           </div>
-        </div>
-      </div>
+        </div >
+      </div >
       <Footer />
     </>
   );

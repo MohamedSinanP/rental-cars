@@ -10,5 +10,7 @@ export default interface ISubscriptionService {
   makeSubscription(req: Request, priceId: string, subId: string): Promise<string>;
   handleWebhook(event: Stripe.Event): Promise<void>;
   handleCheckoutSessionCompleted(event: Stripe.Event): Promise<void>;
-  getUserSubscription(req: Request): Promise<IUserSubscriptionModel>;
+  getUserSubscription(req: Request): Promise<IUserSubscriptionModel | null>;
+  getUsersSubscriptions(): Promise<IUserSubscriptionModel[]>;
+  updateUserSubStatus(userId: string, status: string): Promise<IUserSubscriptionModel>;
 }

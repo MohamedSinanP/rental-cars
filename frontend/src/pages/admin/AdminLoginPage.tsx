@@ -36,9 +36,13 @@ const AdminLoginPage: React.FC = () => {
         navigate('/admin/dashboard');
       }
       toast.success(result.message);
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    };
   };
 
   return (

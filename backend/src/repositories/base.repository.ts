@@ -1,4 +1,4 @@
-import { Document, Model, UpdateQuery } from "mongoose";
+import { Document, Model, PopulateOptions, UpdateQuery } from "mongoose";
 import { injectable } from "inversify";
 import IBaseRepository from "../interfaces/repositories/base.repository";
 
@@ -14,17 +14,29 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     return await this.model.create(data);
   };
 
-  async findById(id: string): Promise<T | null> {
-    return await this.model.findById(id).exec();
-  };
+  async findById(id: string, populate?: PopulateOptions[]): Promise<T | null> {
+    let query = this.model.findById(id);
+    if (populate) {
+      query = query.populate(populate);
+    }
+    return await query.exec();
+  }
 
-  async findOne(query: object): Promise<T | null> {
-    return await this.model.findOne(query).exec();
-  };
+  async findOne(query: object, populate?: PopulateOptions[]): Promise<T | null> {
+    let findQuery = this.model.findOne(query);
+    if (populate) {
+      findQuery = findQuery.populate(populate);
+    }
+    return await findQuery.exec();
+  }
 
-  async findAll(query: object = {}): Promise<T[]> {
-    return await this.model.find(query).exec();
-  };
+  async findAll(query: object = {}, populate?: PopulateOptions[]): Promise<T[]> {
+    let findQuery = this.model.find(query);
+    if (populate) {
+      findQuery = findQuery.populate(populate);
+    }
+    return await findQuery.exec();
+  }
 
   async update(id: string, data: Partial<T>): Promise<T | null> {
     return await this.model.findByIdAndUpdate(id, data, { new: true }).exec();

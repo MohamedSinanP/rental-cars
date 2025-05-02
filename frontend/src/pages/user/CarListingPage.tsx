@@ -4,11 +4,9 @@ import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
 import { ICar } from '../../types/types';
 import { getCars } from '../../services/apis/userApis';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Pagination from '../../components/Pagination';
-
-
-
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 interface Filters {
   carType: string[];
@@ -73,6 +71,7 @@ export default function CarListingPage() {
       if (!data.length) {
         console.warn('No cars found in response');
       }
+      console.log(result, "thekk");
 
       setCars(data);
       setCurrentPage(result.data.currentPage);
@@ -188,6 +187,33 @@ export default function CarListingPage() {
     ratings: ['4.5+ Ratings', '4.0+ Ratings', '3.0+ Ratings', 'All'],
   };
 
+  // If loading, show full-page loading spinner
+  if (loading) {
+    return (
+      <div className="max-w-screen-xl mx-auto">
+        <NavBar />
+        <div className="flex justify-center items-center h-screen">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
+
+  // If error, show error message
+  if (error) {
+    return (
+      <div className="max-w-screen-xl mx-auto">
+        <NavBar />
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-red-500 text-center">
+            <p className="text-xl font-semibold mb-2">Error Loading Cars</p>
+            <p>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-screen-xl mx-auto">
       <NavBar />
@@ -195,7 +221,7 @@ export default function CarListingPage() {
       {/* Search Section */}
       <div className="bg-gray-50 px-6 py-6 sm:px-10">
         <div className="mb-3 text-sm text-gray-500">
-          Home / <span className="text-gray-700 font-medium">Cars</span>
+          <Link to={'/'}>Home /</Link><span className="text-gray-700 font-medium">Cars</span>
         </div>
         <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
           <div className="flex flex-col sm:flex-col items-center gap-4 w-full lg:w-2/3">
@@ -318,9 +344,11 @@ export default function CarListingPage() {
 
         {/* Car listings */}
         <div className="flex-1 p-4">
-          {loading && <p>Loading cars...</p>}
-          {error && <p className="text-red-500">Error: {error}</p>}
-          {!loading && filteredCars.length === 0 && <p>No cars match your filters.</p>}
+          {filteredCars.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-lg">No cars match your filters.</p>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {filteredCars.map((car) => (
               <div key={car._id || car.carName} className="border rounded-lg bg-white overflow-hidden relative">
@@ -366,12 +394,12 @@ export default function CarListingPage() {
           </div>
         </div>
       </div>
-      <Pagination currentPage={currentPage}
+      <Pagination
+        currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
       />
-
       <Footer />
-    </div >
+    </div>
   );
 }

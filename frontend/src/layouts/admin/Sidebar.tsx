@@ -19,8 +19,12 @@ const Sidebar = () => {
       const result = await logout();
       toast.success(result.message);
       navigate('/admin/login');
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     };
   };
 
@@ -88,6 +92,14 @@ const Sidebar = () => {
                 <div className="flex items-center gap-x-2">
                   <BadgeCheck className="w-5 h-5" />
                   <span>Subscription</span>
+                </div>
+              </NavLink>
+            </li>
+            <li className='m-4'>
+              <NavLink to={'/admin/user-subscription'} onClick={handleLinkClick}>
+                <div className="flex items-center gap-x-2">
+                  <BadgeCheck className="w-5 h-5" />
+                  <span>Users Subscription</span>
                 </div>
               </NavLink>
             </li>

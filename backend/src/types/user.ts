@@ -20,8 +20,30 @@ export default interface IUser {
   resetTokenExpiresAt?: Date | null;
   isBlocked: boolean;
   isVerified: boolean;
-  subscriptionId?: string
 };
+export interface IUserModel extends Document {
+  _id: mongoose.Types.ObjectId;
+  userName: string;
+  email: string;
+  password: string;
+  role: string;
+  location?: {
+    type: 'Point';
+    coordinates: [number, number];
+    address: string;
+  };
+  googleId?: string;
+  otp?: string | null;
+  otpExpiresAt?: Date | null;
+  otpLastSentAt?: Date | null;
+  refreshToken?: string | null;
+  resetToken?: string | null;
+  resetTokenExpiresAt?: Date | null;
+  isBlocked: boolean;
+  isVerified: boolean;
+};
+
+
 
 export interface IUserGoogle {
   userName: string;
@@ -33,6 +55,7 @@ export interface IUserGoogle {
 };
 
 export interface userData {
+  _id?: string;
   userName?: string;
   email?: string;
   password?: string;
@@ -80,6 +103,7 @@ export interface IUserSubscription {
 };
 
 export interface IUserSubscriptionModel extends Document {
+  _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   subscriptionId: mongoose.Types.ObjectId;
   stripeSubscriptionId: string;
@@ -105,3 +129,20 @@ export interface IAddressModel extends Document {
   address: string;
 }
 
+export type TTransaction = {
+  paymentType: string;
+  transactionAmount: number;
+  transactionId?: string;
+  date: Date;
+};
+
+export type TWallet = {
+  userId: mongoose.Types.ObjectId;
+  balance: number;
+  transactions: TTransaction[];
+};
+export interface IWalletModel extends Document {
+  userId: mongoose.Types.ObjectId;
+  transactions: TTransaction[];
+  balance: number;
+};

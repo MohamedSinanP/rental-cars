@@ -51,7 +51,7 @@ export interface IBookingModel extends Document {
   totalPrice: number;
   paymentStatus: 'pending' | 'completed' | 'failed' | 'refunded';
   paymentMethod: 'wallet' | 'stripe';
-  paymentId: string;
+  paymentId?: string;
   status?: 'active' | 'cancelled' | 'completed';
   isPremiumBooking?: boolean;
   discountAmount?: number;

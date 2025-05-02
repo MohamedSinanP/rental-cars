@@ -11,6 +11,7 @@ const UsersPage = () => {
   const [users, setUsers] = useState<IUsers[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const limit = 6;
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -61,11 +62,11 @@ const UsersPage = () => {
       header: 'Name',
       render: (user) => (
         <div className="flex items-center">
-          <div className="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
+          <div className="flex-shrink-0 h-8 w-8 md:h-10 md:w-10 bg-gray-200 rounded-full flex items-center justify-center">
             <span className="text-gray-600 font-medium">{user.userName?.charAt(0) || '?'}</span>
           </div>
-          <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900">{user.userName}</div>
+          <div className="ml-2 md:ml-4">
+            <div className="text-xs md:text-sm font-medium text-gray-900">{user.userName}</div>
           </div>
         </div>
       )
@@ -73,23 +74,22 @@ const UsersPage = () => {
     {
       key: 'email',
       header: 'Email',
-      render: (user) => <div className="text-sm text-gray-600">{user.email}</div>
+      render: (user) => <div className="text-xs md:text-sm text-gray-600">{user.email}</div>
     },
     {
       key: 'role',
       header: 'Role',
       render: (user) => (
-        <span className={"px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"}>
+        <span className="px-2 py-1 md:px-3 md:py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
           {user.role}
-        </span >
+        </span>
       )
     },
     {
       key: 'status',
       header: 'Status',
       render: (user) => (
-        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isBlocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-          } `}>
+        <span className={`px-2 py-1 md:px-3 md:py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isBlocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
           {user.isBlocked ? 'Blocked' : 'Active'}
         </span>
       )
@@ -108,10 +108,36 @@ const UsersPage = () => {
     }
   ];
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 p-6">
+    <div className="flex flex-col md:flex-row">
+      {/* Mobile menu button */}
+      <div className="md:hidden p-4">
+        <button
+          onClick={toggleSidebar}
+          className="text-gray-600 hover:text-gray-900 focus:outline-none"
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d={sidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Sidebar - hidden on mobile by default, shown when menu button is clicked */}
+      <div className={`${sidebarOpen ? 'block' : 'hidden'} md:block`}>
+        <Sidebar />
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 p-2 md:p-6">
         <DataTable
           data={users}
           columns={columns}
@@ -119,11 +145,13 @@ const UsersPage = () => {
           title="Users"
           loading={loading}
         />
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        <div className="mt-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
     </div>
   );
