@@ -6,7 +6,7 @@ export default interface IOwner {
   email: string;
   role: string;
   password: string;
-  commision: number;
+  commission: number;
   otp?: string | null;
   otpExpiresAt?: Date | null;
   otpLastSentAt?: Date | null;
@@ -22,7 +22,7 @@ export interface IOwnerModel extends Document {
   email: string;
   role: string;
   password: string;
-  commision: number;
+  commission: number;
   otp?: string | null;
   otpExpiresAt?: Date | null;
   otpLastSentAt?: Date | null;
@@ -39,7 +39,7 @@ export interface ownerData {
   email?: string;
   password?: string;
   role?: string;
-  commision: number;
+  commission: number;
   otp?: string;
   otpExpiresAt?: Date;
   isBlocked?: boolean;

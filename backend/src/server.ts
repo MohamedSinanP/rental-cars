@@ -1,11 +1,11 @@
-// import { Server } from "socket.io";
-// import http from "http";
+import http from "http";
 import express from "express";
 import cors from "cors";
 import fileUpload from "express-fileupload";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import passport from "passport";
+import "./cron/booking.cron";
 
 dotenv.config();
 
@@ -25,12 +25,8 @@ import adminRoutes from "./routes/admin.routes";
 
 // Error middleware
 import { errorHandler } from "./middlewares/error.middleware";
-import { initSocket } from "./socket";
 
 const app = express();
-// const server = http.createServer(app);
-
-// initSocket(server);
 
 // Connect database
 connectDB();

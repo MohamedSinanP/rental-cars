@@ -8,4 +8,6 @@ export default interface IBookingController {
   changeBookingStatus(req: Request, res: Response, next: NextFunction): Promise<void>;
   getLatestBooking(req: Request, res: Response, next: NextFunction): Promise<void>;
   cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void>;
+  invoiceForUser(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getSalesReportPdf(req: Request, res: Response, next: NextFunction): Promise<void>;
 };

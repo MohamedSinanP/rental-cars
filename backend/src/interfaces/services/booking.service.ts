@@ -1,4 +1,5 @@
-import { IBooking, IBookingModel } from "../../types/booking";
+import { UpdateResult } from "mongoose";
+import { IBooking, IBookingModel, IBookingPopulated } from "../../types/booking";
 import { PaginatedData } from "../../types/types";
 
 export default interface IBookingService {
@@ -8,4 +9,7 @@ export default interface IBookingService {
   changeBookingStatus(bookingId: string, status: "active" | "cancelled" | "completed"): Promise<IBookingModel>;
   getLatestBooking(bookingId: string): Promise<IBookingModel>;
   cancelBooking(bookingId: string): Promise<IBookingModel>;
+  getBookingById(bookingId: string): Promise<IBookingPopulated>;
+  completeExpiredBookings(): Promise<UpdateResult>;
+  getSalesInformation(type: string, year: number, from: string, to: string): Promise<void>;
 }

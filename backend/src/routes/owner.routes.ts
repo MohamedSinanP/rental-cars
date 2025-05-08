@@ -1,5 +1,5 @@
 import express from 'express';
-import { bookingController, carController } from '../di/container';
+import { bookingController, carController, dashboardController } from '../di/container';
 import { FileUploadRequest } from '../interfaces/controllers/car.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 
@@ -17,5 +17,9 @@ router.get('/reverse-geocode', authenticate(["owner"]), carController.getAddress
 router.get('/bookings', authenticate(["owner"]), bookingController.fetchOwnerAllBookings.bind(bookingController));
 router.get('/bookings', authenticate(["owner"]), bookingController.fetchOwnerAllBookings.bind(bookingController));
 router.patch('/bookings/:id', authenticate(["owner"]), bookingController.changeBookingStatus.bind(bookingController));
+
+router.get('/get-stats', authenticate(["owner"]), dashboardController.getStatsForOwner.bind(dashboardController));
+router.get('/rental-stats', authenticate(["owner"]), dashboardController.getRentalStatsForOwner.bind(dashboardController));
+
 
 export default router;

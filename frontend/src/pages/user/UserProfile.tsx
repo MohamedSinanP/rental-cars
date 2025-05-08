@@ -1,39 +1,201 @@
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
 import AccountSidebar from '../../layouts/users/AccountSidebar';
+import { getUserProfile, updateProfile, updatePassword, updateProfilePic } from '../../services/apis/userApis';
+import { Camera } from 'lucide-react';
+import { toast } from 'react-toastify';
+import avatar_default from '../../assets/avatar-default.webp';
+import { uploadToCloudinary } from '../../utils/cloudinaryUploader';
 
-interface UserData {
+interface BasicInfoFormValues {
   name: string;
-  role: string;
-  timezone: string;
-  phone: number | string;
   email: string;
+  phone: string;
+}
+
+interface PasswordFormValues {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
 
 const UserProfile: React.FC = () => {
-  const [userData, setUserData] = useState<UserData>({
-    name: 'Alaa Mohamed',
-    role: 'Product Design',
-    timezone: 'Eastern European Time (EET), Cairo UTC +3',
-    email: '',
-    phone: 293434834834,
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+  const [profileImage, setProfileImage] = useState<string>('');
+  const [uploading, setUploading] = useState<boolean>(false);
+  const [uploadError, setUploadError] = useState<string>('');
+  const [userName, setUserName] = useState<string>('');
+  const [userRole, setUserRole] = useState<string>('');
+
+  // Basic Info Form
+  const {
+    register: registerBasicInfo,
+    handleSubmit: handleSubmitBasicInfo,
+    reset: resetBasicInfo,
+    formState: { errors: basicInfoErrors, isSubmitting: isSubmittingBasicInfo },
+    setError: setBasicInfoError
+  } = useForm<BasicInfoFormValues>({
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: ''
+    }
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    const { name, value } = e.target;
-    setUserData(prev => ({ ...prev, [name]: value }));
+  // Password Form
+  const {
+    register: registerPassword,
+    handleSubmit: handleSubmitPassword,
+    watch: watchPassword,
+    reset: resetPassword,
+    formState: { errors: passwordErrors, isSubmitting: isSubmittingPassword },
+    setError: setPasswordError
+  } = useForm<PasswordFormValues>({
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    }
+  });
+
+  // For password confirmation validation
+  const newPassword = watchPassword('newPassword');
+
+  // Success messages state
+  const [basicInfoSuccess, setBasicInfoSuccess] = useState<string>('');
+  const [passwordSuccess, setPasswordSuccess] = useState<string>('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getUserProfile();
+
+        // Set user details for profile display
+        setUserName(result.data.userName || '');
+        setUserRole(result.data.role || 'Product Design');
+
+        // Set profile image if available
+        if (result.data.profilePic) {
+          setProfileImage(result.data.profilePic);
+        };
+
+        // Reset form values
+        resetBasicInfo({
+          name: result.data.userName || '',
+          email: result.data.email || '',
+          phone: result.data.phone || ''
+        });
+      } catch (error: any) {
+        console.error('Failed to fetch user profile:', error.message);
+        setBasicInfoError('root', {
+          type: 'manual',
+          message: 'Failed to load user profile'
+        });
+      }
+    };
+
+    fetchData();
+  }, [resetBasicInfo, setBasicInfoError]);
+
+  const onSubmitBasicInfo = async (data: BasicInfoFormValues) => {
+    try {
+      setBasicInfoSuccess('');
+
+      const formData = new FormData();
+      formData.append('userName', data.name);
+      formData.append('email', data.email);
+
+      const result = await updateProfile(formData);
+
+      setUserName(result.data.userName);
+      setBasicInfoSuccess('Profile information updated successfully');
+    } catch (error: any) {
+      console.error('Basic info update failed:', error.message);
+      setBasicInfoError('root', {
+        type: 'manual',
+        message: error.message || 'Failed to update profile information'
+      });
+    };
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    console.log('Form submitted:', userData);
+  const onSubmitPassword = async (data: PasswordFormValues) => {
+    try {
+      const formData = new FormData();
+      formData.append('currentPwd', data.currentPassword);
+      formData.append('newPwd', data.newPassword);
+      const result = await updatePassword(formData);
+      toast.success(result.data.message);
+      resetPassword({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    } catch (error: any) {
+      console.error('Password update failed:', error.message);
+      toast.error(error.message);
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Reset error state
+    setUploadError('');
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setUploadError('Please select a valid image file (JPEG, PNG, or WebP)');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      setUploadError('Image size should be less than 5MB');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const cloudinaryUrl = await uploadToCloudinary(file);
+
+      if (!cloudinaryUrl) {
+        throw new Error('Failed to upload image to Cloudinary');
+      }
+      setProfileImage(cloudinaryUrl);
+      const formData = new FormData();
+      formData.append('profilePic', cloudinaryUrl);
+
+      const result = await updateProfilePic(formData);
+      toast.success(result.message);
+    } catch (error: any) {
+      console.error('Image upload failed:', error);
+      toast.error(error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeletePhoto = async () => {
+    try {
+      setUploading(true);
+
+      const formData = new FormData();
+      formData.append('profilePic', '');
+
+      await updateProfilePic(formData);
+
+      setProfileImage('');
+      toast.success('Profile image removed successfully');
+    } catch (error: any) {
+      console.error('Failed to remove profile image:', error);
+      toast.error('Failed to remove profile image');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -42,198 +204,219 @@ const UserProfile: React.FC = () => {
       <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
         <AccountSidebar />
 
-        {/* Main content - responsive padding and layout */}
         <div className="flex-1 p-4 sm:p-6 lg:p-8 w-full mt-16 lg:mt-0">
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-4 sm:mb-6">User Profile</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">User Profile</h1>
 
-          {/* Profile header - responsive layout */}
-          <div className="flex flex-col sm:flex-row items-center mb-6 sm:mb-8">
-            <div className="relative mb-4 sm:mb-0">
-              <img
-                src="/api/placeholder/100/100"
-                alt="Profile"
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover"
-              />
-            </div>
+          {/* Profile Header with Avatar */}
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="relative group">
+                <div
+                  className={`w-28 h-28 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg ${uploading ? 'opacity-50' : ''
+                    }`}
+                >
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt={userName || 'Profile'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) :
+                    <img
+                      src={avatar_default}
+                      alt="Default Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  }
+                </div>
 
-            <div className="text-center sm:text-left sm:ml-6">
-              <h2 className="text-lg font-medium text-gray-800">{userData.name}</h2>
-              <p className="text-gray-600">{userData.role}</p>
-              <p className="text-sm text-gray-500">{userData.timezone}</p>
-            </div>
+                {uploading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
 
-            <div className="mt-4 sm:mt-0 sm:ml-auto flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-              <button
-                type="button"
-                className="px-4 py-2 bg-gray-700 text-white rounded-md text-sm"
-              >
-                Upload New Photo
-              </button>
-              <button
-                type="button"
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm"
-              >
-                Delete
-              </button>
+                <label
+                  htmlFor="profile-upload"
+                  className="absolute bottom-0 right-0 w-9 h-9 bg-teal-600 rounded-full flex items-center justify-center cursor-pointer shadow-md hover:bg-teal-700 transition-colors"
+                >
+                  <Camera size={18} className="text-white" />
+                  <input
+                    type="file"
+                    id="profile-upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
+
+              <div className="text-center md:text-left">
+                <h2 className="text-xl font-semibold text-gray-800">{userName || 'User Name'}</h2>
+                <p className="text-gray-600 mb-1">{userRole}</p>
+              </div>
+
+              <div className="mt-4 md:mt-0 md:ml-auto flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={handleDeletePhoto}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 transition"
+                >
+                  Delete Photo
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Form - responsive grid layout */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">User Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={userData.name}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                  placeholder="Enter your name"
-                />
-              </div>
+          {/* Basic Info Form */}
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-8">
+            <h2 className="text-lg font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-100">Basic Information</h2>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                    </svg>
-                  </div>
+            {basicInfoSuccess && (
+              <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {basicInfoSuccess}
+              </div>
+            )}
+
+            {basicInfoErrors.root && (
+              <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {basicInfoErrors.root.message}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitBasicInfo(onSubmitBasicInfo)} className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">User Name</label>
+                  <input
+                    type="text"
+                    {...registerBasicInfo('name', { required: 'Name is required' })}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
+                    placeholder="Enter your name"
+                  />
+                  {basicInfoErrors.name && <p className="text-red-500 text-sm mt-1">{basicInfoErrors.name.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                   <input
                     type="email"
-                    name="email"
-                    value={userData.email}
-                    onChange={handleChange}
-                    className="w-full p-3 pl-10 border border-gray-300 rounded-md"
+                    {...registerBasicInfo('email', {
+                      required: 'Email is required',
+                      pattern: {
+                        value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                        message: 'Invalid email address',
+                      },
+                    })}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
                     placeholder="Email address"
                   />
+                  {basicInfoErrors.email && <p className="text-red-500 text-sm mt-1">{basicInfoErrors.email.message}</p>}
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                    </svg>
-                  </div>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={userData.phone}
-                    onChange={handleChange}
-                    className="w-full p-3 pl-10 border border-gray-300 rounded-md"
-                    placeholder="Phone number"
-                  />
-                </div>
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={isSubmittingBasicInfo}
+                  className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition flex items-center justify-center gap-2 font-medium disabled:opacity-70"
+                >
+                  Update Profile
+                </button>
               </div>
-            </div>
+            </form>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <input
-                    type="password"
-                    name="currentPassword"
-                    value={userData.currentPassword}
-                    onChange={handleChange}
-                    className="w-full p-3 pl-10 border border-gray-300 rounded-md"
-                    placeholder="Current password"
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
+          {/* Password Form */}
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <h2 className="text-lg font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-100">Change Password</h2>
+
+            {passwordSuccess && (
+              <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {passwordSuccess}
               </div>
+            )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
+            {passwordErrors.root && (
+              <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {passwordErrors.root.message}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
                   <input
                     type="password"
-                    name="newPassword"
-                    value={userData.newPassword}
-                    onChange={handleChange}
-                    className="w-full p-3 pl-10 border border-gray-300 rounded-md"
-                    placeholder="New password"
+                    {...registerPassword('currentPassword', {
+                      required: 'Current password is required'
+                    })}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
+                    placeholder="Enter current password"
                   />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                    </svg>
-                  </button>
+                  {passwordErrors.currentPassword &&
+                    <p className="text-red-500 text-sm mt-1">{passwordErrors.currentPassword.message}</p>}
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
                   <input
                     type="password"
-                    name="confirmPassword"
-                    value={userData.confirmPassword}
-                    onChange={handleChange}
-                    className="w-full p-3 pl-10 border border-gray-300 rounded-md"
+                    {...registerPassword('newPassword', {
+                      required: 'New password is required',
+                      minLength: {
+                        value: 6,
+                        message: 'Password must be at least 6 characters',
+                      },
+                    })}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
+                    placeholder="Enter new password"
+                  />
+                  {passwordErrors.newPassword &&
+                    <p className="text-red-500 text-sm mt-1">{passwordErrors.newPassword.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                  <input
+                    type="password"
+                    {...registerPassword('confirmPassword', {
+                      required: 'Confirm password is required',
+                      validate: value => value === newPassword || 'Passwords do not match',
+                    })}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
                     placeholder="Confirm new password"
                   />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                    </svg>
-                  </button>
+                  {passwordErrors.confirmPassword &&
+                    <p className="text-red-500 text-sm mt-1">{passwordErrors.confirmPassword.message}</p>}
                 </div>
               </div>
-            </div>
 
-            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-8">
-              <button
-                type="button"
-                className="w-full sm:w-auto px-6 py-2 border border-gray-300 text-gray-700 rounded-md"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="w-full sm:w-auto px-6 py-2 bg-gray-700 text-white rounded-md"
-              >
-                Save Changes
-              </button>
-            </div>
-          </form>
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={isSubmittingPassword}
+                  className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition flex items-center justify-center gap-2 font-medium disabled:opacity-70"
+                >
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
       <Footer />

@@ -100,3 +100,29 @@ export const getCarDocsDetails = async (carId: string, userMessage: string) => {
     throw new Error(getApiErrorMessage(error));
   };
 };
+
+export const getStatsForOwner = async () => {
+  try {
+    const response = await api.get('/owner/get-stats');
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+
+export const getRentalStatsForOwner = async (type: string, year: number, from?: string, to?: string) => {
+  try {
+    const response = await api.get('/owner/rental-stats', {
+      params: {
+        type,
+        year,
+        from,
+        to
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+

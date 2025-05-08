@@ -114,7 +114,7 @@ export default class CarController implements ICarController {
         insuranceDoc: req.files.insuranceDoc
       };
       const updatedCar = await this._carService.reuploadCarDocs(carId, carDocs);
-      res.status(200).json(HttpResponse.success(updatedCar, "Your documents will verified in 24 hours"));
+      res.status(StatusCode.OK).json(HttpResponse.success(updatedCar, "Your documents will verified in 24 hours"));
     } catch (error) {
       next(error);
     };
@@ -201,7 +201,7 @@ export default class CarController implements ICarController {
       const carId = req.params.id;
       const { userMessage } = req.body;
       const result = await this._carService.getCarDocsDetails(carId, userMessage);
-      res.status(200).json(HttpResponse.success({ answer: result }));
+      res.status(StatusCode.OK).json(HttpResponse.success({ answer: result }));
     } catch (error) {
       next(error);
     };

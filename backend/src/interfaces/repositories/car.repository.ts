@@ -4,6 +4,7 @@ import ICar from "../../types/car";
 
 export default interface ICarRepository extends IBaseRepository<ICarModel> {
   addCar(data: ICar): Promise<ICarModel>;
+  countCars(ownerId: string): Promise<number>;
   editCar(carId: string, data: Partial<ICar>): Promise<ICarModel>;
   findByOwner(userId: string, page: number, limit: number): Promise<{ data: ICarModel[]; total: number; }>;
   findPaginated(page: number, limit: number): Promise<{ data: ICarModel[]; total: number }>;

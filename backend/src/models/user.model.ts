@@ -24,6 +24,10 @@ const userSchema = new Schema<IUserModel>(
       type: String,
       default: "user",
     },
+    profilePic: {
+      type: String,
+      required: false
+    },
     location: {
       type: {
         type: String,

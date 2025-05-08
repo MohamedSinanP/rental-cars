@@ -183,3 +183,44 @@ export const getUserWallet = async (page: number, limit: number) => {
     throw new Error(getApiErrorMessage(error));
   };
 };
+
+export const updateProfile = async (data: FormData) => {
+  try {
+    const response = await api.put('/user/update-profile', data);
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+
+export const updatePassword = async (data: FormData) => {
+  try {
+    const response = await api.put('/user/update-password', data);
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+
+export const updateProfilePic = async (data: FormData) => {
+  try {
+    const response = await api.patch('/user/update-profile-pic', data);
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+
+export const downloadInvoice = async (id: string) => {
+  try {
+    const response = await api.get(`/user/invoice/${id}`, {
+      responseType: 'arraybuffer',
+      headers: {
+        'Accept': 'application/pdf',
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};

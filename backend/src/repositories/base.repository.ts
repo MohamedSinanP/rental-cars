@@ -20,7 +20,7 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
       query = query.populate(populate);
     }
     return await query.exec();
-  }
+  };
 
   async findOne(query: object, populate?: PopulateOptions[]): Promise<T | null> {
     let findQuery = this.model.findOne(query);
@@ -50,6 +50,5 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     const result = await this.model.findByIdAndDelete(id).exec();
     return !!result;
   };
-
 
 };

@@ -4,7 +4,7 @@ import TYPES from "../di/types";
 import ISubscriptionRepository from "../interfaces/repositories/subscription.repository";
 import { ISubscription, ISubscriptionModel, IUserSubscriptionModel } from "../types/user";
 import { HttpError } from "../utils/http.error";
-import { StatusCode } from "../types/types";
+import { PaginatedData, StatusCode } from "../types/types";
 import stripe from "../config/stripe";
 import { Request } from "express";
 import Stripe from "stripe";
@@ -118,7 +118,6 @@ export default class SubscriptionService implements ISubscriptionService {
       current_period_start: number;
       current_period_end: number;
     }
-    console.log(event.data);
 
     const session = event.data.object as Stripe.Checkout.Session;
     const { userId, subscriptionId } = session.metadata!;
@@ -166,12 +165,18 @@ export default class SubscriptionService implements ISubscriptionService {
     return userSub;
   };
 
-  async getUsersSubscriptions(): Promise<IUserSubscriptionModel[]> {
-    const usersSubs = await this._userSubsRepository.findUsersSubscriptions();
-    if (!usersSubs) {
+  async getUsersSubscriptions(page: number, limit: number, search: string): Promise<PaginatedData<IUserSubscriptionModel>> {
+    const { data, total } = await this._userSubsRepository.findUsersSubscriptions(page, limit, search);
+
+    if (!data) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't find your subscription");
     };
-    return usersSubs;
+    const totalPages = Math.ceil(total / limit);
+    return {
+      data,
+      totalPages,
+      currentPage: page,
+    };
   };
 
   async updateUserSubStatus(subId: string, status: string): Promise<IUserSubscriptionModel> {
@@ -181,4 +186,8 @@ export default class SubscriptionService implements ISubscriptionService {
     };
     return updatedUseSub;
   };
+
+  async getSalesInformation(type: string, year: number, from: string, to: string): Promise<void> {
+
+  }
 };

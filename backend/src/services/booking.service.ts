@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import IBookingService from "../interfaces/services/booking.service";
-import { IBooking, IBookingModel } from "../types/booking";
+import { IBooking, IBookingModel, IBookingPopulated } from "../types/booking";
 import TYPES from "../di/types";
 import IBookingRepository from "../interfaces/repositories/booking.repository";
 import { HttpError } from "../utils/http.error";
@@ -8,7 +8,8 @@ import { PaginatedData, StatusCode } from "../types/types";
 import IAddressRepository from "../interfaces/repositories/address.repository";
 import ICarRepository from "../interfaces/repositories/car.repository";
 import IWalletRepository from "../interfaces/repositories/wallet.repository";
-import { Types } from "mongoose";
+import { Types, UpdateResult } from "mongoose";
+import IOwnerRepository from "../interfaces/repositories/owner.repository";
 
 
 @injectable()
@@ -17,7 +18,8 @@ export default class BookingService implements IBookingService {
     @inject(TYPES.IBookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.IAddressRepository) private _addressRepository: IAddressRepository,
     @inject(TYPES.ICarRepository) private _carRepository: ICarRepository,
-    @inject(TYPES.IWalletRepository) private _walletRepository: IWalletRepository
+    @inject(TYPES.IWalletRepository) private _walletRepository: IWalletRepository,
+    @inject(TYPES.IOwnerRepository) private _ownerRepository: IOwnerRepository
   ) { };
 
   async createBooking(data: IBooking): Promise<IBookingModel> {
@@ -27,6 +29,26 @@ export default class BookingService implements IBookingService {
     if (isBooked) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Car is already booked for the selected time period");
     };
+    const bookedCar = await this._carRepository.findOne({ _id: carId }, [{ path: 'ownerId' }]);
+    const DEFAULT_COMMISSION_PERCENTAGE = 10;
+
+    let commissionPercentage = DEFAULT_COMMISSION_PERCENTAGE;
+    if (bookedCar && 'ownerId' in bookedCar && bookedCar.ownerId && 'commission' in bookedCar.ownerId) {
+      commissionPercentage = bookedCar.ownerId.commission;
+    }
+
+
+    const adminCommissionAmount = (data.totalPrice * commissionPercentage) / 100;
+
+    const ownerEarning = data.totalPrice - adminCommissionAmount;
+
+    const bookingData = {
+      ...data,
+      commissionPercentage,
+      adminCommissionAmount,
+      ownerEarning
+    };
+
     let booking;
     if (data.paymentMethod === 'wallet') {
       const userObjId = new Types.ObjectId(userId)
@@ -38,7 +60,8 @@ export default class BookingService implements IBookingService {
 
       await this._walletRepository.refundToWallet(userId, data.totalPrice);
     };
-    booking = await this._bookingRepository.bookCar(data);
+
+    booking = await this._bookingRepository.bookCar(bookingData);
     await this._carRepository.update(carId, { status: "Booked" });
     const existingAddress = await this._addressRepository.findOne({ name, email, phoneNumber, address });
     if (!existingAddress) {
@@ -110,7 +133,6 @@ export default class BookingService implements IBookingService {
       throw new HttpError(StatusCode.BAD_REQUEST, "Cannot cancel your booking..");
     };
 
-    // Refund to wallet using repository logic
     const refundAmount = booking.totalPrice;
     const transactionId = `refund-${booking._id}`;
 
@@ -128,4 +150,20 @@ export default class BookingService implements IBookingService {
     };
     return populatedBooking;
   };
+
+  async getBookingById(bookingId: string): Promise<IBookingPopulated> {
+    const booking = await this._bookingRepository.getPopulatedBooking(bookingId);
+    if (!booking) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Can't find your bookings");
+    };
+    return booking;
+  };
+
+  async completeExpiredBookings(): Promise<UpdateResult> {
+    return await this._bookingRepository.updateExpiredBookings();
+  }
+
+  async getSalesInformation(type: string, year: number, from: string, to: string): Promise<void> {
+    return await this._bookingRepository.
+  }
 };

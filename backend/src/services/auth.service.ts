@@ -98,7 +98,7 @@ export default class AuthService implements IAuthService {
       email,
       password: hashedPwd,
       role,
-      commision,
+      commission: commision,
       otp,
       otpExpiresAt,
       otpLastSentAt,
@@ -117,7 +117,7 @@ export default class AuthService implements IAuthService {
       password: owner.password,
       isBlocked: owner.isBlocked,
       role: owner.role,
-      commision: owner.commision,
+      commission: owner.commission,
       isVerified: owner.isVerified,
     };
   };
@@ -228,6 +228,7 @@ export default class AuthService implements IAuthService {
       accessToken,
       refreshToken,
       user: {
+        _id: user._id.toString(),
         userName: user.userName,
         email: user.email,
         role: user.role,
@@ -447,6 +448,7 @@ export default class AuthService implements IAuthService {
     if (!user) {
       user = await this._adminRepository.findById(userId);
     }
+
     if (!user) {
       throw new HttpError(StatusCode.BAD_REQUEST, "User not found");
     }

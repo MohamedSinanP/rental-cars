@@ -240,19 +240,7 @@ const Cars: React.FC = () => {
                       <Trash2 size={16} /> List/Unlist
                     </button>
                   </div>
-
                   <DocumentSearch carId={selectedCar._id} />
-
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">Live Location</h4>
-                    <div className="w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
-                      <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/GoogleMaps.jpg/640px-GoogleMaps.jpg"
-                        alt="map"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
                 </div>
               ) : (
                 <div className="bg-white rounded-xl shadow-sm p-8 text-center text-gray-600">

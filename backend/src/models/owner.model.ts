@@ -24,7 +24,7 @@ const ownerSchema = new Schema<IOwnerModel>(
       type: String,
       default: "user",
     },
-    commision: {
+    commission: {
       type: Number,
       required: true,
     },

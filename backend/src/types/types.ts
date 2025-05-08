@@ -43,6 +43,7 @@ export interface LoginGoogleResponse {
   accessToken: string;
   refreshToken: string;
   user: {
+    _id: string;
     userName: string;
     email: string;
     isBlocked: boolean;
@@ -64,4 +65,19 @@ export interface PaginatedData<T> {
   data: T[];
   totalPages: number;
   currentPage: number;
+}
+
+export interface IAdminDashboardData {
+  totalUsers: number;
+  totalOwners: number;
+  totalEarnings: number;
+  subscriptionEarnings: number;
+  totalCommission: number;
+  totalBookings: number
+}
+export interface IOwnerDashboardData {
+  totalEarnings: number;
+  totalCars: number;
+  totalBookings: number;
+  platformCommission: number;
 }

@@ -1,6 +1,7 @@
 import { Request } from "express";
 import { ISubscription, ISubscriptionModel, IUserSubscriptionModel } from "../../types/user";
 import Stripe from "stripe";
+import { PaginatedData } from "../../types/types";
 
 export default interface ISubscriptionService {
   createSubscription(data: ISubscription): Promise<ISubscriptionModel>;
@@ -11,6 +12,7 @@ export default interface ISubscriptionService {
   handleWebhook(event: Stripe.Event): Promise<void>;
   handleCheckoutSessionCompleted(event: Stripe.Event): Promise<void>;
   getUserSubscription(req: Request): Promise<IUserSubscriptionModel | null>;
-  getUsersSubscriptions(): Promise<IUserSubscriptionModel[]>;
+  getUsersSubscriptions(page: number, limit: number, search: string): Promise<PaginatedData<IUserSubscriptionModel>>;
   updateUserSubStatus(userId: string, status: string): Promise<IUserSubscriptionModel>;
-}
+  getSalesInformation(type: string, year: number, from: string, to: string): Promise<void>;
+};

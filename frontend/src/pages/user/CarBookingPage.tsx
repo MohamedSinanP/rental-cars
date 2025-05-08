@@ -12,6 +12,7 @@ import { extractFeatureValue, formatINR } from '../../utils/commonUtilities';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useDispatch } from 'react-redux';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY as string);
 
@@ -69,6 +70,7 @@ interface IUserAddress {
 }
 
 const CarBookingPage: React.FC = () => {
+  const dispatch = useDispatch();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const stripe = useStripe();

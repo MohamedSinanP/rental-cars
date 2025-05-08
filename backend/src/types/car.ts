@@ -1,4 +1,5 @@
-import { Document, ObjectId, Schema } from "mongoose";
+import { Document, Schema } from "mongoose";
+import IOwner from "./owner";
 
 export default interface ICar {
   _id?: string;
@@ -36,7 +37,7 @@ export interface ICarModel extends Document {
   transmission: string;
   fuelType: string;
   fuelOption: string;
-  ownerId: Schema.Types.ObjectId;
+  ownerId: Schema.Types.ObjectId | IOwner;
   carImages: string[];
   rcDoc: string;
   pucDoc: string;

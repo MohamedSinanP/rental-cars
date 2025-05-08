@@ -33,7 +33,7 @@ const GoogleAuthCallback = () => {
           }));
           try {
             const { location } = await getUserLocation();
-            await sendUserLocation(location);
+            await sendUserLocation(result.data._id, location);
           } catch (locationError) {
             console.error("Could not handle user location:", locationError);
           }

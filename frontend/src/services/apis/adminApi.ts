@@ -5,12 +5,13 @@ import api from "./api"
 
 
 
-export const fetchUsers = async (page: number, limit: number) => {
+export const fetchUsers = async (page: number, limit: number, search: string) => {
   try {
     const response = await api.get('/admin/fetch-users', {
       params: {
         page,
         limit,
+        search
       },
     });
     return response.data;
@@ -19,12 +20,13 @@ export const fetchUsers = async (page: number, limit: number) => {
   };
 };
 
-export const fetchOwners = async (page: number, limit: number) => {
+export const fetchOwners = async (page: number, limit: number, search: string) => {
   try {
     const response = await api.get('/admin/fetch-owners', {
       params: {
         page,
-        limit
+        limit,
+        search
       },
     });
     return response.data;
@@ -103,9 +105,17 @@ export const updateSubscription = async (subId: string, data: FormData) => {
     throw new Error(getApiErrorMessage(error));
   };
 };
-export const fetchUserSubscriptions = async () => {
+export const fetchUserSubscriptions = async (page: number, limit: number, search: string) => {
   try {
-    const response = await api.get('/admin/users-subscriptions');
+    const response = await api.get('/admin/users-subscriptions', {
+      params: {
+        page,
+        limit,
+        search
+      }
+    });
+    console.log(response.data);
+
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
@@ -119,4 +129,63 @@ export const updateSubscriptionStatus = async (subId: string, status: string) =>
     throw new Error(getApiErrorMessage(error));
   };
 };
+
+export const getStatsForAdmin = async () => {
+  try {
+    const response = await api.get('/admin/get-stats');
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+
+
+export const getRentalStatsForAdmin = async (type: string, year: number, from?: string, to?: string) => {
+  try {
+    const response = await api.get('/admin/rental-stats', {
+      params: {
+        type,
+        year,
+        from,
+        to
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+export const getRentalForAdmin = async (page: number, limit: number, type: string, year: number, from?: string, to?: string) => {
+  try {
+    const response = await api.get('/admin/rentals', {
+      params: {
+        page,
+        limit,
+        type,
+        year,
+        from,
+        to
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+};
+
+export const getSalesReportPdf = async (type: string, year: number, from?: string, to?: string) => {
+  try {
+    const response = await api.get('/admin/sales-report', {
+      params: {
+        type,
+        year,
+        from,
+        to
+      }
+    })
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  };
+}
 

@@ -50,9 +50,12 @@ import AddressRepository from "../repositories/address.repository";
 import { Wallet } from "../models/wallet.model";
 import IWalletRepository from "../interfaces/repositories/wallet.repository";
 import WalletRepository from "../repositories/wallet.repository";
+import IDashboardService from "../interfaces/services/dashboard.service";
+import DashboardService from "../services/dashboard.service";
+import DashboardController from "../controllers/dashboard.controller";
 
 
-const container = new Container();
+export const container = new Container();
 
 // controllers
 container.bind<AuthController>(TYPES.IAuthController).to(AuthController).inSingletonScope();
@@ -62,6 +65,7 @@ container.bind<PaymentController>(TYPES.IPaymentController).to(PaymentController
 container.bind<BookingController>(TYPES.IBookingController).to(BookingController).inSingletonScope();
 container.bind<AdminController>(TYPES.IAdminController).to(AdminController).inSingletonScope();
 container.bind<SubscriptionController>(TYPES.ISubscriptionController).to(SubscriptionController).inSingletonScope();
+container.bind<DashboardController>(TYPES.IDashboardController).to(DashboardController).inSingletonScope();
 
 
 // repositories
@@ -87,6 +91,7 @@ container.bind<IPaymentService>(TYPES.IPaymentService).to(PaymentService).inSing
 container.bind<IBookingService>(TYPES.IBookingService).to(BookingService).inSingletonScope();
 container.bind<IOwnerService>(TYPES.IOwnerService).to(OwnerService).inSingletonScope();
 container.bind<ISubscriptionService>(TYPES.ISubscriptionService).to(SubscriptionService).inSingletonScope();
+container.bind<IDashboardService>(TYPES.IDashboardService).to(DashboardService).inSingletonScope();
 
 
 
@@ -109,3 +114,4 @@ export const paymentController = container.get<PaymentController>(TYPES.IPayment
 export const bookingController = container.get<BookingController>(TYPES.IBookingController);
 export const adminController = container.get<AdminController>(TYPES.IAdminController);
 export const subscriptionController = container.get<SubscriptionController>(TYPES.ISubscriptionController);
+export const dashboardController = container.get<DashboardController>(TYPES.IDashboardController);

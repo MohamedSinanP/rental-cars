@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
 import { IBookingWithPopulatedData } from '../../types/types';
-import { userRentals } from '../../services/apis/userApis';
+import { downloadInvoice, userRentals } from '../../services/apis/userApis';
 import RentalDetailsModal from '../../components/RentalDetailsModal';
 import Pagination from '../../components/Pagination';
 import DataTable, { DataItem, Column, Action } from '../../components/DataTable';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const CarRentalsPage: React.FC = () => {
   const [rentals, setRentals] = useState<IBookingWithPopulatedData[]>([]);
@@ -40,10 +41,27 @@ const CarRentalsPage: React.FC = () => {
     fetchRentals();
   }, [currentPage]);
 
-  const handleInvoiceDownload = (id: string): void => {
-    console.log(`Downloading invoice for rental ${id}`);
-  };
 
+  const handleInvoiceDownload = async (id: string) => {
+    try {
+      const result = await downloadInvoice(id);
+      console.log(result, "PDF data received");
+      const blob = new Blob([result], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${id}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
   const handleViewDetails = (rental: IBookingWithPopulatedData): void => {
     setSelectedRental(rental);
     setIsModalOpen(true);
@@ -118,12 +136,14 @@ const CarRentalsPage: React.FC = () => {
       label: 'Invoice Down',
       onClick: (item: BookingDataItem) => handleInvoiceDownload(item._id!),
       className: 'bg-teal-400 text-white hover:bg-teal-500',
+      // Only show for completed bookings
+      isVisible: (item: BookingDataItem) => Boolean(item.status && item.status.toLowerCase() === 'completed')
     },
     {
       label: 'View Details',
       onClick: (item: BookingDataItem) => handleViewDetails(item),
       className: 'border border-teal-400 text-teal-400 hover:bg-teal-50',
-    },
+    }
   ];
 
   // Custom empty state message as a string for DataTable compatibility
@@ -226,12 +246,14 @@ const CarRentalsPage: React.FC = () => {
                       </div>
 
                       <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                        <button
-                          onClick={() => handleInvoiceDownload(rental._id!)}
-                          className="bg-teal-400 text-white px-4 py-2 rounded text-sm w-full sm:w-auto text-center"
-                        >
-                          Invoice Down
-                        </button>
+                        {rental.status && rental.status.toLowerCase() === 'completed' && (
+                          <button
+                            onClick={() => handleInvoiceDownload(rental._id!)}
+                            className="bg-teal-400 text-white px-4 py-2 rounded text-sm w-full sm:w-auto text-center"
+                          >
+                            Invoice Down
+                          </button>
+                        )}
                         <button
                           onClick={() => handleViewDetails(rental)}
                           className="border border-teal-400 text-teal-400 px-4 py-2 rounded text-sm w-full sm:w-auto text-center"

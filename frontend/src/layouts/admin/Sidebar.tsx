@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, UserCog, LayoutDashboard, Menu, X, ClipboardCheck, LogOut, BadgeCheck, } from 'lucide-react';
+import { Users, UserCog, LayoutDashboard, Menu, X, ClipboardCheck, LogOut, BadgeCheck, FileBarChart } from 'lucide-react';
 import Logo from '../../components/Logo';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '../../services/apis/authApi';
@@ -100,6 +100,14 @@ const Sidebar = () => {
                 <div className="flex items-center gap-x-2">
                   <BadgeCheck className="w-5 h-5" />
                   <span>Users Subscription</span>
+                </div>
+              </NavLink>
+            </li>
+            <li className='m-4'>
+              <NavLink to={'/admin/sales-report'} onClick={handleLinkClick}>
+                <div className="flex items-center gap-x-2">
+                  <FileBarChart className="w-5 h-5" />
+                  <span>Sales Report</span>
                 </div>
               </NavLink>
             </li>

@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import IUserController from "../interfaces/controllers/user.controller";
-import { LoginResponse, StatusCode } from "../types/types";
+import { StatusCode } from "../types/types";
 import { Request, Response, NextFunction } from "express";
 import TYPES from "../di/types";
 import IUserService from "../interfaces/services/user.service";
@@ -27,7 +27,7 @@ export default class UserConroller implements IUserController {
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId!;
       const userDetails = await this._userService.getUserDetails(userId);
-      res.status(200).json(HttpResponse.success(userDetails));
+      res.status(StatusCode.OK).json(HttpResponse.success(userDetails));
     } catch (error) {
       next(error);
     };
@@ -59,7 +59,7 @@ export default class UserConroller implements IUserController {
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId!;
       const addresses = await this._userService.getUserAddresses(userId);
-      res.status(200).json(HttpResponse.success(addresses))
+      res.status(StatusCode.OK).json(HttpResponse.success(addresses))
     } catch (error) {
       next(error);
     };
@@ -70,9 +70,44 @@ export default class UserConroller implements IUserController {
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId!;
       const wallet = await this._userService.getUserWallet(userId);
-      res.status(200).json(HttpResponse.success(wallet));
+      res.status(StatusCode.OK).json(HttpResponse.success(wallet));
     } catch (error) {
       next(error);
     };
   };
+
+  async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { user } = req as AuthenticatedRequest;
+      const userId = user?.userId!;
+      const { userName, email } = req.body;
+      const updatedUser = await this._userService.updateUser(userId, userName, email);
+    } catch (error) {
+      next(error);
+    };
+  };
+
+  async updatePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { user } = req as AuthenticatedRequest;
+      const userId = user?.userId!;
+      const { currentPwd, newPwd } = req.body;
+      await this._userService.updatePassword(userId, currentPwd, newPwd);
+      res.status(StatusCode.OK).json(HttpResponse.success({}, "Your password updated successfully"));
+    } catch (error) {
+      next(error);
+    };
+  };
+  async uploadImage(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { user } = req as AuthenticatedRequest;
+      const userId = user?.userId!;
+      const { profilePic } = req.body;
+      const imageUrl = await this._userService.updateProfilePic(userId, profilePic);
+      res.status(StatusCode.OK).json(HttpResponse.success(imageUrl, "Your profile pic updated successfully"));
+    } catch (error) {
+      next(error);
+    };
+  };
+
 };

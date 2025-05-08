@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import { inject, injectable } from "inversify";
 import IUserService from "../interfaces/services/user.service";
 import { IAddressModel, IWalletModel, userData } from "../types/user";
@@ -10,6 +11,7 @@ import { fetchAddressFromCoordinates } from "../utils/geolocation";
 import IAddressRepository from "../interfaces/repositories/address.repository";
 import IWalletRepository from "../interfaces/repositories/wallet.repository";
 import { Types } from "mongoose";
+import { throwDeprecation } from 'process';
 
 @injectable()
 export default class UserService implements IUserService {
@@ -42,8 +44,8 @@ export default class UserService implements IUserService {
     return user;
   };
 
-  async fetchAllUsers(page: number, limit: number): Promise<PaginatedData<IUserModel>> {
-    const { data, total } = await this._userRepository.findPaginated(page, limit);
+  async fetchAllUsers(page: number, limit: number, search: string): Promise<PaginatedData<IUserModel>> {
+    const { data, total } = await this._userRepository.findPaginated(page, limit, search);
     if (!data) {
       throw new HttpError(StatusCode.BAD_REQUEST, "User not found");
     };
@@ -119,6 +121,47 @@ export default class UserService implements IUserService {
       throw new HttpError(StatusCode.BAD_REQUEST, "Failed to fetch your wallet.");
     };
     return wallet;
+  };
+
+  async updateUser(userId: string, userName: string, email: string): Promise<Partial<IUserModel>> {
+    const updatedUser = await this._userRepository.update(userId, { userName, email });
+    if (!updatedUser) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Can't update your information");
+    };
+    return {
+      userName: updatedUser.userName,
+      email: updatedUser.email
+    };
+  };
+
+  async updatePassword(userId: string, currentPwd: string, newPwd: string): Promise<void> {
+    if (!userId || !currentPwd || !newPwd) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "User ID, current password, and new password are required");
+    }
+    if (typeof currentPwd !== 'string' || typeof newPwd !== 'string') {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Passwords must be strings");
+    }
+
+    const user = await this._userRepository.findById(userId);
+    if (!user) throw new HttpError(StatusCode.BAD_REQUEST, "User not found");
+    if (!user.password) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Password not set for this user");
+    }
+
+    const isMatch = await bcrypt.compare(currentPwd, user.password);
+    if (!isMatch) throw new HttpError(StatusCode.BAD_REQUEST, "Current password is incorrect");
+
+    const hashedNewPassword = await bcrypt.hash(newPwd, 10);
+
+    await this._userRepository.update(userId, { password: hashedNewPassword });
+  };
+
+  async updateProfilePic(userId: string, profilePic: string): Promise<string> {
+    const updatedUser = await this._userRepository.update(userId, { profilePic });
+    if (!updatedUser) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Can't update your profile image");
+    };
+    return updatedUser.profilePic || "";
   };
 
 };

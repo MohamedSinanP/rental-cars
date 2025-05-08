@@ -21,7 +21,8 @@ export default class AdminController implements IAdminController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 6;
-      const users = await this.userService.fetchAllUsers(page, limit);
+      const search = (req.query.search as string) || '';
+      const users = await this.userService.fetchAllUsers(page, limit, search);
       res.status(StatusCode.OK).json(HttpResponse.success(users));
     } catch (error) {
       next(error);
@@ -32,7 +33,8 @@ export default class AdminController implements IAdminController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 6;
-      const owners = await this.ownerService.getAllOwners(page, limit);
+      const search = (req.query.search as string) || '';
+      const owners = await this.ownerService.getAllOwners(page, limit, search);
       res.status(StatusCode.OK).json(HttpResponse.success(owners));
     } catch (error) {
       next(error);
@@ -60,8 +62,6 @@ export default class AdminController implements IAdminController {
 
   async rejectCar(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      console.log("hehehehe");
-
       const carId = req.params.id;
       const { rejectionReason } = req.body;
       const car = await this.carService.rejectCar(carId, rejectionReason);
@@ -90,4 +90,5 @@ export default class AdminController implements IAdminController {
       next(error);
     };
   };
+
 };

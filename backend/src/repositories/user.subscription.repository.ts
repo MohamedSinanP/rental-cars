@@ -27,10 +27,23 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
       .lean();
   };
 
-  async findUsersSubscriptions(): Promise<IUserSubscriptionModel[]> {
-    return await this._userSubsModel.find()
+  async findUsersSubscriptions(page: number, limit: number, search: string): Promise<{ data: IUserSubscriptionModel[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const searchQuery = search
+      ? {
+        $or: [
+          { status: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+        ]
+      }
+      : {};
+
+    const data = await this._userSubsModel.find(searchQuery).skip(skip).limit(limit)
       .populate('subscriptionId')
       .populate('userId');
+    const total = await this._userSubsModel.countDocuments();
+    return { data, total };
   };
   async findLatestActiveByUserId(userId: string): Promise<IUserSubscriptionModel | null> {
     return await this._userSubsModel.findOne({
@@ -39,4 +52,32 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
       cancelAtPeriodEnd: false,
     }).sort({ currentPeriodEnd: -1 });
   };
+  async getTotalSubscriptionEarnings(): Promise<number> {
+    const result = await this._userSubsModel.aggregate([
+      {
+        $match: {
+          status: "active"
+        }
+      },
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "subscriptionId",
+          foreignField: "_id",
+          as: "subscriptionData"
+        }
+      },
+      {
+        $unwind: "$subscriptionData"
+      },
+      {
+        $group: {
+          _id: null,
+          totalEarnings: { $sum: "$subscriptionData.price" }
+        }
+      }
+    ]);
+
+    return result[0]?.totalEarnings || 0;
+  }
 };

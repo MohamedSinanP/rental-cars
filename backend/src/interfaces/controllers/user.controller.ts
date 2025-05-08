@@ -7,4 +7,7 @@ export default interface IUserController {
   setUserLocation(req: Request, res: Response, next: NextFunction): Promise<void>;
   fetchUserAddresses(req: Request, res: Response, next: NextFunction): Promise<void>;
   getUserWallet(req: Request, res: Response, next: NextFunction): Promise<void>;
+  updateProfile(req: Request, res: Response, next: NextFunction): Promise<void>;
+  updatePassword(req: Request, res: Response, next: NextFunction): Promise<void>;
+  uploadImage(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

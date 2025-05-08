@@ -9,7 +9,7 @@ export interface AuthenticatedRequest extends Request {
     userId: string;
     role: string;
   };
-}
+};
 
 export const authenticate = (allowedRoles: string[] = []): RequestHandler => {
   return (req, res, next) => {

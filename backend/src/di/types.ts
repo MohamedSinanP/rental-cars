@@ -8,6 +8,7 @@ const TYPES = {
   IBookingController: Symbol.for("IBookingController"),
   IAdminController: Symbol.for("IAdminController"),
   ISubscriptionController: Symbol.for("ISubscriptionController"),
+  IDashboardController: Symbol.for("IDashboardController"),
 
   // repositories
   IUserRepository: Symbol.for("IUserRepository"),
@@ -31,6 +32,7 @@ const TYPES = {
   IBookingService: Symbol.for("IBookingService"),
   IOwnerService: Symbol.for("IOwnerService"),
   ISubscriptionService: Symbol.for("ISubscriptionService"),
+  IDashboardService: Symbol.for("IDashboardService"),
 
   // models
   UserModel: Symbol.for("UserModel"),

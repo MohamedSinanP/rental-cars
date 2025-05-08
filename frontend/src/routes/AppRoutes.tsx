@@ -12,7 +12,7 @@ import ResetOtpPage from "../pages/authentication/ResetOtpPage";
 import GoogleAuthCallback from "../pages/authentication/GoogleAuthCallback"
 
 // Owner Pages
-import Dashboard from "../pages/owners/Dashboard";
+import OwnerDashboardPage from "../pages/owners/OwnerDashboardPage";
 import Cars from "../pages/owners/Cars";
 import CarAddedHistoryPage from "../pages/owners/CarAddedHistoryPage";
 import OwnerBookingsPage from "../pages/owners/OwnerBookingsPage";
@@ -25,7 +25,7 @@ import CarDetailsPage from "../pages/user/CarDetailsPage";
 import CarBookingPage from "../pages/user/CarBookingPage";
 import UserProfile from "../pages/user/UserProfile";
 import CarRentalsPage from "../pages/user/CarRentalsPage";
-import Dashboars from "../pages/admin/Dashboard";
+import AdminDashboardPage from "../pages/admin/AdminDashboard";
 import AdminLoginPage from "../pages/admin/AdminLoginPage";
 import UsersPage from "../pages/admin/UsersPage";
 import OwnersPage from "../pages/admin/OwnersPage";
@@ -36,6 +36,7 @@ import SubscriptionCheckout from "../pages/user/SubscriptionCheckoutPage";
 import SubscriptionSuccessPage from "../pages/user/SubscriptionSuccessPage";
 import UserSubscriptionsPage from "../pages/admin/UsersSubscriptionsPage";
 import WalletPage from "../pages/user/WalletPage";
+import SalesReportPage from "../pages/admin/SalerReportPage";
 
 // Fallback / Errors
 // import Unauthorized from "../pages/Unauthorized";
@@ -57,7 +58,7 @@ const AppRoutes = () => {
 
       {/* Routes for owner */}
       < Route element={<PrivateRoute allowedRoles={['owner']} />}>
-        <Route path="/owner/dashboard" element={<Dashboard />} />
+        <Route path="/owner/dashboard" element={<OwnerDashboardPage />} />
         <Route path="/owner/cars" element={<Cars />} />
         <Route path="/owner/car-history" element={<CarAddedHistoryPage />} />
         <Route path="/owner/rentals" element={<OwnerBookingsPage />} />
@@ -81,14 +82,14 @@ const AppRoutes = () => {
       { /* Routes for the admin */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
       < Route element={<PrivateRoute allowedRoles={['admin']} />}>
-        <Route path="/admin/dashboard" element={<Dashboars />} />
+        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
         <Route path="/admin/users" element={<UsersPage />} />
         <Route path="/admin/owners" element={<OwnersPage />} />
         <Route path="/admin/approvals" element={<CarVerification />} />
         <Route path="/admin/subscription" element={<SubscriptionPage />} />
         <Route path="/admin/user-subscription" element={<UserSubscriptionsPage />} />
+        <Route path="/admin/sales-report" element={<SalesReportPage />} />
       </Route>
-
     </Routes>
   );
 };

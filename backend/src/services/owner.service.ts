@@ -5,14 +5,15 @@ import IOwnerRepository from "../interfaces/repositories/owner.repository";
 import { IOwnerModel } from "../types/owner";
 import { HttpError } from "../utils/http.error";
 import { PaginatedData, StatusCode } from "../types/types";
+import { StringExpressionOperatorReturningObject } from "mongoose";
 
 @injectable()
 export default class OwnerService implements IOwnerService {
 
   constructor(@inject(TYPES.IOwnerRepository) private _ownerRepository: IOwnerRepository) { };
 
-  async getAllOwners(page: number, limit: number): Promise<PaginatedData<IOwnerModel>> {
-    const { data, total } = await this._ownerRepository.findPaginated(page, limit);
+  async getAllOwners(page: number, limit: number, search: string): Promise<PaginatedData<IOwnerModel>> {
+    const { data, total } = await this._ownerRepository.findPaginated(page, limit, search);
     if (!data) {
       throw new HttpError(StatusCode.UNAUTHORIZED, "User not found");
     };

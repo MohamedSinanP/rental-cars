@@ -4,16 +4,17 @@ import IBookingService from "../interfaces/services/booking.service";
 import IBookingController from "../interfaces/controllers/booking.controller";
 import { Request, Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
-import { IBooking } from "../types/booking";
+import { IBooking, IBookingPopulated } from "../types/booking";
 import { HttpResponse } from "../utils/http.response";
 import { stat } from "fs";
 import { StatusCode } from "../types/types";
+import { generateInvoicePDF } from "../utils/invoiceGenerator";
 
 
 
 @injectable()
 export default class BookingController implements IBookingController {
-  constructor(@inject(TYPES.IBookingService) private bookingService: IBookingService) { };
+  constructor(@inject(TYPES.IBookingService) private _bookingService: IBookingService) { };
 
   async creatBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -34,7 +35,7 @@ export default class BookingController implements IBookingController {
         paymentId: req.body.paymentId,
         status: 'active',
       };
-      const booking = await this.bookingService.createBooking(bookingData);
+      const booking = await this._bookingService.createBooking(bookingData);
       res.status(StatusCode.CREATED).json(HttpResponse.created(booking, "Your Booking confirmed"));
     } catch (error) {
       next(error);
@@ -47,8 +48,7 @@ export default class BookingController implements IBookingController {
       const limit = parseInt(req.query.limit as string) || 4;
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId!;
-      const userRentals = await this.bookingService.fetchUserRentals(userId, page, limit);
-      console.log(userRentals);
+      const userRentals = await this._bookingService.fetchUserRentals(userId, page, limit);
       res.status(StatusCode.OK).json(HttpResponse.success(userRentals));
     } catch (error) {
       next(error);
@@ -61,7 +61,7 @@ export default class BookingController implements IBookingController {
       const limit = parseInt(req.query.limit as string) || 8;
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId!;
-      const userRentals = await this.bookingService.getCarBookingsOfOwner(userId, page, limit);
+      const userRentals = await this._bookingService.getCarBookingsOfOwner(userId, page, limit);
       res.status(StatusCode.OK).json(HttpResponse.success(userRentals));
     } catch (error) {
       next(error);
@@ -72,7 +72,7 @@ export default class BookingController implements IBookingController {
     try {
       const bookingId = req.params.id;
       const { status } = req.body;
-      const updatedBooking = await this.bookingService.changeBookingStatus(bookingId, status);
+      const updatedBooking = await this._bookingService.changeBookingStatus(bookingId, status);
       res.status(StatusCode.OK).json(HttpResponse.success(updatedBooking));
     } catch (error) {
       next(error);
@@ -82,7 +82,7 @@ export default class BookingController implements IBookingController {
   async getLatestBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const bookingId = req.params.id;
-      const latestBooking = await this.bookingService.getLatestBooking(bookingId);
+      const latestBooking = await this._bookingService.getLatestBooking(bookingId);
       res.status(StatusCode.OK).json(HttpResponse.success(latestBooking));
     } catch (error) {
       next(error)
@@ -91,13 +91,37 @@ export default class BookingController implements IBookingController {
 
   async cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      console.log("hehehe");
-
       const bookingId = req.params.id;
-      const updatedBooking = await this.bookingService.cancelBooking(bookingId);
+      const updatedBooking = await this._bookingService.cancelBooking(bookingId);
       res.status(StatusCode.OK).json(HttpResponse.success(updatedBooking));
     } catch (error) {
       next(error)
     };
+  };
+
+
+  async invoiceForUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const bookingId = req.params.id;
+      const booking = await this._bookingService.getBookingById(bookingId);
+      await generateInvoicePDF(res, booking);
+    } catch (error) {
+      next(error);
+    };
+  };
+
+  async getSalesReportPdf(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { type, year, from, to } = req.query;
+      const validType = typeof type === 'string' ? type : 'monthly';
+
+      const validYear = year ? Number(year) : new Date().getFullYear();
+
+      const validFrom = typeof from === 'string' ? from : '';
+      const validTo = typeof to === 'string' ? to : '';
+      const sales = await this._bookingService.getSalesInformation(validType, validYear, validFrom, validTo);
+    } catch (error) {
+      next(error);
+    }
   }
 };

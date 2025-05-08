@@ -10,4 +10,5 @@ export default interface IAdminController {
   rejectCar(req: Request, res: Response, next: NextFunction): Promise<void>;
   blockOrUnblockUser(req: Request, res: Response, next: NextFunction): Promise<void>;
   blockOrUnblockOwner(req: Request, res: Response, next: NextFunction): Promise<void>;
+
 }

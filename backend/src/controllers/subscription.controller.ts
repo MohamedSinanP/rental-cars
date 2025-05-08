@@ -55,7 +55,6 @@ export default class SubscriptionController implements ISubscriptionController {
         stripePriceId: req.body.stripePriceId,
         isActive: req.body.isActive
       };
-      console.log(req.body, "this is rqboy");
 
       const subscriptions = await this._subscriptionService.editSubscription(subId, subEditData);
       res.status(StatusCode.OK).json(HttpResponse.success(subscriptions, "Subscription updated."));
@@ -84,7 +83,6 @@ export default class SubscriptionController implements ISubscriptionController {
   };
 
   async handleWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
-    console.log("i am also working >>>>>");
     const sig = req.headers['stripe-signature'] as string;
     let event: Stripe.Event;
 
@@ -114,7 +112,10 @@ export default class SubscriptionController implements ISubscriptionController {
 
   async getUsersSubscriptions(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const usersSubs = await this._subscriptionService.getUsersSubscriptions();
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 6;
+      const search = (req.query.search as string) || '';
+      const usersSubs = await this._subscriptionService.getUsersSubscriptions(page, limit, search);
       res.status(StatusCode.OK).json(HttpResponse.success(usersSubs));
     } catch (error) {
       next(error);

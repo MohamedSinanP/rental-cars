@@ -57,6 +57,18 @@ const bookingSchema = new Schema<IBookingModel>({
     type: Number,
     required: false
   },
+  commissionPercentage: {
+    type: Number,
+    required: true
+  },
+  adminCommissionAmount: {
+    type: Number,
+    required: true
+  },
+  ownerEarning: {
+    type: Number,
+    required: true
+  },
   status: {
     type: String,
     enum: ['active', 'cancelled', 'completed'],

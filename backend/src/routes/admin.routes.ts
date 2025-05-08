@@ -1,5 +1,5 @@
 import express from "express";
-import { adminController, subscriptionController } from "../di/container";
+import { adminController, dashboardController, subscriptionController } from "../di/container";
 import { authenticate } from "../middlewares/auth.middleware";
 
 const router = express.Router();
@@ -11,6 +11,9 @@ router.patch('/block-owner/:id', authenticate(["admin"]), adminController.blockO
 router.get('/pending-cars', authenticate(["admin"]), adminController.getPendingCars.bind(adminController));
 router.patch('/verify-car/:id', authenticate(["admin"]), adminController.verifyCar.bind(adminController));
 router.patch('/reject-car/:id', authenticate(["admin"]), adminController.rejectCar.bind(adminController));
+router.get('/get-stats', authenticate(["admin"]), dashboardController.getStatsForAdmin.bind(dashboardController));
+router.get('/rental-stats/', authenticate(["admin"]), dashboardController.getRentalStatsForAdmin.bind(dashboardController));
+router.get('/rentals/', authenticate(["admin"]), dashboardController.getAllBookingsForAdmin.bind(dashboardController));
 
 // subscription routes
 router.post('/add-subscription', authenticate(["admin"]), subscriptionController.createSubscription.bind(subscriptionController));

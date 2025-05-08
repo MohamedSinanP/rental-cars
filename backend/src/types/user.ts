@@ -6,6 +6,7 @@ export default interface IUser {
   email: string;
   password: string;
   role: string;
+  profilePic?: string | null;
   location?: {
     type: 'Point';
     coordinates: [number, number];
@@ -27,6 +28,7 @@ export interface IUserModel extends Document {
   email: string;
   password: string;
   role: string;
+  profilePic?: string | null;
   location?: {
     type: 'Point';
     coordinates: [number, number];
