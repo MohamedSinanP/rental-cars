@@ -50,7 +50,7 @@ const carSchema = new Schema<ICarModel>(
       default: "PendingApproval",
     },
     features: [{ type: String }],
-    pricePerDay: { type: Number, required: true },
+    pricePerHour: { type: Number, required: true },
     deposit: { type: Number, required: true },
     lastmaintenanceDate: { type: String, required: true },
     maintenanceInterval: { type: Number, required: true },

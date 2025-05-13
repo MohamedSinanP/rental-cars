@@ -236,19 +236,6 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Download Report Button - Moved outside and adjacent to chart div */}
-        <div className="flex justify-end mb-2">
-          <button
-            onClick={downloadSalesReport}
-            className="bg-teal-600 text-white px-3 py-1 rounded-md text-sm flex items-center shadow-sm hover:bg-teal-700 transition-colors"
-            disabled={chartData.length === 0 || loading}
-          >
-            <Download className="w-4 h-4 mr-1" />
-            Download Report
-          </button>
-        </div>
-
         {/* Chart Section */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">

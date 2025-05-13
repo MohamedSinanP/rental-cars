@@ -7,4 +7,6 @@ export default interface IUserSubsRepository extends IBaseRepository<IUserSubscr
   findUsersSubscriptions(page: number, limit: number, search: string): Promise<{ data: IUserSubscriptionModel[]; total: number }>;
   findLatestActiveByUserId(userId: string): Promise<IUserSubscriptionModel | null>;
   getTotalSubscriptionEarnings(): Promise<number>;
+  getTotalEarnings(type: string, year: number, from: string, to: string): Promise<number>;
+  getUserSubs(userId: string, page: number, limit: number): Promise<{ data: IUserSubscriptionModel[]; total: number }>;
 };

@@ -1,5 +1,5 @@
 import mongoose, { FilterQuery, Model, Types, UpdateResult } from "mongoose";
-import { IBooking, IBookingModel, IBookingPopulated, RentalStatsForAdmin, RentalStatsForOwner, SalesInformation } from "../types/booking";
+import { BasicSalesInfo, IBooking, IBookingModel, IBookingPopulated, RentalStatsForAdmin, RentalStatsForOwner, SalesInformation } from "../types/booking";
 import { BaseRepository } from "./base.repository";
 import TYPES from "../di/types";
 import { inject, injectable } from "inversify";
@@ -36,9 +36,9 @@ export class BookingRepository extends BaseRepository<IBookingModel> implements 
     return { data, total };
   };
 
-  async findPaginated(page: number, limit: number): Promise<{ data: IBookingModel[]; total: number; }> {
+  async findPaginated(id: string, page: number, limit: number): Promise<{ data: IBookingModel[]; total: number; }> {
     const skip = (page - 1) * limit;
-    const data = await this._bookingModel.find()
+    const data = await this._bookingModel.find({ userId: id })
       .populate('carId')
       .populate('ownerId')
       .populate('userId')
@@ -306,13 +306,21 @@ export class BookingRepository extends BaseRepository<IBookingModel> implements 
     return booking as unknown as IBookingPopulated;
   };
 
-  async updateExpiredBookings(): Promise<UpdateResult> {
+  async updateExpiredBookings(): Promise<IBookingModel[]> {
     const now = new Date();
-    return this._bookingModel.updateMany(
-      { status: 'active', dropoffDateTime: { $lt: now } },
+    const expiredBookings = await this._bookingModel.find({
+      status: 'active',
+      dropoffDateTime: { $lt: now },
+    });
+
+    await this._bookingModel.updateMany(
+      { _id: { $in: expiredBookings.map(b => b._id) } },
       { $set: { status: 'completed' } }
     );
-  };
+
+    return expiredBookings;
+  }
+
   async getTotalBookingCount(): Promise<number> {
     return this._bookingModel.countDocuments();
   };
@@ -355,47 +363,87 @@ export class BookingRepository extends BaseRepository<IBookingModel> implements 
     return { data, total }
   }
 
-  async aggregateBookingData(dateFilter: { $gte: Date; $lte: Date }): Promise<{
-    totalBookings: number;
-    totalEarnings: number;
-    totalDiscount: number;
-    totalCommission: number;
-    bookings: IBookingModel[];
-  }> {
-    const bookingAggregation = await this._bookingModel.aggregate([
-      {
-        $match: {
-          createdAt: dateFilter,
-          status: { $in: ['active', 'completed'] }, // Only include active or completed bookings
-          paymentStatus: 'completed', // Only include paid bookings
-        },
-      },
+  async getSalesInformation(type: 'yearly' | 'monthly' | 'custom',
+    year?: number,
+    month?: number,
+    from?: string,
+    to?: string): Promise<BasicSalesInfo> {
+    const match: any = {
+      paymentStatus: 'completed'
+    };
+
+    if (type === 'yearly' && year) {
+      match.createdAt = {
+        $gte: new Date(`${year}-01-01T00:00:00Z`),
+        $lte: new Date(`${year}-12-31T23:59:59Z`)
+      };
+    }
+
+    if (type === 'monthly' && year && month) {
+      const monthStr = String(month).padStart(2, '0');
+      const start = new Date(`${year}-${monthStr}-01T00:00:00Z`);
+      const end = new Date(new Date(start).setMonth(start.getMonth() + 1));
+      match.createdAt = { $gte: start, $lt: end };
+    }
+
+    if (type === 'custom' && from && to) {
+      match.createdAt = {
+        $gte: new Date(from),
+        $lte: new Date(to)
+      };
+    }
+
+    const results = await this._bookingModel.aggregate([
+      { $match: match },
       {
         $group: {
           _id: null,
-          totalBookings: { $sum: 1 },
           totalEarnings: { $sum: '$totalPrice' },
+          totalCommissionEarnings: { $sum: '$adminCommissionAmount' },
+          totalOwnerEarnings: { $sum: '$ownerEarning' },
           totalDiscount: { $sum: { $ifNull: ['$discountAmount', 0] } },
-          totalCommission: { $sum: '$adminCommissionAmount' },
-          bookings: { $push: '$$ROOT' }, // Collect all booking documents
-        },
+          totalBookings: { $sum: 1 },
+          premiumBookings: {
+            $sum: {
+              $cond: [{ $eq: ['$isPremiumBooking', true] }, 1, 0]
+            }
+          },
+          refundedBookings: {
+            $sum: {
+              $cond: [{ $eq: ['$paymentStatus', 'refunded'] }, 1, 0]
+            }
+          },
+          averageOrderValue: { $avg: '$totalPrice' }
+        }
       },
+      {
+        $project: {
+          _id: 0,
+          totalEarnings: 1,
+          totalCommissionEarnings: 1,
+          totalOwnerEarnings: 1,
+          totalDiscount: 1,
+          totalBookings: 1,
+          premiumBookings: 1,
+          refundedBookings: 1,
+          averageOrderValue: 1
+        }
+      }
     ]);
 
-    return bookingAggregation.length > 0
-      ? {
-        totalBookings: bookingAggregation[0].totalBookings,
-        totalEarnings: bookingAggregation[0].totalEarnings,
-        totalDiscount: bookingAggregation[0].totalDiscount,
-        totalCommission: bookingAggregation[0].totalCommission,
-        bookings: bookingAggregation[0].bookings,
-      }
-      : {
-        totalBookings: 0,
+
+
+    return {
+      ...(results[0] || {
         totalEarnings: 0,
+        totalCommissionEarnings: 0,
+        totalOwnerEarnings: 0,
         totalDiscount: 0,
-        totalCommission: 0,
-        bookings: [],
-      };
-  }
+        totalBookings: 0,
+        premiumBookings: 0,
+        refundedBookings: 0,
+        averageOrderValue: 0
+      })
+    };
+  };
 };

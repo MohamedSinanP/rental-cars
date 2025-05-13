@@ -68,8 +68,6 @@ export default class DashboardController implements IDashboardController {
 
   async getAllBookingsForAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      console.log("blah blah", req.query);
-
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 6;
       const { type, year, from, to } = req.query;
@@ -80,7 +78,6 @@ export default class DashboardController implements IDashboardController {
       const validFrom = typeof from === 'string' ? from : '';
       const validTo = typeof to === 'string' ? to : '';
       const bookings = await this._dashboardService.getAllRentalsForAdmin(page, limit, validType, validYear, validFrom, validTo);
-      console.log(bookings, "no problem??");
 
       res.status(StatusCode.OK).json(HttpResponse.success(bookings));
     } catch (error) {

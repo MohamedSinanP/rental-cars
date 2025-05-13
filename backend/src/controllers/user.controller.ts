@@ -82,6 +82,7 @@ export default class UserConroller implements IUserController {
       const userId = user?.userId!;
       const { userName, email } = req.body;
       const updatedUser = await this._userService.updateUser(userId, userName, email);
+      res.status(StatusCode.OK).json(HttpResponse.success(updatedUser, "Your profile details changed"));
     } catch (error) {
       next(error);
     };

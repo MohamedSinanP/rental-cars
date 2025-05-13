@@ -224,3 +224,43 @@ export const downloadInvoice = async (id: string) => {
     throw new Error(getApiErrorMessage(error));
   }
 };
+
+export const addReview = async (id: string | undefined, reviewData: { rating: number, comment: string }) => {
+  try {
+    const response = await api.post(`/user/add-review/${id}`, reviewData);
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};
+export const getCarAllReview = async (id: string | undefined) => {
+  try {
+    const response = await api.get(`/user/get-reviews/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};
+
+export const getUserSubscriptions = async (page = 1, limit = 5) => {
+  try {
+    const response = await api.get(`/user/subscriptions/all-stats`, {
+      params: {
+        page,
+        limit
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};
+
+export const cancelSubscription = async (id: string | undefined) => {
+  try {
+    const response = await api.patch(`/user/subscriptions/${id}/cancel`);
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};

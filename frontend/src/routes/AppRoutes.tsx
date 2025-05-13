@@ -37,6 +37,9 @@ import SubscriptionSuccessPage from "../pages/user/SubscriptionSuccessPage";
 import UserSubscriptionsPage from "../pages/admin/UsersSubscriptionsPage";
 import WalletPage from "../pages/user/WalletPage";
 import SalesReportPage from "../pages/admin/SalerReportPage";
+import UnauthorizedPage from "../pages/errors/UnauthorizedPage";
+import NotFoundPage from "../pages/errors/notFoundPage";
+import SubscriptionHistory from "../pages/user/SubscriptionHistoryPage";
 
 // Fallback / Errors
 // import Unauthorized from "../pages/Unauthorized";
@@ -55,6 +58,8 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/reset-otp" element={<ResetOtpPage />} />
       <Route path='/auth/google' element={<GoogleAuthCallback />} />
+      <Route path='/unauthorized' element={<UnauthorizedPage />} />
+      <Route path='/not-found' element={<NotFoundPage />} />
 
       {/* Routes for owner */}
       < Route element={<PrivateRoute allowedRoles={['owner']} />}>
@@ -71,6 +76,7 @@ const AppRoutes = () => {
         <Route path="/rentals" element={<CarRentalsPage />} />
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/greetings/:id" element={<BookingSuccessPage />} />
+        <Route path="/subscription-history" element={<SubscriptionHistory />} />
       </Route>
 
       { /* Routes for the user */}
@@ -90,6 +96,7 @@ const AppRoutes = () => {
         <Route path="/admin/user-subscription" element={<UserSubscriptionsPage />} />
         <Route path="/admin/sales-report" element={<SalesReportPage />} />
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

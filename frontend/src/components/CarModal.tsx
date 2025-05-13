@@ -73,7 +73,7 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
       formData.append("fuelType", data.fuelType);
       formData.append("fuelOption", data.fuelOption);
       formData.append("location", JSON.stringify(data.location));
-      formData.append("pricePerDay", data.pricePerDay.toString());
+      formData.append("pricePerHour", data.pricePerHour.toString());
       formData.append("deposit", data.deposit.toString());
       formData.append("status", data.status);
       formData.append("lastmaintenanceDate", data.maintenanceDate);
@@ -242,12 +242,12 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose }) => {
           </div>
           <div>
             <label>Car Price Per Hour</label>
-            <input type="number"  {...register('pricePerDay', {
+            <input type="number"  {...register('pricePerHour', {
               required: 'Price is required',
               valueAsNumber: true,
               validate: value => value > 0 || 'Price must be greater than 0',
             })} className="w-full border p-2 rounded" />
-            {errors.pricePerDay && <p className="text-red-500 text-sm">{errors.pricePerDay.message}</p>}
+            {errors.pricePerHour && <p className="text-red-500 text-sm">{errors.pricePerHour.message}</p>}
           </div>
 
           <div>

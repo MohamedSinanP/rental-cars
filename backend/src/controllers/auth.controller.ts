@@ -13,12 +13,12 @@ import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 
 @injectable()
 export default class AuthController implements IAuthController {
-  constructor(@inject(TYPES.IAuthService) private authService: IAuthService) { };
+  constructor(@inject(TYPES.IAuthService) private _authService: IAuthService) { };
 
   async signupUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { userName, email, password, role }: { userName: string, email: string, password: string, role: Role.USER } = req.body;
-      const user = await this.authService.signupConsumer(userName, email, password, role);
+      const user = await this._authService.signupConsumer(userName, email, password, role);
       res.status(StatusCode.CREATED).json(HttpResponse.success(user));
     } catch (error: any) {
       next(error);
@@ -28,7 +28,7 @@ export default class AuthController implements IAuthController {
   async signupOwner(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { userName, email, password, role, commision }: { userName: string, email: string, password: string, role: Role.OWNER, commision: number } = req.body;
-      const owner = await this.authService.signupOwner(userName, email, password, role, commision);
+      const owner = await this._authService.signupOwner(userName, email, password, role, commision);
       res.status(StatusCode.CREATED).json(HttpResponse.success(owner, "OTP sended successfully"));
     } catch (error: any) {
       next(error);
@@ -38,7 +38,7 @@ export default class AuthController implements IAuthController {
   async adminLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, password } = req.body;
-      const user = await this.authService.adminLogin(email, password, res);
+      const user = await this._authService.adminLogin(email, password, res);
       res.status(StatusCode.OK).json(HttpResponse.success(user, "You are logged in successfully"));
     } catch (error) {
       next(error);
@@ -48,7 +48,7 @@ export default class AuthController implements IAuthController {
   async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, password }: { email: string, password: string } = req.body;
-      const userDetails = await this.authService.login(email, password, res);
+      const userDetails = await this._authService.login(email, password, res);
       res.status(StatusCode.OK).json(HttpResponse.success({ userDetails }, "You are logged in successfully"));
     } catch (error) {
       next(error);
@@ -58,7 +58,7 @@ export default class AuthController implements IAuthController {
   async handleGoogleCallback(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const profile = req.user as GoogleProfile;
-      const { accessToken, refreshToken, user } = await this.authService.googleAuth(profile);
+      const { accessToken, refreshToken, user } = await this._authService.googleAuth(profile);
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -77,7 +77,7 @@ export default class AuthController implements IAuthController {
     try {
 
       const { email, otp }: { email: string, otp: string } = req.body;
-      const token = await this.authService.verifyOtp(email, otp, res);
+      const token = await this._authService.verifyOtp(email, otp, res);
       res.status(StatusCode.OK).json(HttpResponse.success({ token: token.accessToken }, "OTP verified successfully"))
 
     } catch (error: any) {
@@ -92,7 +92,7 @@ export default class AuthController implements IAuthController {
         throw new HttpError(StatusCode.BAD_REQUEST, "Email is required");
       };
 
-      await this.authService.resendOtp(email);
+      await this._authService.resendOtp(email);
       res.status(StatusCode.OK).json(HttpResponse.success({}, "New OTP sended successfully."))
     } catch (error) {
       next(error);
@@ -103,7 +103,7 @@ export default class AuthController implements IAuthController {
     try {
 
       const { email }: { email: string } = req.body;
-      await this.authService.verifyEmail(email);
+      await this._authService.verifyEmail(email);
       res.status(StatusCode.OK).json(HttpResponse.success({}, "reset passwrod link send to your email "));
 
     } catch (error: any) {
@@ -114,7 +114,7 @@ export default class AuthController implements IAuthController {
   async verifyResetOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, otp }: { email: string, otp: string } = req.body;
-      await this.authService.resetPassword(email, otp);
+      await this._authService.resetPassword(email, otp);
       res.status(StatusCode.OK).json(HttpResponse.success({}, "OTP verified successfully"));
     } catch (error) {
       next(error);
@@ -124,7 +124,7 @@ export default class AuthController implements IAuthController {
   async resetPwd(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { token, newPwd }: { token: string, newPwd: string } = req.body;
-      await this.authService.resetPassword(token, newPwd);
+      await this._authService.resetPassword(token, newPwd);
       res.status(StatusCode.OK).json(HttpResponse.success({}, "Password changed successfully"));
     } catch (error) {
       next(error);
@@ -133,7 +133,7 @@ export default class AuthController implements IAuthController {
 
   async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { newAccessToken, newRefreshToken } = await this.authService.rotateRefreshToken(req.cookies.refreshToken);
+      const { newAccessToken, newRefreshToken } = await this._authService.rotateRefreshToken(req.cookies.refreshToken);
       res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -148,7 +148,7 @@ export default class AuthController implements IAuthController {
 
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      await this.authService.logout(req, res);
+      await this._authService.logout(req, res);
       res.status(StatusCode.OK).json(HttpResponse.success({}, "Logget out successfully"));
     } catch (error) {
       next(error);
@@ -159,7 +159,7 @@ export default class AuthController implements IAuthController {
     try {
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId!;
-      const currentUser = await this.authService.getCurrentUser(userId);
+      const currentUser = await this._authService.getCurrentUser(userId);
       res.status(StatusCode.OK).json(HttpResponse.success(currentUser));
     } catch (error) {
       next(error);

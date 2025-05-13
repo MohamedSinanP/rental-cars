@@ -54,7 +54,7 @@ export interface CarFormData {
     coordinates: number[];
     address: string;
   };
-  pricePerDay: number;
+  pricePerHour: number;
   deposit: number;
   features: string[];
   status: string;
@@ -81,7 +81,7 @@ export interface ICar {
     coordinates: number[];
     address: string;
   };
-  pricePerDay: number;
+  pricePerHour: number;
   deposit: number;
   features: string[];
   status: string;

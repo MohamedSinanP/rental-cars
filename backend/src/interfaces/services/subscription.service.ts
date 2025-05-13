@@ -14,5 +14,6 @@ export default interface ISubscriptionService {
   getUserSubscription(req: Request): Promise<IUserSubscriptionModel | null>;
   getUsersSubscriptions(page: number, limit: number, search: string): Promise<PaginatedData<IUserSubscriptionModel>>;
   updateUserSubStatus(userId: string, status: string): Promise<IUserSubscriptionModel>;
-  getSalesInformation(type: string, year: number, from: string, to: string): Promise<void>;
+  getUserAllSubscriptions(userId: string, page: number, limit: number): Promise<PaginatedData<IUserSubscriptionModel>>;
+  cancelUserSub(subId: string): Promise<IUserSubscriptionModel>;
 };

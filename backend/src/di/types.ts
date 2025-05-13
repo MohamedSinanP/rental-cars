@@ -9,6 +9,7 @@ const TYPES = {
   IAdminController: Symbol.for("IAdminController"),
   ISubscriptionController: Symbol.for("ISubscriptionController"),
   IDashboardController: Symbol.for("IDashboardController"),
+  IReviewController: Symbol.for("IReviewController"),
 
   // repositories
   IUserRepository: Symbol.for("IUserRepository"),
@@ -20,6 +21,7 @@ const TYPES = {
   IUserSubsRepository: Symbol.for("IUserSubsRepository"),
   IAddressRepository: Symbol.for("IAddressRepository"),
   IWalletRepository: Symbol.for("IWalletRepository"),
+  IReviewRepository: Symbol.for("IReviewRepository"),
 
 
   // services 
@@ -33,6 +35,7 @@ const TYPES = {
   IOwnerService: Symbol.for("IOwnerService"),
   ISubscriptionService: Symbol.for("ISubscriptionService"),
   IDashboardService: Symbol.for("IDashboardService"),
+  IReviewService: Symbol.for("IReviewService"),
 
   // models
   UserModel: Symbol.for("UserModel"),
@@ -44,6 +47,7 @@ const TYPES = {
   UserSubsModel: Symbol.for("UserSubsModel"),
   AddressModel: Symbol.for("AddressModel"),
   WalletModel: Symbol.for("WalletModel"),
+  ReviewModel: Symbol.for("ReviewModel")
 }
 
 export default TYPES;

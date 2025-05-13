@@ -20,6 +20,7 @@ export default class CarController implements ICarController {
       const ownerId = req.user?.userId!;
       const parsedLocation = JSON.parse(req.body.location);
       const parsedCarImages = JSON.parse(req.body.carImages);
+      console.log(req.body);
 
       const carData: ICar & {
         rcDoc: UploadedFile;
@@ -38,7 +39,7 @@ export default class CarController implements ICarController {
         location: parsedLocation,
         status: req.body.status,
         features: req.body.features,
-        pricePerDay: Number(req.body.pricePerDay),
+        pricePerHour: Number(req.body.pricePerHour),
         deposit: Number(req.body.deposit),
         lastmaintenanceDate: req.body.lastmaintenanceDate,
         maintenanceInterval: Number(req.body.maintenanceInterval),
@@ -74,7 +75,7 @@ export default class CarController implements ICarController {
         location: parsedLocation,
         status: req.body.status,
         features: req.body.features,
-        pricePerDay: Number(req.body.pricePerDay),
+        pricePerHour: Number(req.body.pricePerHour),
         deposit: Number(req.body.deposit),
         lastmaintenanceDate: req.body.lastmaintenanceDate,
         maintenanceInterval: Number(req.body.maintenanceInterval),

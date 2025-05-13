@@ -18,7 +18,6 @@ export default class SubscriptionService implements ISubscriptionService {
   constructor(
     @inject(TYPES.ISubscriptionRepository) private _subscriptionRepository: ISubscriptionRepository,
     @inject(TYPES.IUserSubsRepository) private _userSubsRepository: IUserSubsRepository,
-    @inject(TYPES.IUserRepository) private _userRepository: IUserRepository,
     @inject(TYPES.IUserSubsRepository) private _userSubscriptionRepository: IUserSubsRepository
   ) { };
   async createSubscription(data: ISubscription): Promise<ISubscriptionModel> {
@@ -183,11 +182,28 @@ export default class SubscriptionService implements ISubscriptionService {
     const updatedUseSub = await this._userSubsRepository.update(subId, { status: status });
     if (!updatedUseSub) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't update user subscription status");
-    };
+    }
     return updatedUseSub;
   };
 
-  async getSalesInformation(type: string, year: number, from: string, to: string): Promise<void> {
+  async getUserAllSubscriptions(userId: string, page: number, limit: number): Promise<PaginatedData<IUserSubscriptionModel>> {
+    const { data, total } = await this._userSubsRepository.getUserSubs(userId, page, limit);
+    if (!total) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Can't find your subscriptions");
+    }
+    const totalPages = Math.ceil(total / limit);
+    return {
+      data,
+      totalPages,
+      currentPage: page,
+    };
+  }
 
+  async cancelUserSub(subId: string): Promise<IUserSubscriptionModel> {
+    const cancelledSub = await this._userSubsRepository.update(subId, { status: 'cancelled' });
+    if (!cancelledSub) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Can't find your subscriptions");
+    }
+    return cancelledSub;
   }
 };

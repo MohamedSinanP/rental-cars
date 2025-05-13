@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../redux/store";
 import api from "../services/apis/api";
 import { toast } from "react-toastify";
-import { removeAuth } from "../redux/slices/authSlice"; // Make sure this import exists
+import { removeAuth } from "../redux/slices/authSlice";
 
 export const useAuthCheck = () => {
   const [checking, setChecking] = useState(true);

@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { bookingController, carController, subscriptionController, userController } from "../di/container";
+import { bookingController, carController, reviewController, subscriptionController, userController } from "../di/container";
 import { attachUserIfExists } from "../middlewares/attachUserIfExist";
 const router = express.Router();
 
@@ -16,6 +16,9 @@ router.get('/wallet', authenticate(["user"]), userController.getUserWallet.bind(
 router.put('/update-profile', authenticate(["user"]), userController.updateProfile.bind(userController));
 router.put('/update-password', authenticate(["user"]), userController.updatePassword.bind(userController));
 router.patch('/update-profile-pic', authenticate(["user"]), userController.uploadImage.bind(userController));
+router.post('/add-review/:id', authenticate(["user"]), reviewController.addReview.bind(reviewController));
+router.get('/get-reviews/:id', reviewController.getAllCarReview.bind(reviewController));
+
 
 // booking related routes
 router.post('/book-car', authenticate(['user']), bookingController.creatBooking.bind(bookingController));
@@ -30,5 +33,8 @@ router.get('/subscriptions', subscriptionController.getActiveSubscriptions.bind(
 router.get('/subscription', authenticate(["user"]), subscriptionController.getUserSubscription.bind(subscriptionController));
 router.post('/create-subscription', authenticate(["user"]), subscriptionController.makeSubscription.bind(subscriptionController));
 router.post('/webhook', subscriptionController.handleWebhook.bind(subscriptionController));
+router.get('/subscriptions/all-stats', authenticate(["user"]), subscriptionController.getUserAllSubscriptions.bind(subscriptionController));
+router.patch('/subscriptions/:id/cancel', authenticate(["user"]), subscriptionController.cancelUserSub.bind(subscriptionController));
+
 
 export default router;

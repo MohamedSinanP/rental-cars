@@ -45,3 +45,13 @@ export interface ownerData {
   isBlocked?: boolean;
   isVerified?: boolean;
 }
+
+
+export interface OwnerResponseDTO {
+  id: string;
+  userName: string;
+  email: string;
+  role: string;
+  isBlocked?: boolean;
+  isVerified?: boolean;
+}

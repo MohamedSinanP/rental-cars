@@ -7,6 +7,7 @@ import { ISubscription } from "../types/user";
 import { StatusCode } from "../types/types";
 import { HttpResponse } from "../utils/http.response";
 import stripe, { Stripe } from "stripe";
+import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 
 @injectable()
 export default class SubscriptionController implements ISubscriptionController {
@@ -69,7 +70,7 @@ export default class SubscriptionController implements ISubscriptionController {
       res.status(StatusCode.OK).json(HttpResponse.success(activeSubs));
     } catch (error) {
       next(error);
-    };
+    }
   };
 
   async makeSubscription(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -79,7 +80,7 @@ export default class SubscriptionController implements ISubscriptionController {
       res.status(StatusCode.OK).json({ url: session_url });
     } catch (error) {
       next(error);
-    };
+    }
   };
 
   async handleWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -131,7 +132,37 @@ export default class SubscriptionController implements ISubscriptionController {
       res.status(StatusCode.OK).json(HttpResponse.success(updatedUserSub));
     } catch (error) {
       next(error);
-    };
+    }
+  };
+
+  async getUserAllSubscriptions(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { user } = req as AuthenticatedRequest;
+      const userId = user?.userId;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 6;
+      const userSubs = await this._subscriptionService.getUserAllSubscriptions(userId, page, limit);
+      res.status(StatusCode.OK).json(HttpResponse.success(userSubs));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  async cancelUserSub(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id: subscriptionId } = req.params;
+      if (!subscriptionId) {
+        res.status(StatusCode.BAD_REQUEST).json(
+          HttpResponse.error('Subscription ID is required')
+        );
+        return;
+      }
+
+      const result = await this._subscriptionService.cancelUserSub(subscriptionId);
+      res.status(StatusCode.OK).json(HttpResponse.success(result, 'Subscription cancelled successfully'));
+    } catch (error) {
+      next(error);
+    }
   };
 
 };

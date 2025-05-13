@@ -8,7 +8,7 @@ const bookingService = container.get<IBookingService>(TYPES.IBookingService);
 cron.schedule("*/5 * * * *", async () => {
   try {
     const result = await bookingService.completeExpiredBookings();
-    console.log(`[CRON] Bookings completed: ${result.modifiedCount}`);
+    console.log(`[CRON] Bookings completed: ${result}`);
   } catch (error) {
     console.error("[CRON] Failed to complete expired bookings:", error);
   }

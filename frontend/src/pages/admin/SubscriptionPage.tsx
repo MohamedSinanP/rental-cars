@@ -78,7 +78,7 @@ const SubscriptionPage = () => {
         setIsEditing(true);
         setShowModal(true);
       },
-      className: 'bg-blue-50 text-blue-700 hover:bg-blue-100',
+      className: 'bg-teal-50 text-teal-700 hover:bg-teal-100',
     }
   ];
 
@@ -125,7 +125,7 @@ const SubscriptionPage = () => {
                   setCurrentSubscription(null);
                   setShowModal(true);
                 }}
-                className="mt-4 sm:mt-0 inline-flex items-center px-3 py-2 md:px-4 md:py-2 bg-indigo-600 border border-transparent rounded-md font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm"
+                className="mt-4 sm:mt-0 inline-flex items-center px-3 py-2 md:px-4 md:py-2 bg-teal-600 border border-transparent rounded-md font-medium text-white hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 text-sm"
               >
                 <PlusIcon size={18} className="mr-1 md:mr-2" />
                 Add Plan

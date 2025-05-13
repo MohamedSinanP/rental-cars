@@ -140,9 +140,9 @@ export default function CarListingPage() {
     // Filter by priceRange
     result = result.filter(
       (car) =>
-        car.pricePerDay != null &&
-        car.pricePerDay >= filters.priceRange[0] &&
-        car.pricePerDay <= filters.priceRange[1]
+        car.pricePerHour != null &&
+        car.pricePerHour >= filters.priceRange[0] &&
+        car.pricePerHour <= filters.priceRange[1]
     );
 
     // Filter by fuel
@@ -352,9 +352,6 @@ export default function CarListingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {filteredCars.map((car) => (
               <div key={car._id || car.carName} className="border rounded-lg bg-white overflow-hidden relative">
-                <button className="absolute top-2 right-2 bg-white p-1 rounded-full">
-                  <Heart size={20} />
-                </button>
                 <img
                   src={car.carImages[0] || '/api/placeholder/400/320'}
                   alt={car.carName}
@@ -377,7 +374,7 @@ export default function CarListingPage() {
                   )}
 
                   <div className="mt-2">
-                    <span className="font-bold text-lg">${car.pricePerDay}</span>
+                    <span className="font-bold text-lg">${car.pricePerHour}</span>
                     <span className="text-sm text-gray-600">/Day</span>
                   </div>
                   <button

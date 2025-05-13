@@ -1,4 +1,5 @@
 import mongoose, { Document } from "mongoose";
+import { Role } from "./types";
 
 export default interface IUser {
   _id?: string;
@@ -147,4 +148,27 @@ export interface IWalletModel extends Document {
   userId: mongoose.Types.ObjectId;
   transactions: TTransaction[];
   balance: number;
+};
+
+export interface IReview {
+  userId: string
+  carId: string;
+  rating: number;
+  comment: string;
+};
+
+export interface IReviewModel extends Document {
+  userId: mongoose.Types.ObjectId;
+  carId: mongoose.Types.ObjectId;
+  rating: number;
+  comment: string;
+};
+
+export interface UserResponseDTO {
+  id: string;
+  userName: string;
+  email: string;
+  role: string;
+  isVerified: boolean;
+  isBlocked: boolean
 };

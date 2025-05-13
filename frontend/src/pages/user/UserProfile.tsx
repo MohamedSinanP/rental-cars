@@ -24,7 +24,6 @@ interface PasswordFormValues {
 const UserProfile: React.FC = () => {
   const [profileImage, setProfileImage] = useState<string>('');
   const [uploading, setUploading] = useState<boolean>(false);
-  const [uploadError, setUploadError] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const [userRole, setUserRole] = useState<string>('');
 
@@ -50,7 +49,6 @@ const UserProfile: React.FC = () => {
     watch: watchPassword,
     reset: resetPassword,
     formState: { errors: passwordErrors, isSubmitting: isSubmittingPassword },
-    setError: setPasswordError
   } = useForm<PasswordFormValues>({
     defaultValues: {
       currentPassword: '',
@@ -61,10 +59,6 @@ const UserProfile: React.FC = () => {
 
   // For password confirmation validation
   const newPassword = watchPassword('newPassword');
-
-  // Success messages state
-  const [basicInfoSuccess, setBasicInfoSuccess] = useState<string>('');
-  const [passwordSuccess, setPasswordSuccess] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,16 +94,17 @@ const UserProfile: React.FC = () => {
 
   const onSubmitBasicInfo = async (data: BasicInfoFormValues) => {
     try {
-      setBasicInfoSuccess('');
+      console.log("this is working");
 
       const formData = new FormData();
       formData.append('userName', data.name);
       formData.append('email', data.email);
 
       const result = await updateProfile(formData);
+      console.log(result, "tumdfkd");
 
       setUserName(result.data.userName);
-      setBasicInfoSuccess('Profile information updated successfully');
+      toast.success(result.message);
     } catch (error: any) {
       console.error('Basic info update failed:', error.message);
       setBasicInfoError('root', {
@@ -125,7 +120,7 @@ const UserProfile: React.FC = () => {
       formData.append('currentPwd', data.currentPassword);
       formData.append('newPwd', data.newPassword);
       const result = await updatePassword(formData);
-      toast.success(result.data.message);
+      toast.success(result.message);
       resetPassword({
         currentPassword: '',
         newPassword: '',
@@ -141,20 +136,18 @@ const UserProfile: React.FC = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Reset error state
-    setUploadError('');
 
     // Validate file type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      setUploadError('Please select a valid image file (JPEG, PNG, or WebP)');
+      toast.error('Please select a valid image file (JPEG, PNG, or WebP)');
       return;
     }
 
     // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB in bytes
     if (file.size > maxSize) {
-      setUploadError('Image size should be less than 5MB');
+      toast.error('Image size should be less than 5MB');
       return;
     }
 
@@ -272,16 +265,6 @@ const UserProfile: React.FC = () => {
           {/* Basic Info Form */}
           <div className="bg-white p-6 rounded-xl shadow-sm mb-8">
             <h2 className="text-lg font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-100">Basic Information</h2>
-
-            {basicInfoSuccess && (
-              <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-lg flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {basicInfoSuccess}
-              </div>
-            )}
-
             {basicInfoErrors.root && (
               <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -337,16 +320,6 @@ const UserProfile: React.FC = () => {
           {/* Password Form */}
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h2 className="text-lg font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-100">Change Password</h2>
-
-            {passwordSuccess && (
-              <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-lg flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {passwordSuccess}
-              </div>
-            )}
-
             {passwordErrors.root && (
               <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

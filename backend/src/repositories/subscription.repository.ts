@@ -8,10 +8,10 @@ import ISubscriptionRepository from "../interfaces/repositories/subscription.rep
 
 @injectable()
 export default class SubscriptionRepository extends BaseRepository<ISubscriptionModel> implements ISubscriptionRepository {
-  constructor(@inject(TYPES.SubscriptionModel) private subscriptionModel: Model<ISubscriptionModel>) {
-    super(subscriptionModel);
+  constructor(@inject(TYPES.SubscriptionModel) private _subscriptionModel: Model<ISubscriptionModel>) {
+    super(_subscriptionModel);
   };
   async addSubscription(data: ISubscription): Promise<ISubscriptionModel> {
-    return await this.subscriptionModel.create(data);
+    return await this._subscriptionModel.create(data);
   };
 };

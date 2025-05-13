@@ -8,12 +8,12 @@ import { StatusCode } from "../types/types";
 
 @injectable()
 export default class PaymentController implements IPaymentController {
-  constructor(@inject(TYPES.IPaymentService) private paymentService: IPaymentService) { };
+  constructor(@inject(TYPES.IPaymentService) private _paymentService: IPaymentService) { };
 
   async createPaymentIntent(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { amount } = req.body;
-      const { clientSecret, paymentId } = await this.paymentService.createPaymentIntentService(amount);
+      const { clientSecret, paymentId } = await this._paymentService.createPaymentIntentService(amount);
       res.status(StatusCode.OK).json(HttpResponse.success({ clientSecret, paymentId }));
     } catch (error) {
       next(error);

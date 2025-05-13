@@ -9,6 +9,7 @@ import { HttpResponse } from "../utils/http.response";
 import { stat } from "fs";
 import { StatusCode } from "../types/types";
 import { generateInvoicePDF } from "../utils/invoiceGenerator";
+import { generateSalesReportPDF } from "../utils/salesReportGenerator";
 
 
 
@@ -112,15 +113,33 @@ export default class BookingController implements IBookingController {
 
   async getSalesReportPdf(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { type, year, from, to } = req.query;
-      const validType = typeof type === 'string' ? type : 'monthly';
+      const { type, year, from, to, month } = req.query;
+
+      // Validate and convert query parameters
+      const validType = typeof type === 'string' && ['yearly', 'monthly', 'custom'].includes(type)
+        ? type as 'yearly' | 'monthly' | 'custom'
+        : 'monthly';
 
       const validYear = year ? Number(year) : new Date().getFullYear();
-
+      const validMonth = month ? Number(month) : undefined;
       const validFrom = typeof from === 'string' ? from : '';
       const validTo = typeof to === 'string' ? to : '';
-      const sales = await this._bookingService.getSalesInformation(validType, validYear, validFrom, validTo);
+
+      // Get sales data from service
+      const salesData = await this._bookingService.getSalesInformation(
+        validType, validYear, validMonth, validFrom, validTo
+      );
+
+      // Generate and send the PDF report
+      await generateSalesReportPDF(res, salesData, {
+        type: validType,
+        year: validYear,
+        month: validMonth,
+        from: validFrom,
+        to: validTo
+      });
     } catch (error) {
+      console.error('Error generating sales report:', error);
       next(error);
     }
   }

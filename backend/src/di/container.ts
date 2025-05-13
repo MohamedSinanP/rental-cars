@@ -53,6 +53,12 @@ import WalletRepository from "../repositories/wallet.repository";
 import IDashboardService from "../interfaces/services/dashboard.service";
 import DashboardService from "../services/dashboard.service";
 import DashboardController from "../controllers/dashboard.controller";
+import { Review } from "../models/review.model";
+import IReviewRepository from "../interfaces/repositories/reveiw.repository";
+import ReviewRepository from "../repositories/review.repository";
+import ReviewController from "../controllers/review.controller";
+import IReviewService from "../interfaces/services/review.service";
+import ReviewService from "../services/review.service";
 
 
 export const container = new Container();
@@ -66,6 +72,7 @@ container.bind<BookingController>(TYPES.IBookingController).to(BookingController
 container.bind<AdminController>(TYPES.IAdminController).to(AdminController).inSingletonScope();
 container.bind<SubscriptionController>(TYPES.ISubscriptionController).to(SubscriptionController).inSingletonScope();
 container.bind<DashboardController>(TYPES.IDashboardController).to(DashboardController).inSingletonScope();
+container.bind<ReviewController>(TYPES.IReviewController).to(ReviewController).inSingletonScope();
 
 
 // repositories
@@ -78,6 +85,7 @@ container.bind<ISubscriptionRepository>(TYPES.ISubscriptionRepository).to(Subscr
 container.bind<IUserSubsRepository>(TYPES.IUserSubsRepository).to(UserSubsRepository).inSingletonScope();
 container.bind<IAddressRepository>(TYPES.IAddressRepository).to(AddressRepository).inSingletonScope();
 container.bind<IWalletRepository>(TYPES.IWalletRepository).to(WalletRepository).inSingletonScope();
+container.bind<IReviewRepository>(TYPES.IReviewRepository).to(ReviewRepository).inSingletonScope();
 
 
 
@@ -92,6 +100,7 @@ container.bind<IBookingService>(TYPES.IBookingService).to(BookingService).inSing
 container.bind<IOwnerService>(TYPES.IOwnerService).to(OwnerService).inSingletonScope();
 container.bind<ISubscriptionService>(TYPES.ISubscriptionService).to(SubscriptionService).inSingletonScope();
 container.bind<IDashboardService>(TYPES.IDashboardService).to(DashboardService).inSingletonScope();
+container.bind<IReviewService>(TYPES.IReviewService).to(ReviewService).inSingletonScope();
 
 
 
@@ -105,6 +114,7 @@ container.bind<typeof Subscription>(TYPES.SubscriptionModel).toConstantValue(Sub
 container.bind<typeof UserSubscription>(TYPES.UserSubsModel).toConstantValue(UserSubscription);
 container.bind<typeof Address>(TYPES.AddressModel).toConstantValue(Address);
 container.bind<typeof Wallet>(TYPES.WalletModel).toConstantValue(Wallet);
+container.bind<typeof Review>(TYPES.ReviewModel).toConstantValue(Review);
 
 
 export const authController = container.get<AuthController>(TYPES.IAuthController);
@@ -115,3 +125,4 @@ export const bookingController = container.get<BookingController>(TYPES.IBooking
 export const adminController = container.get<AdminController>(TYPES.IAdminController);
 export const subscriptionController = container.get<SubscriptionController>(TYPES.ISubscriptionController);
 export const dashboardController = container.get<DashboardController>(TYPES.IDashboardController);
+export const reviewController = container.get<ReviewController>(TYPES.IReviewController);

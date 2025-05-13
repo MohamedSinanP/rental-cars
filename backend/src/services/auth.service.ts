@@ -5,13 +5,13 @@ import { inject, injectable } from "inversify";
 import IAuthService from "../interfaces/services/auth.service";
 import TYPES from "../di/types";
 import IUserRepository from "../interfaces/repositories/user.repository";
-import IUser from "../types/user";
+import IUser, { UserResponseDTO } from "../types/user";
 import { adminLoginResponse, AuthCheck, IJwtToken, LoginGoogleResponse, LoginResponse, Role, StatusCode } from "../types/types";
 import { generateOtp, IOtpService } from "../utils/mail";
 import { HttpError } from "../utils/http.error";
 import { IJwtService } from "../utils/jwt";
 import { Request, Response } from "express";
-import IOwner from "../types/owner";
+import IOwner, { OwnerResponseDTO } from "../types/owner";
 import IOwnerRepository from "../interfaces/repositories/owner.repository";
 import { Profile } from "passport-google-oauth20";
 import { IUserModel } from "../types/user";
@@ -34,7 +34,7 @@ export default class AuthService implements IAuthService {
   ) {
   };
 
-  async signupConsumer(userName: string, email: string, password: string, role: Role.USER): Promise<IUser> {
+  async signupConsumer(userName: string, email: string, password: string, role: Role.USER): Promise<UserResponseDTO> {
     const existingUser =
       (await this._userRepository.findByEmail(email)) ||
       (await this._ownerRepository.findByEmail(email));
@@ -67,17 +67,16 @@ export default class AuthService implements IAuthService {
       this._otpService.sendEmail(user.email, otp, "emailVerification")
     };
     return {
-      _id: user._id.toString(),
+      id: user._id.toString(),
       userName: user.userName,
       email: user.email,
-      password: user.password,
       isBlocked: user.isBlocked,
       role: user.role,
       isVerified: user.isVerified,
     };
   };
 
-  async signupOwner(userName: string, email: string, password: string, role: string, commision: number): Promise<IOwner> {
+  async signupOwner(userName: string, email: string, password: string, role: string, commision: number): Promise<OwnerResponseDTO> {
     const existingUser =
       (await this._ownerRepository.findByEmail(email)) ||
       (await this._userRepository.findByEmail(email));
@@ -112,12 +111,11 @@ export default class AuthService implements IAuthService {
     };
 
     return {
+      id: owner._id.toString(),
       userName: owner.userName,
       email: owner.email,
-      password: owner.password,
       isBlocked: owner.isBlocked,
       role: owner.role,
-      commission: owner.commission,
       isVerified: owner.isVerified,
     };
   };
@@ -466,8 +464,7 @@ export default class AuthService implements IAuthService {
         email: user.email,
         role: user.role,
       };
-    }
-
+    };
   };
 };
 

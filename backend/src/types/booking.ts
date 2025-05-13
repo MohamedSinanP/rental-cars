@@ -123,3 +123,14 @@ export interface SalesInformation {
   earningsBySubscription: number;
   bookings: IBookingModel[];
 }
+
+export type BasicSalesInfo = {
+  totalEarnings: number;
+  totalCommissionEarnings: number;
+  totalOwnerEarnings: number;
+  totalDiscount: number;
+  totalBookings: number;
+  premiumBookings: number;
+  refundedBookings: number;
+  averageOrderValue: number;
+};

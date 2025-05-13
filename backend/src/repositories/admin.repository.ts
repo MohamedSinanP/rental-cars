@@ -8,10 +8,10 @@ import { Model } from "mongoose";
 
 @injectable()
 export default class AdminRepository extends BaseRepository<IAdminModel> implements IAdminRepository {
-  constructor(@inject(TYPES.AdminModel) private adminModel: Model<IAdminModel>) {
-    super(adminModel)
+  constructor(@inject(TYPES.AdminModel) private _adminModel: Model<IAdminModel>) {
+    super(_adminModel)
   };
   async findByEmail(email: string): Promise<IAdminModel | null> {
-    return await this.adminModel.findOne({ email }).exec();
+    return await this._adminModel.findOne({ email }).exec();
   };
 };

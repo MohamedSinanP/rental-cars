@@ -29,8 +29,6 @@ const NavBar = () => {
   const handleLogout = async () => {
     try {
       const result = await logout();
-      console.log(result, "6666666666666");
-
       toast.success(result.message);
       navigate('/login');
     } catch (error: unknown) {

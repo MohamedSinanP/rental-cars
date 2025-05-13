@@ -12,7 +12,6 @@ import { extractFeatureValue, formatINR } from '../../utils/commonUtilities';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { useDispatch } from 'react-redux';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY as string);
 
@@ -28,10 +27,6 @@ interface BookingFormData {
   paymentMethod: 'wallet' | 'stripe';
   allowGPS: boolean;
   selectedAddressId?: string;
-}
-
-interface ICarExtended extends ICar {
-  pricePerHour?: number;
 }
 
 interface IUserSubscription {
@@ -70,12 +65,11 @@ interface IUserAddress {
 }
 
 const CarBookingPage: React.FC = () => {
-  const dispatch = useDispatch();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const stripe = useStripe();
   const elements = useElements();
-  const [car, setCar] = useState<ICarExtended | null>(null);
+  const [car, setCar] = useState<ICar | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -84,6 +78,7 @@ const CarBookingPage: React.FC = () => {
   const [discount, setDiscount] = useState<number | null>(null);
   const [freeHours, setFreeHours] = useState<number>(0);
   const [userAddresses, setUserAddresses] = useState<IUserAddress[]>([]);
+  const [accessValidated, setAccessValidated] = useState<boolean>(false);
 
   const { register, handleSubmit, control, formState: { errors }, watch, setValue } = useForm<BookingFormData>({
     defaultValues: {
@@ -119,19 +114,53 @@ const CarBookingPage: React.FC = () => {
 
         // Fetch car details
         const result = await carDetails(id);
-        const data: ICarExtended = await result.data;
+        const data: ICar = await result.data;
+
+        // Check if car is already booked
+        if (data.status === 'Booked') {
+          toast.error("This car is already booked");
+          navigate(`/car-details/${id}`);
+          return;
+        }
+
+        // Check if this is a luxury car that requires subscription
+        const isLuxuryCar = data.carType === 'Luxury';
+
+        // Fetch user subscription status
+        const subscriptionResult = await getUserSubscription();
+        const userSub = subscriptionResult.data;
+        setSubscription(userSub);
+
+        // Validate subscription requirements
+        if (isLuxuryCar) {
+          if (!userSub) {
+            toast.error("This is a premium car. You need a subscription to book it.");
+            navigate('/subscription', { state: { from: `/car/${id}` } });
+            return;
+          }
+
+          if (userSub.status !== 'active') {
+            toast.error("Your subscription is cancelled or completed. Please renew to book premium cars.");
+            navigate('/subscription', { state: { from: `/car/${id}` } });
+            return;
+          }
+
+          if (userSub.subscriptionId.name === 'DrivePlus') {
+            toast.error("This premium car is only available for Elite plan users.");
+            navigate('/subscription', { state: { from: `/car/${id}` } });
+            return;
+          }
+        }
+
+        // If we reached here, access is valid
+        setAccessValidated(true);
+
         if (!data.pricePerHour) {
-          data.pricePerHour = data.pricePerDay / 24;
+          data.pricePerHour = data.pricePerHour / 24;
         }
         setCar(data);
         setValue('pickupLocation', data.location.address);
         setValue('dropoffLocation', data.location.address);
-
-        // Fetch user subscription status
-        const subscriptionResult = await getUserSubscription();
-        setSubscription(subscriptionResult.data);
-
-
 
         // Fetch user addresses
         const addressesResult = await getUserAddresses();
@@ -146,7 +175,7 @@ const CarBookingPage: React.FC = () => {
     };
 
     fetchCarData();
-  }, [id, setValue]);
+  }, [id, navigate, setValue]);
 
   useEffect(() => {
     if (subscription?.subscriptionId?.features) {
@@ -220,6 +249,21 @@ const CarBookingPage: React.FC = () => {
   const onSubmit = async (data: BookingFormData) => {
     if (!car || !id || !stripe || !elements) {
       toast.error('Missing required data');
+      return;
+    }
+
+    // Double-check car availability before proceeding
+    try {
+      const latestCarDetails = await carDetails(id);
+      const latestCarData = latestCarDetails.data;
+
+      if (latestCarData.status === 'Booked') {
+        toast.error("This car was just booked by someone else. Please choose another car.");
+        navigate('/cars');
+        return;
+      }
+    } catch (err: any) {
+      toast.error(`Failed to verify car availability: ${err.message}`);
       return;
     }
 
@@ -310,11 +354,11 @@ const CarBookingPage: React.FC = () => {
     );
   }
 
-  if (error || !car) {
+  if (error || !car || !accessValidated) {
     return (
       <>
         <NavBar />
-        <div className="max-w-6xl mx-auto p-6">{error || 'Car not found'}</div>
+        <div className="max-w-6xl mx-auto p-6">{error || 'Car not found or not available for booking'}</div>
         <Footer />
       </>
     );
@@ -359,7 +403,7 @@ const CarBookingPage: React.FC = () => {
               </p>
               <p className="text-gray-600 mb-2">{car.carType}</p>
               <div className="flex items-center justify-between">
-                <p className="font-bold">{formatINR(car.pricePerHour || car.pricePerDay)}/Hour</p>
+                <p className="font-bold">{formatINR(car.pricePerHour || car.pricePerHour)}/Hour</p>
                 <p className="text-gray-600">◆ Deposit Amount: {formatINR(car.deposit)}</p>
               </div>
             </div>

@@ -155,7 +155,7 @@ export const getRentalStatsForAdmin = async (type: string, year: number, from?: 
     throw new Error(getApiErrorMessage(error));
   };
 };
-export const getRentalForAdmin = async (page: number, limit: number, type: string, year: number, from?: string, to?: string) => {
+export const getRentalForAdmin = async (page: number, limit: number, type: string, year: number, from?: string, to?: string, month?: number) => {
   try {
     const response = await api.get('/admin/rentals', {
       params: {
@@ -164,7 +164,8 @@ export const getRentalForAdmin = async (page: number, limit: number, type: strin
         type,
         year,
         from,
-        to
+        to,
+        month
       },
     });
     return response.data;
@@ -173,19 +174,21 @@ export const getRentalForAdmin = async (page: number, limit: number, type: strin
   };
 };
 
-export const getSalesReportPdf = async (type: string, year: number, from?: string, to?: string) => {
+export const getSalesReportPdf = async (type: string, year: number, from?: string, to?: string, month?: number) => {
   try {
-    const response = await api.get('/admin/sales-report', {
+    const response = await api.get('/admin/sales-report-pdf', {
       params: {
         type,
         year,
         from,
-        to
-      }
-    })
+        to,
+        month
+      },
+      responseType: 'arraybuffer'
+    });
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
-  };
-}
+  }
+};
 

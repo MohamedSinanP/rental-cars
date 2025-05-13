@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, Calendar, Download, Car, Users, RefreshCw } from 'lucide-react';
+import { DollarSign, Calendar, Download, Car, RefreshCw } from 'lucide-react';
 import Sidebar from '../../layouts/admin/Sidebar';
 import DataTable, { Column } from '../../components/DataTable';
 import Pagination from '../../components/Pagination';
 import { getRentalForAdmin, getSalesReportPdf, getStatsForAdmin } from '../../services/apis/adminApi';
 import { formatINR } from '../../utils/commonUtilities';
+import { toast } from 'react-toastify';
 
 // Define TypeScript interfaces
 interface SalesReportData {
@@ -43,6 +44,7 @@ const SalesReportPage = () => {
     totalPlatformRevenue: 0,
   });
   const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [month, setMonth] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
   const [showDateRange, setShowDateRange] = useState<boolean>(false);
@@ -89,7 +91,7 @@ const SalesReportPage = () => {
         if (timeFilter === 'yearly') {
           result = await getRentalForAdmin(currentPage, limit, 'yearly', year);
         } else if (timeFilter === 'monthly') {
-          result = await getRentalForAdmin(currentPage, limit, 'monthly', year);
+          result = await getRentalForAdmin(currentPage, limit, 'monthly', year, undefined, undefined, month);
         } else if (timeFilter === 'custom') {
           result = await getRentalForAdmin(currentPage, limit, 'custom', year, startDate, endDate);
         }
@@ -122,7 +124,7 @@ const SalesReportPage = () => {
     };
 
     fetchSalesData();
-  }, [timeFilter, year, currentPage, startDate, endDate]);
+  }, [timeFilter, year, month, currentPage, startDate, endDate]);
 
   // Apply custom date filter
   const applyDateFilter = async () => {
@@ -159,7 +161,7 @@ const SalesReportPage = () => {
   // Handle filter change
   const handleFilterChange = (filter: TimeFilterType) => {
     setTimeFilter(filter);
-    setCurrentPage(1); // Reset to first page on
+    setCurrentPage(1);
 
     if (filter === 'custom') {
       setShowDateRange(true);
@@ -171,13 +173,13 @@ const SalesReportPage = () => {
   // Download sales report function
   const downloadSalesReport = async () => {
     if (salesData.length === 0) {
-      alert('No data available to download');
+      toast.error('No data available to download');
       return;
     }
 
     try {
-      const response = await getSalesReportPdf(timeFilter, year, startDate, endDate);
-      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const result = await getSalesReportPdf(timeFilter, year, startDate, endDate, month);
+      const blob = new Blob([result], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -186,7 +188,7 @@ const SalesReportPage = () => {
       if (timeFilter === 'yearly') {
         filename = `sales_report_${year}.pdf`;
       } else if (timeFilter === 'monthly') {
-        filename = `sales_report_${year}_monthly.pdf`;
+        filename = `sales_report_${year}_${month}.pdf`;
       } else {
         filename = `sales_report_${startDate}_to_${endDate}.pdf`;
       }
@@ -196,9 +198,10 @@ const SalesReportPage = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      toast.success('Sales report downloaded successfully');
     } catch (error) {
       console.error('Error downloading sales report:', error);
-      alert('Failed to download the sales report. Please try again.');
+      toast.error('Failed to download the sales report. Please try again.');
     }
   };
 
@@ -207,33 +210,33 @@ const SalesReportPage = () => {
     {
       key: 'owner',
       header: 'Owner',
-      render: (item) => <div className="font-medium text-gray-900">{item.ownerId.userName}</div>
+      render: (item) => <div className="font-medium text-gray-900">{item.ownerId.userName}</div>,
     },
     {
       key: 'car',
       header: 'Car',
-      render: (item) => <span className="text-gray-600">{item.carId.carName}</span>
+      render: (item) => <span className="text-gray-600">{item.carId.carName}</span>,
     },
     {
       key: 'bookingDate',
       header: 'Booking Date',
-      render: (item) => <span className="text-gray-600 hidden sm:inline">{new Date(item.bookingDate).toLocaleDateString()}</span>
+      render: (item) => <span className="text-gray-600 hidden sm:inline">{new Date(item.bookingDate).toLocaleDateString()}</span>,
     },
     {
       key: 'dropOffDate',
       header: 'Drop-off',
-      render: (item) => <span className="text-gray-600 hidden sm:inline">{new Date(item.dropOffDate).toLocaleDateString()}</span>
+      render: (item) => <span className="text-gray-600 hidden sm:inline">{new Date(item.dropOffDate).toLocaleDateString()}</span>,
     },
     {
       key: 'amount',
       header: 'Amount',
-      render: (item) => <span className="text-gray-900 font-medium">{formatINR(item.totalPrice)}</span>
+      render: (item) => <span className="text-gray-900 font-medium">{formatINR(item.totalPrice)}</span>,
     },
     {
       key: 'commission',
       header: 'Commission',
-      render: (item) => <span className="text-teal-600 font-medium">{formatINR(item.adminCommissionAmount)}</span>
-    }
+      render: (item) => <span className="text-teal-600 font-medium">{formatINR(item.adminCommissionAmount)}</span>,
+    },
   ];
 
   // Loading spinner component
@@ -245,6 +248,20 @@ const SalesReportPage = () => {
   );
 
   const currentYear = new Date().getFullYear();
+  const months = [
+    { value: 1, label: 'January' },
+    { value: 2, label: 'February' },
+    { value: 3, label: 'March' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'May' },
+    { value: 6, label: 'June' },
+    { value: 7, label: 'July' },
+    { value: 8, label: 'August' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'October' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'December' },
+  ];
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -324,15 +341,28 @@ const SalesReportPage = () => {
                     </div>
                   </div>
                   {(timeFilter === 'yearly' || timeFilter === 'monthly') && (
-                    <select
-                      className="border border-gray-300 rounded-md px-2 py-1 text-sm"
-                      value={year}
-                      onChange={(e) => setYear(parseInt(e.target.value))}
-                    >
-                      {Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map(y => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
+                    <div className="flex items-center gap-2">
+                      <select
+                        className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                        value={year}
+                        onChange={(e) => setYear(parseInt(e.target.value))}
+                      >
+                        {Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map((y) => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </select>
+                      {timeFilter === 'monthly' && (
+                        <select
+                          className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                          value={month}
+                          onChange={(e) => setMonth(parseInt(e.target.value))}
+                        >
+                          {months.map((m) => (
+                            <option key={m.value} value={m.value}>{m.label}</option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
                   )}
                   {showDateRange && (
                     <div className="flex items-center gap-2">
@@ -359,7 +389,10 @@ const SalesReportPage = () => {
                         />
                       </div>
                       <button
-                        onClick={() => { setCurrentPage(1); applyDateFilter(); }}
+                        onClick={() => {
+                          setCurrentPage(1);
+                          applyDateFilter();
+                        }}
                         className="bg-teal-600 text-white px-3 py-1 rounded-md text-sm flex items-center"
                       >
                         <Calendar className="w-3 h-3 mr-1" />

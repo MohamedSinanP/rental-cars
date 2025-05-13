@@ -22,7 +22,7 @@ export default interface ICar {
   };
   status: "Available" | "Booked" | "Unavailable" | "UnderMaintenance" | "PendingApproval" | "Archived";
   features?: string[];
-  pricePerDay: number;
+  pricePerHour: number;
   deposit: number;
   lastmaintenanceDate: string;
   maintenanceInterval: number;
@@ -52,7 +52,7 @@ export interface ICarModel extends Document {
   };
   status: "Available" | "Booked" | "Unavailable" | "UnderMaintenance" | "PendingApproval" | "Archived";
   features?: string[];
-  pricePerDay: number;
+  pricePerHour: number;
   deposit: number;
   lastmaintenanceDate: string;
   maintenanceInterval: number;

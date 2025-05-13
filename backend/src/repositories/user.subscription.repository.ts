@@ -79,5 +79,65 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
     ]);
 
     return result[0]?.totalEarnings || 0;
+  };
+
+  async getTotalEarnings(type: string, year: number, from: string, to: string): Promise<number> {
+    const matchConditions: any = {
+      status: 'active' // assuming only active subscriptions count as earnings
+    };
+
+    if (type === 'yearly') {
+      const start = new Date(`${year}-01-01`);
+      const end = new Date(`${year}-12-31`);
+      matchConditions.currentPeriodStart = { $gte: start, $lte: end };
+    }
+
+    if (type === 'monthly') {
+      const start = new Date(`${year}-${from}-01`);
+      const end = new Date(`${year}-${from}-31`); // rough end of month
+      matchConditions.currentPeriodStart = { $gte: start, $lte: end };
+    }
+
+    if (type === 'custom') {
+      const start = new Date(from);
+      const end = new Date(to);
+      matchConditions.currentPeriodStart = { $gte: start, $lte: end };
+    }
+
+    const result = await this._userSubsModel.aggregate([
+      { $match: matchConditions },
+      {
+        $lookup: {
+          from: 'subscriptions',
+          localField: 'subscriptionId',
+          foreignField: '_id',
+          as: 'subscription'
+        }
+      },
+      { $unwind: '$subscription' },
+      {
+        $group: {
+          _id: null,
+          totalEarnings: { $sum: '$subscription.price' }
+        }
+      }
+    ]);
+
+    return result.length > 0 ? result[0].totalEarnings : 0;
+  };
+
+  async getUserSubs(userId: string, page: number, limit: number): Promise<{ data: IUserSubscriptionModel[]; total: number; }> {
+    const skip = (page - 1) * limit;
+
+    const data = await this._userSubsModel
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('subscriptionId');
+
+    const total = await this._userSubsModel.countDocuments({ userId });
+
+    return { data, total };
   }
 };

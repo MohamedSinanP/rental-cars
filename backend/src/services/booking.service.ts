@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import IBookingService from "../interfaces/services/booking.service";
-import { IBooking, IBookingModel, IBookingPopulated } from "../types/booking";
+import { BasicSalesInfo, IBooking, IBookingModel, IBookingPopulated } from "../types/booking";
 import TYPES from "../di/types";
 import IBookingRepository from "../interfaces/repositories/booking.repository";
 import { HttpError } from "../utils/http.error";
@@ -10,6 +10,7 @@ import ICarRepository from "../interfaces/repositories/car.repository";
 import IWalletRepository from "../interfaces/repositories/wallet.repository";
 import { Types, UpdateResult } from "mongoose";
 import IOwnerRepository from "../interfaces/repositories/owner.repository";
+import IUserSubsRepository from "../interfaces/repositories/user.subscription.repository";
 
 
 @injectable()
@@ -19,7 +20,7 @@ export default class BookingService implements IBookingService {
     @inject(TYPES.IAddressRepository) private _addressRepository: IAddressRepository,
     @inject(TYPES.ICarRepository) private _carRepository: ICarRepository,
     @inject(TYPES.IWalletRepository) private _walletRepository: IWalletRepository,
-    @inject(TYPES.IOwnerRepository) private _ownerRepository: IOwnerRepository
+    @inject(TYPES.IUserSubsRepository) private _userSubsRepository: IUserSubsRepository
   ) { };
 
   async createBooking(data: IBooking): Promise<IBookingModel> {
@@ -74,7 +75,7 @@ export default class BookingService implements IBookingService {
   }
 
   async fetchUserRentals(id: string, page: number, limit: number): Promise<PaginatedData<IBookingModel>> {
-    const { data, total } = await this._bookingRepository.findPaginated(page, limit)
+    const { data, total } = await this._bookingRepository.findPaginated(id, page, limit)
       ;
     if (!data) {
       throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.")
@@ -159,11 +160,32 @@ export default class BookingService implements IBookingService {
     return booking;
   };
 
-  async completeExpiredBookings(): Promise<UpdateResult> {
-    return await this._bookingRepository.updateExpiredBookings();
+  async completeExpiredBookings(): Promise<number> {
+    const completedBookings = await this._bookingRepository.updateExpiredBookings();
+
+    for (const booking of completedBookings) {
+      await this._carRepository.update(booking.carId.toString(), { status: 'Available' });
+    }
+    return completedBookings.length;
   }
 
-  async getSalesInformation(type: string, year: number, from: string, to: string): Promise<void> {
-    return await this._bookingRepository.
+  async getSalesInformation(
+    type: 'yearly' | 'monthly' | 'custom',
+    year: number,
+    month: number,
+    from: string,
+    to: string
+  ): Promise<BasicSalesInfo & { totalSubsEarnings: number; overallTotalEarnings: number }> {
+    const totalSubsEarnings = await this._userSubsRepository.getTotalEarnings(type, year, from, to);
+
+    const salesInfo = await this._bookingRepository.getSalesInformation(type, year, month, from, to);
+
+    const overallTotalEarnings = totalSubsEarnings + (salesInfo.totalCommissionEarnings || 0);
+
+    return {
+      ...salesInfo,
+      totalSubsEarnings,
+      overallTotalEarnings
+    };
   }
 };

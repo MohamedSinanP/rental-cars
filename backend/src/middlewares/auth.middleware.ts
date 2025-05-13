@@ -1,18 +1,18 @@
-import { Request, RequestHandler } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { HttpError } from "../utils/http.error";
 
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
 
 export interface AuthenticatedRequest extends Request {
-  user?: {
+  user: {
     userId: string;
     role: string;
   };
-};
+}
 
 export const authenticate = (allowedRoles: string[] = []): RequestHandler => {
-  return (req, res, next) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -44,7 +44,6 @@ export const authenticate = (allowedRoles: string[] = []): RequestHandler => {
       }
 
       return next(new HttpError(403, "Invalid token payload"));
-
     } catch (err: any) {
       if (err.name === "TokenExpiredError") {
         return next(new HttpError(401, "Access token expired"));
