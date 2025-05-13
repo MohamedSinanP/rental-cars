@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, MapPin, Heart, Star, ChevronDown } from 'lucide-react';
+import { Search, MapPin, Star, ChevronDown } from 'lucide-react';
 import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
 import { ICar } from '../../types/types';

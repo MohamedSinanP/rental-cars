@@ -192,7 +192,7 @@ const UserSubscriptionPage = () => {
   const actions: Action<IUserSubscription>[] = [
     {
       label: 'Update Status',
-      onClick: (subscription) => { }, // Empty onClick as we use render for dropdown
+      onClick: () => { },
       render: (subscription) => (
         <select
           value={subscription.status}

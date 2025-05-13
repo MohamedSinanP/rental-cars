@@ -22,7 +22,7 @@ const CarDetailsPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [reviewLoading, setReviewLoading] = useState<boolean>(false);
   const [showReviewForm, setShowReviewForm] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [userLoading, setUserLoading] = useState<boolean>(false);
   const [averageRating, setAverageRating] = useState<number>(0);
   const [ratingCounts, setRatingCounts] = useState<RatingCounts>({

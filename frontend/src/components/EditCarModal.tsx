@@ -40,7 +40,7 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ isOpen, onClose, carData, o
       setValue('transmission', carData.transmission);
       setValue('fuelType', carData.fuelType);
       setValue('fuelOption', carData.fuelOption);
-      setValue('pricePerDay', carData.pricePerDay);
+      setValue('pricePerHour', carData.pricePerHour);
       setValue('deposit', carData.deposit);
       setValue('status', carData.status);
       setValue('maintenanceDate', carData.lastmaintenanceDate?.split('T')[0]);
@@ -112,7 +112,7 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ isOpen, onClose, carData, o
       formData.append("fuelType", data.fuelType);
       formData.append("fuelOption", data.fuelOption);
       formData.append("location", JSON.stringify(data.location));
-      formData.append("pricePerDay", data.pricePerDay.toString());
+      formData.append("pricePerHour", data.pricePerHour.toString());
       formData.append("deposit", data.deposit.toString());
       formData.append("status", data.status);
       formData.append("lastmaintenanceDate", data.maintenanceDate);
@@ -320,8 +320,8 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ isOpen, onClose, carData, o
 
           <div>
             <label>Car Price Per Hour</label>
-            <input type="number" {...register('pricePerDay', { required: 'Price is required', valueAsNumber: true })} className="w-full border p-2 rounded" />
-            {errors.pricePerDay && <p className="text-red-500 text-sm">{errors.pricePerDay.message}</p>}
+            <input type="number" {...register('pricePerHour', { required: 'Price is required', valueAsNumber: true })} className="w-full border p-2 rounded" />
+            {errors.pricePerHour && <p className="text-red-500 text-sm">{errors.pricePerHour.message}</p>}
           </div>
 
           <div>

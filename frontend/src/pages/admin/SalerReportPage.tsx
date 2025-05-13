@@ -46,22 +46,11 @@ const SalesReportPage = () => {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [month, setMonth] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isMobileView, setIsMobileView] = useState<boolean>(false);
   const [showDateRange, setShowDateRange] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const limit = 6;
 
-  // Monitor screen size for responsive layout
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(window.innerWidth < 768);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Fetch summary data
   useEffect(() => {

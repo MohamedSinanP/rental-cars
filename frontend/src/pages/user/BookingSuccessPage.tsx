@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, Calendar, MapPin, Clock, Download, ArrowLeft, Car } from 'lucide-react';
+import { Check, Calendar, MapPin, Clock, ArrowLeft, Car } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getLatestBooking } from '../../services/apis/userApis';
 

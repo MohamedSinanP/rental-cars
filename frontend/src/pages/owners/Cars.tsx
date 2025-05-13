@@ -180,7 +180,7 @@ const Cars: React.FC = () => {
                         {selectedCar.transmission} & {selectedCar.fuelType}
                       </p>
                       <p className="text-lg font-medium text-gray-800 mt-2">
-                        {formatINR(selectedCar.pricePerDay)}/Hour
+                        {formatINR(selectedCar.pricePerHour)}/Hour
                       </p>
                     </div>
                   </div>

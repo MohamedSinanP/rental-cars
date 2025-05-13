@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 const SubscriptionCheckout = () => {
   const [plans, setPlans] = useState<ISubscription[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error] = useState(null);
 
   useEffect(() => {
     const fetchPlans = async () => {

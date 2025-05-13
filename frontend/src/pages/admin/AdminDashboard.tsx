@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
-import { DollarSign, Users, UserCog, BarChart2, Calendar, Loader, Download } from 'lucide-react';
+import { DollarSign, Users, UserCog, BarChart2, Calendar, Loader } from 'lucide-react';
 import Sidebar from '../../layouts/admin/Sidebar';
 import { getStatsForAdmin, getRentalStatsForAdmin } from '../../services/apis/adminApi';
 
@@ -137,55 +137,6 @@ const AdminDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Download sales report function
-  const downloadSalesReport = () => {
-    // // Check if we have data to download
-    // if (chartData.length === 0) {
-    //   alert('No data available to download');
-    //   return;
-    // }
-
-    // // Create CSV content
-    // let csvContent = 'data:text/csv;charset=utf-8,';
-
-    // // Add headers
-    // csvContent += 'Date,Total Commission,Count\n';
-
-    // // Add data rows
-    // chartData.forEach(item => {
-    //   let date;
-    //   if (timeFilter === 'monthly') {
-    //     date = `${item.fullName} ${year}`;
-    //   } else if (timeFilter === 'yearly') {
-    //     date = item.year?.toString() || '';
-    //   } else {
-    //     date = item.date || '';
-    //   }
-
-    //   csvContent += `${date},${item.totalCommission},${item.count}\n`;
-    // });
-
-    // // Create download link
-    // const encodedUri = encodeURI(csvContent);
-    // const link = document.createElement('a');
-    // link.setAttribute('href', encodedUri);
-
-    // // Set filename based on the filter type
-    // let filename;
-    // if (timeFilter === 'monthly') {
-    //   filename = `sales_report_monthly_${year}.csv`;
-    // } else if (timeFilter === 'yearly') {
-    //   filename = 'sales_report_yearly.csv';
-    // } else {
-    //   filename = `sales_report_${startDate}_to_${endDate}.csv`;
-    // }
-
-    // link.setAttribute('download', filename);
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
   };
 
   const currentYear = new Date().getFullYear();
