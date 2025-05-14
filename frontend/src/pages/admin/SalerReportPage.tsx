@@ -7,8 +7,26 @@ import { getRentalForAdmin, getSalesReportPdf, getStatsForAdmin } from '../../se
 import { formatINR } from '../../utils/commonUtilities';
 import { toast } from 'react-toastify';
 
-// Define TypeScript interfaces
-interface SalesReportData {
+// Interface for DataItem that matches what DataTable expects
+interface DataItem {
+  _id: string;
+  ownerId: { userName: string };
+  carId: { carName: string };
+  bookingDate: string;
+  dropOffDate: string;
+  totalPrice: number;
+  adminCommissionAmount: number;
+  [key: string]: string | number | { userName: string } | { carName: string } | undefined;
+}
+interface SummaryData {
+  totalCommissionEarnings: number;
+  totalSubscriptionEarnings: number;
+  totalBookings: number;
+  totalPlatformRevenue: number;
+}
+
+// Define types for API response data
+interface BookingData {
   _id: string;
   ownerId: {
     userName: string;
@@ -22,11 +40,12 @@ interface SalesReportData {
   adminCommissionAmount: number;
 }
 
-interface SummaryData {
-  totalCommissionEarnings: number;
-  totalSubscriptionEarnings: number;
-  totalBookings: number;
-  totalPlatformRevenue: number;
+interface RentalApiResponse {
+  data: {
+    data: BookingData[];
+    totalPages: number;
+    currentPage: number;
+  };
 }
 
 type TimeFilterType = 'yearly' | 'monthly' | 'custom';
@@ -36,7 +55,7 @@ const SalesReportPage = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilterType>('yearly');
   const [startDate, setStartDate] = useState<string>('2025-01-01');
   const [endDate, setEndDate] = useState<string>('2025-05-08');
-  const [salesData, setSalesData] = useState<SalesReportData[]>([]);
+  const [salesData, setSalesData] = useState<DataItem[]>([]);
   const [summaryData, setSummaryData] = useState<SummaryData>({
     totalCommissionEarnings: 0,
     totalSubscriptionEarnings: 0,
@@ -50,7 +69,6 @@ const SalesReportPage = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const limit = 6;
-
 
   // Fetch summary data
   useEffect(() => {
@@ -76,7 +94,7 @@ const SalesReportPage = () => {
     const fetchSalesData = async () => {
       setLoading(true);
       try {
-        let result;
+        let result: RentalApiResponse | undefined;
         if (timeFilter === 'yearly') {
           result = await getRentalForAdmin(currentPage, limit, 'yearly', year);
         } else if (timeFilter === 'monthly') {
@@ -87,7 +105,7 @@ const SalesReportPage = () => {
 
         if (result && result.data) {
           const bookings = result.data.data || [];
-          const mappedData: SalesReportData[] = bookings.map((booking: any) => ({
+          const mappedData: DataItem[] = bookings.map((booking: BookingData) => ({
             _id: booking._id,
             ownerId: booking.ownerId,
             carId: booking.carId,
@@ -123,7 +141,7 @@ const SalesReportPage = () => {
 
       if (result && result.data && result.data.data) {
         const bookings = result.data.data;
-        const mappedData: SalesReportData[] = bookings.map((booking: any) => ({
+        const mappedData: DataItem[] = bookings.map((booking: BookingData) => ({
           _id: booking._id,
           ownerId: booking.ownerId,
           carId: booking.carId,
@@ -195,7 +213,7 @@ const SalesReportPage = () => {
   };
 
   // Define table columns
-  const columns: Column<SalesReportData>[] = [
+  const columns: Column<DataItem>[] = [
     {
       key: 'owner',
       header: 'Owner',

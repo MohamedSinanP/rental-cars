@@ -58,8 +58,12 @@ const CarRentalsPage: React.FC = () => {
       document.body.removeChild(link);
 
       window.URL.revokeObjectURL(url);
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to download invoice.");
+      }
     }
   };
   const handleViewDetails = (rental: IBookingWithPopulatedData): void => {

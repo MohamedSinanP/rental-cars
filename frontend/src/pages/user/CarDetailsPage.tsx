@@ -68,15 +68,13 @@ const CarDetailsPage: React.FC = () => {
     fetchCarData();
   }, [id]);
 
-  const calculateRatingStats = (reviewsData: any) => {
+  const calculateRatingStats = (reviewsData: Review[] | unknown) => {
     let reviewsArray: Review[] = [];
 
     if (Array.isArray(reviewsData)) {
       reviewsArray = reviewsData;
-    } else if (reviewsData && Array.isArray(reviewsData[0])) {
-      reviewsArray = reviewsData[0];
-    } else if (reviewsData && reviewsData.success && Array.isArray(reviewsData[0])) {
-      reviewsArray = reviewsData[0];
+    } else if (reviewsData && typeof reviewsData === 'object' && Array.isArray((reviewsData as { [key: string]: unknown })[0])) {
+      reviewsArray = (reviewsData as { [key: string]: Review[] })[0];
     }
 
     if (!reviewsArray.length) {

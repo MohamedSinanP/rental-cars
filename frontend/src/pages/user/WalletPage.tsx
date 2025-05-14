@@ -23,6 +23,14 @@ interface WalletData {
   transactions: Transaction[];
 }
 
+interface RawTransaction {
+  transactionId: string;
+  date: string;
+  paymentType: 'Credit' | 'Debit' | 'Refund';
+  transactionAmount: number;
+  status: 'Completed' | 'Pending';
+}
+
 
 // Initial empty state for wallet data
 const initialWalletState: WalletData = {
@@ -54,7 +62,7 @@ const WalletPage: React.FC = () => {
         setError(null);
 
         const result = await getUserWallet(currentPage, limit);
-        const transformedTransactions: Transaction[] = result.data.transactions.map((transaction: any) => ({
+        const transformedTransactions: Transaction[] = result.data.transactions.map((transaction: RawTransaction) => ({
           ...transaction,
           _id: transaction.transactionId, // Add _id field required by DataItem
           date: new Date(transaction.date)
@@ -66,16 +74,20 @@ const WalletPage: React.FC = () => {
         });
         setCurrentPage(result.data.currentPage);
         setTotalPages(result.data.totalPages);
-      } catch (err: any) {
-        console.error('Error fetching wallet data:', err);
-        setError(err.response?.data?.message || 'Failed to load wallet data');
-      } finally {
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message || 'Failed to load wallet data');
+        } else {
+          setError("Something went wrong");
+        }
+      }
+      finally {
         setIsLoading(false);
       }
     };
 
     fetchWalletData();
-  }, []);
+  }, [currentPage]);
 
   // Filter transactions based on selected filter
   const filteredTransactions: Transaction[] = walletData.transactions.filter(transaction => {

@@ -6,7 +6,14 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setAuth } from '../../redux/slices/authSlice';
 
-
+// Define a proper interface for validation errors
+interface FormErrors {
+  fullName?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  commission?: string;
+}
 
 const SignupOwner = () => {
   const dispatch = useDispatch();
@@ -18,7 +25,7 @@ const SignupOwner = () => {
     confirmPassword: '',
     commission: '',
   });
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,8 +35,8 @@ const SignupOwner = () => {
     });
   };
 
-  const validateForm = (data: Owner) => {
-    const errors: any = {};
+  const validateForm = (data: Owner): FormErrors => {
+    const errors: FormErrors = {};
     if (!data.fullName.trim()) {
       errors.fullName = 'Full Name is required';
     } else if (data.fullName.length < 4) {

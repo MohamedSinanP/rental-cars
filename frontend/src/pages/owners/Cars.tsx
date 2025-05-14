@@ -49,9 +49,15 @@ const Cars: React.FC = () => {
       setCars(fetchedCars);
       setCurrentPage(result.data.currentPage);
       setTotalPages(result.data.totalPages);
-    } catch (err) {
-      setError('Failed to fetch cars. Please try again.');
-      toast.error('Error fetching cars');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+        toast.error(error.message);
+
+      } else {
+        setError('Failed to fetch cars. Please try again.');
+        toast.error('Failed to fetch cars. Please try again.');
+      }
     }
   }, [currentPage]);
 
@@ -77,8 +83,12 @@ const Cars: React.FC = () => {
           setSelectedCar(null);
         }
         toast.success('Car deleted successfully');
-      } catch (err) {
-        toast.error('Failed to delete car');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('Failed to fetch bookings');
+        }
       }
     }
   };

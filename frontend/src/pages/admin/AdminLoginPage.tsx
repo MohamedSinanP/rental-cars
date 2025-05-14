@@ -42,7 +42,7 @@ const AdminLoginPage: React.FC = () => {
       } else {
         toast.error("Something went wrong");
       }
-    };
+    }
   };
 
   return (

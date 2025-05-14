@@ -166,9 +166,13 @@ const CarBookingPage: React.FC = () => {
         const addressesResult = await getUserAddresses();
         setUserAddresses(addressesResult.data || []);
 
-      } catch (err: any) {
-        toast.error(err.message);
-        setError(err instanceof Error ? err.message : 'An error occurred');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+          setError(error.message);
+        } else {
+          toast.error("Something went wrong");
+        }
       } finally {
         setLoading(false);
       }
@@ -188,9 +192,12 @@ const CarBookingPage: React.FC = () => {
           const freeHours = extractFeatureValue(subscription.subscriptionId.features[2]);
           setFreeHours(Number(freeHours));
         }
-      } catch (err: any) {
-        console.error('Failed to extract subscription benefits:', err.message);
-        toast.error('Failed to process subscription benefits');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Failed to process subscriptoin benefits");
+        }
       }
     }
   }, [subscription]);
@@ -262,8 +269,12 @@ const CarBookingPage: React.FC = () => {
         navigate('/cars');
         return;
       }
-    } catch (err: any) {
-      toast.error(`Failed to verify car availability: ${err.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
       return;
     }
 
@@ -281,8 +292,12 @@ const CarBookingPage: React.FC = () => {
         setPaymentIntentId(paymentId);
         currentClientSecret = newSecret;
         currentPaymentId = paymentId;
-      } catch (err: any) {
-        toast.error(`Failed to initiate Stripe payment: ${err.message}`);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Something went wrong");
+        }
         return;
       }
     }
@@ -306,8 +321,12 @@ const CarBookingPage: React.FC = () => {
           toast.error(`Stripe payment failed: ${error.message}`);
           return;
         }
-      } catch (err: any) {
-        toast.error(`Error confirming Stripe payment: ${err.message}`);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Something went wrong");
+        }
         return;
       }
     }
@@ -338,8 +357,12 @@ const CarBookingPage: React.FC = () => {
       const bookingId = result.data._id;
       toast.success(result.message);
       navigate(`/greetings/${bookingId}`);
-    } catch (err: any) {
-      toast.error(`Booking failed: ${err.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     } finally {
       setClientSecret(null);
       setPaymentIntentId(null);

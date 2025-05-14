@@ -10,7 +10,13 @@ import { getUserLocation } from '../../utils/getUserLocation';
 import { sendUserLocation } from '../../services/apis/userApis';
 import GoogleLoginButton from '../../components/GoogleLoginButton';
 
-
+// Define a proper interface for validation errors
+interface FormErrors {
+  userName?: string;
+  email?: string;
+  password?: string;
+  confirmPwd?: string;
+}
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -20,8 +26,8 @@ const SignupPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
-  })
-  const [errors, setErrors] = useState<any>();
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -31,12 +37,12 @@ const SignupPage = () => {
     });
   };
 
-  const validateForm = (data: UserInput) => {
-    const errors: any = {};
+  const validateForm = (data: UserInput): FormErrors => {
+    const errors: FormErrors = {};
     if (!data.userName.trim()) {
-      errors.userName = "Username is required"
+      errors.userName = "Username is required";
     } else if (data.userName.length < 4) {
-      errors.userName = "Username must be atleast 4 characters long"
+      errors.userName = "Username must be atleast 4 characters long";
     }
     if (!data.email.trim()) {
       errors.email = 'Email is required';
@@ -57,7 +63,7 @@ const SignupPage = () => {
     }
 
     return errors;
-  }
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     setErrors({});
@@ -72,8 +78,7 @@ const SignupPage = () => {
         email: formData.email,
         password: formData.password,
         role: "user",
-
-      }
+      };
       const result = await signupUser(userData);
 
       if (result) {
@@ -85,12 +90,11 @@ const SignupPage = () => {
             isBlocked: result.isBlocked,
             isVerified: result.isVerified
           }
-        }))
+        }));
         const { location } = await getUserLocation();
         await sendUserLocation(result._id, location);
-        navigate('/verify-otp')
-      };
-
+        navigate('/verify-otp');
+      }
 
       setFormData({
         userName: "",
@@ -105,7 +109,7 @@ const SignupPage = () => {
       } else {
         toast.error("Something went wrong");
       }
-    };
+    }
   };
 
   return (
@@ -200,8 +204,7 @@ const SignupPage = () => {
         </div>
       </div>
     </>
-  )
+  );
+};
 
-}
-
-export default SignupPage
+export default SignupPage;

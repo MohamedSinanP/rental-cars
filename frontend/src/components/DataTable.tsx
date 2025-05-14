@@ -1,11 +1,12 @@
 import { ReactNode } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 
+// Define a minimal DataItem type
 export type DataItem = {
   _id: string;
-  [key: string]: any;
 };
 
+// Update Column and Action to use T extends DataItem
 export type Column<T extends DataItem> = {
   key: keyof T | string;
   header: string;
@@ -45,8 +46,18 @@ const DataTable = <T extends DataItem>({
 }: DataTableProps<T>) => {
   // Default render function
   const defaultRender = (item: T, key: keyof T | string) => {
+    const getNestedValue = (obj: Record<string, unknown>, path: string[]): unknown => {
+      if (path.length === 0) return obj;
+      const [first, ...rest] = path;
+      const value = obj[first];
+      if (!value || typeof value !== 'object') {
+        return rest.length === 0 ? value : undefined;
+      }
+      return getNestedValue(value as Record<string, unknown>, rest);
+    };
+
     const value = key.toString().includes('.')
-      ? key.toString().split('.').reduce((obj, key) => obj?.[key], item as any)
+      ? getNestedValue(item as Record<string, unknown>, key.toString().split('.'))
       : item[key as keyof T];
 
     return <span>{value !== undefined && value !== null ? String(value) : ''}</span>;
@@ -99,12 +110,9 @@ const DataTable = <T extends DataItem>({
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex items-center justify-center space-x-2">
                         {actions.map((action, index) => {
-                          // Check if action should be visible
                           if (action.isVisible && !action.isVisible(item)) {
                             return null;
                           }
-
-                          // Use render if provided
                           if (action.render) {
                             return (
                               <div key={index} className="inline-block">
@@ -112,19 +120,15 @@ const DataTable = <T extends DataItem>({
                               </div>
                             );
                           }
-
                           const actionLabel = typeof action.label === 'function'
                             ? action.label(item)
                             : action.label;
-
                           const actionClass = typeof action.className === 'function'
                             ? action.className(item)
                             : action.className || 'bg-blue-50 text-blue-700 hover:bg-blue-100';
-
                           const iconElement = typeof action.icon === 'function'
                             ? action.icon(item)
                             : action.icon;
-
                           return (
                             <button
                               key={index}
@@ -143,7 +147,6 @@ const DataTable = <T extends DataItem>({
               ))}
             </tbody>
           </table>
-
           {data.length === 0 && (
             <div className="text-center py-6">
               <p className="text-gray-500">{emptyMessage}</p>

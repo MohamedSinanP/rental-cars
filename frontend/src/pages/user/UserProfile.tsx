@@ -80,12 +80,16 @@ const UserProfile: React.FC = () => {
           email: result.data.email || '',
           phone: result.data.phone || ''
         });
-      } catch (error: any) {
-        console.error('Failed to fetch user profile:', error.message);
-        setBasicInfoError('root', {
-          type: 'manual',
-          message: 'Failed to load user profile'
-        });
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+          setBasicInfoError('root', {
+            type: 'manual',
+            message: error.message || 'Failed to update profile information'
+          });
+        } else {
+          toast.error("Failed to fetch your profile");
+        }
       }
     };
 
@@ -94,24 +98,25 @@ const UserProfile: React.FC = () => {
 
   const onSubmitBasicInfo = async (data: BasicInfoFormValues) => {
     try {
-      console.log("this is working");
-
       const formData = new FormData();
       formData.append('userName', data.name);
       formData.append('email', data.email);
 
       const result = await updateProfile(formData);
-      console.log(result, "tumdfkd");
 
       setUserName(result.data.userName);
       toast.success(result.message);
-    } catch (error: any) {
-      console.error('Basic info update failed:', error.message);
-      setBasicInfoError('root', {
-        type: 'manual',
-        message: error.message || 'Failed to update profile information'
-      });
-    };
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+        setBasicInfoError('root', {
+          type: 'manual',
+          message: error.message || 'Failed to update profile information'
+        });
+      } else {
+        toast.error("Failed to update profile details");
+      }
+    }
   };
 
   const onSubmitPassword = async (data: PasswordFormValues) => {
@@ -126,9 +131,12 @@ const UserProfile: React.FC = () => {
         newPassword: '',
         confirmPassword: ''
       });
-    } catch (error: any) {
-      console.error('Password update failed:', error.message);
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to update password");
+      }
     }
   };
 
@@ -164,9 +172,12 @@ const UserProfile: React.FC = () => {
 
       const result = await updateProfilePic(formData);
       toast.success(result.message);
-    } catch (error: any) {
-      console.error('Image upload failed:', error);
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to upload profile image");
+      }
     } finally {
       setUploading(false);
     }
@@ -183,10 +194,14 @@ const UserProfile: React.FC = () => {
 
       setProfileImage('');
       toast.success('Profile image removed successfully');
-    } catch (error: any) {
-      console.error('Failed to remove profile image:', error);
-      toast.error('Failed to remove profile image');
-    } finally {
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to remove profile image");
+      }
+    }
+    finally {
       setUploading(false);
     }
   };

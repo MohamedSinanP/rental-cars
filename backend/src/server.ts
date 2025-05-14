@@ -47,12 +47,12 @@ app.use(fileUpload({
 app.use(passport.initialize());
 
 // Routes
-app.use("/auth", authRoutes);
-app.use("/auth", googleRoutes);
-app.use("/admin", adminRoutes);
-app.use("/owner", ownerRoutes);
-app.use("/user", userRoutes);
-app.use("/payment", paymentRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/auth", googleRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/owner", ownerRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // Global error handler
 app.use(errorHandler as express.ErrorRequestHandler);

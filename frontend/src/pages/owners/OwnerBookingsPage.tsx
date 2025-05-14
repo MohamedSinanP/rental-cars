@@ -27,8 +27,12 @@ const OwnerBookingsPage: React.FC = () => {
         setCurrentPage(result.data.currentPage);
         setTotalPages(result.data.totalPages);
         setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch bookings');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('Failed to fetch bookings');
+        }
         setLoading(false);
       }
     };
@@ -44,8 +48,12 @@ const OwnerBookingsPage: React.FC = () => {
       setBookings(bookings.map(booking =>
         booking._id === bookingId ? { ...booking, status: newStatus } : booking
       ));
-    } catch (err) {
-      setError('Failed to update booking status');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Failed to update bookings. status');
+      }
     }
   };
 

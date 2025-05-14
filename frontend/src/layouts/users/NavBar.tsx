@@ -18,7 +18,7 @@ const navigation = [
   { name: 'About Us', href: '/contact', current: false },
 ]
 
-function classNames(...classes: any) {
+function classNames(...classes: (string | boolean | undefined | null)[]) {
   return classes.filter(Boolean).join(' ')
 }
 
@@ -62,7 +62,7 @@ const NavBar = () => {
                     <ul key={item.name}>
                       <NavLink
                         to={item.href}
-                        className={({ isActive }: { isActive: Boolean }) => isActive ? 'bg-teal-400 text-white rounded-md px-3 py-2 text-sm font-medium' : 'text-black hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'
+                        className={({ isActive }: { isActive: boolean }) => isActive ? 'bg-teal-400 text-white rounded-md px-3 py-2 text-sm font-medium' : 'text-black hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'
                         }
                       >{item.name}
                       </NavLink>

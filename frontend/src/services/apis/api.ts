@@ -1,8 +1,7 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { store } from "../../redux/store";
 import { setAccessToken, removeAuth } from "../../redux/slices/authSlice";
 import { navigateTo } from "../../utils/navigateHelper";
-
 
 // Axios instance
 const api = axios.create({
@@ -31,20 +30,25 @@ api.interceptors.request.use((config) => {
 let isRefreshing = false;
 let failedQueue: {
   resolve: (token: string) => void;
-  reject: (err: any) => void;
+  reject: (err: AxiosError | unknown) => void; // Replace `any` with `AxiosError | unknown`
 }[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: AxiosError | unknown | null, token: string | null = null) => {
   failedQueue.forEach((prom) => {
-    token ? prom.resolve(token) : prom.reject(error);
+    if (token) {
+      prom.resolve(token);
+    } else {
+      prom.reject(error);
+    }
   });
   failedQueue = [];
 };
 
+
 // Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  async (error: AxiosError) => { // Replace `any` with `AxiosError`
     const originalRequest = error.config as CustomAxiosRequest;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -56,7 +60,7 @@ api.interceptors.response.use(
               originalRequest.headers["Authorization"] = `Bearer ${token}`;
               resolve(api(originalRequest));
             },
-            reject: (err: any) => reject(err),
+            reject: (err: AxiosError | unknown) => reject(err), // Replace `any` with `AxiosError | unknown`
           });
         });
       }
