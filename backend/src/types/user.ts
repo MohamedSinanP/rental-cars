@@ -1,5 +1,6 @@
 import mongoose, { Document } from "mongoose";
 import { Role } from "./types";
+import ICar from "./car";
 
 export default interface IUser {
   _id?: string;
@@ -102,7 +103,6 @@ export interface IUserSubscription {
   status: string;
   currentPeriodStart: Date;
   currentPeriodEnd: Date;
-  cancelAtPeriodEnd: boolean;
 };
 
 export interface IUserSubscriptionModel extends Document {
@@ -113,7 +113,6 @@ export interface IUserSubscriptionModel extends Document {
   status: string;
   currentPeriodStart: Date;
   currentPeriodEnd: Date;
-  cancelAtPeriodEnd: boolean;
 };
 
 export interface IAddress {
@@ -171,4 +170,34 @@ export interface UserResponseDTO {
   role: string;
   isVerified: boolean;
   isBlocked: boolean
+};
+
+export interface IWishlistCar {
+  car: string;
+  addedAt: Date;
+}
+
+export interface IWishlist {
+  userId: string;
+  cars: IWishlistCar[];
+}
+
+export interface IWishlistModel extends Document {
+  userId: mongoose.Types.ObjectId;
+  cars: {
+    car: mongoose.Types.ObjectId;
+    addedAt: Date;
+  }[];
+}
+
+export type WishlistPaginatedItem = {
+  addedAt: Date;
+  car: ICar;
+};
+
+
+export interface IUserWishlistPaginatedResponse {
+  data: WishlistPaginatedItem[];
+  totalPages: number;
+  currentPage: number;
 };

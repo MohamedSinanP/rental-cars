@@ -1,5 +1,4 @@
 import React, { FormEvent, useState } from 'react';
-import { NavLink } from 'react-router-dom';
 import GoogleLoginButton from './GoogleLoginButton';
 
 type Props = {
@@ -65,19 +64,6 @@ const LoginForm: React.FC<Props> = ({ onSubmit, showGoogle = false }) => {
           onChange={handleChange}
         />
       </div>
-
-      <div className="flex">
-        <p className="text-xs font-light text-gray-600">
-          Don&apos;t have an account?{' '}
-          <NavLink to="/signup" className="text-sm font-medium cursor-pointer">
-            Register Now
-          </NavLink>
-        </p>
-        <p className="text-sm font-medium text-gray-600 ml-auto cursor-pointer">
-          <NavLink to="/forget-password">Forgot password?</NavLink>
-        </p>
-      </div>
-
       <button className="w-full bg-black text-white py-3 rounded hover:bg-gray-900 cursor-pointer">
         Login
       </button>

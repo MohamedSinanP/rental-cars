@@ -15,7 +15,7 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
     return await this._userSubsModel.create(data);
   };
 
-  async findUserSubscription(userId: string): Promise<IUserSubscriptionModel | null> {
+  async getUserActiveSubscription(userId: string): Promise<IUserSubscriptionModel | null> {
     return await this._userSubsModel.findOne({
       userId,
       status: 'active',
@@ -56,7 +56,7 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
     const result = await this._userSubsModel.aggregate([
       {
         $match: {
-          status: "active"
+          status: { $in: ["active", "cancelled", "completed"] }
         }
       },
       {
@@ -83,7 +83,7 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
 
   async getTotalEarnings(type: string, year: number, from: string, to: string): Promise<number> {
     const matchConditions: any = {
-      status: 'active' // assuming only active subscriptions count as earnings
+      status: { $in: ['active', 'cancelled', 'completed'] }
     };
 
     if (type === 'yearly') {
@@ -139,5 +139,20 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
     const total = await this._userSubsModel.countDocuments({ userId });
 
     return { data, total };
+  };
+
+  async markExpiredAsCompleted(): Promise<{ modifiedCount: number }> {
+    const now = new Date();
+    const result = await this._userSubsModel.updateMany(
+      {
+        status: 'active',
+        currentPeriodEnd: { $lt: now }
+      },
+      {
+        $set: { status: 'completed' }
+      }
+    );
+
+    return { modifiedCount: result.modifiedCount };
   }
 };

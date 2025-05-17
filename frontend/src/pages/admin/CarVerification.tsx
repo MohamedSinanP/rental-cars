@@ -25,9 +25,7 @@ const CarVerification: React.FC = () => {
 
   const handleVerify = async (id: string) => {
     try {
-      const result = await carVerifyApi(id);
-      console.log(result.data, "howee ithegilum");
-
+      await carVerifyApi(id);
       setCars((prev) => prev.filter((car) => car._id !== id));
     } catch (error) {
       console.error("Verification failed:", error);

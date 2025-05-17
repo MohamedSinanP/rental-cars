@@ -1,12 +1,10 @@
-// OwnerBookingsPage.tsx
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../layouts/owners/Sidebar';
 import { changeBookingStatus, fetchAllOwnerBookings } from '../../services/apis/ownerApi';
 import { IBookingWithPopulatedData } from '../../types/types';
 import RentalDetailsModal from '../../components/RentalDetailsModal';
 import Pagination from '../../components/Pagination';
-
-
+import { toast } from 'react-toastify';
 
 const OwnerBookingsPage: React.FC = () => {
   const [bookings, setBookings] = useState<IBookingWithPopulatedData[]>([]);
@@ -17,7 +15,6 @@ const OwnerBookingsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 4;
-
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -42,17 +39,26 @@ const OwnerBookingsPage: React.FC = () => {
 
   const handleStatusChange = async (bookingId: string, newStatus: 'active' | 'cancelled' | 'completed') => {
     try {
+      const booking = bookings.find(b => b._id === bookingId);
+      if (booking && booking.status !== 'active') {
+        toast.error('Cannot change status of a cancelled or completed booking');
+        return;
+      }
+
       const result = await changeBookingStatus(bookingId, newStatus);
-      console.log("this is the status rsult", result.data);
+      console.log("this is the status result", result.data);
 
       setBookings(bookings.map(booking =>
         booking._id === bookingId ? { ...booking, status: newStatus } : booking
       ));
+      toast.success('Booking status updated successfully');
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message);
+        toast.error(error.message);
       } else {
-        setError('Failed to update bookings. status');
+        setError('Failed to update booking status');
+        toast.error('Failed to update booking status');
       }
     }
   };
@@ -118,11 +124,13 @@ const OwnerBookingsPage: React.FC = () => {
                       <select
                         value={booking.status}
                         onChange={(e) => handleStatusChange(booking._id!, e.target.value as 'active' | 'cancelled' | 'completed')}
-                        className="px-1 py-1 text-xs border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-1 py-1 text-xs border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={booking.status !== 'active'}
+                        title={booking.status !== 'active' ? 'Cannot change status of cancelled or completed bookings' : ''}
                       >
                         <option value="active">Active</option>
-                        <option value="cancelled">Cancel</option>
-                        <option value="completed">Complete</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="completed">Completed</option>
                       </select>
                     </div>
                   </td>

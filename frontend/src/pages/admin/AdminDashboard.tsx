@@ -3,25 +3,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } fro
 import { DollarSign, Users, UserCog, BarChart2, Calendar, Loader } from 'lucide-react';
 import Sidebar from '../../layouts/admin/Sidebar';
 import { getStatsForAdmin, getRentalStatsForAdmin } from '../../services/apis/adminApi';
+import { AdminStats, ChartDataPoint, TimeFilterType } from '../../types/user';
 
-// Define TypeScript interfaces for data structures
-interface ChartDataPoint {
-  month?: number;
-  year?: number;
-  date?: string;
-  totalCommission: number;
-  count: number;
-  name?: string;
-}
 
-interface AdminStats {
-  totalUsers: number;
-  totalOwners: number;
-  subscriptionEarnings: number;
-  totalEarnings: number;
-}
-
-type TimeFilterType = 'yearly' | 'monthly' | 'custom';
 
 const AdminDashboard: React.FC = () => {
   // Filter state

@@ -105,7 +105,7 @@ const SignupOwner = () => {
       } else {
         toast.error("Something went wrong");
       }
-    };
+    }
     setFormData({
       fullName: '',
       email: '',
@@ -116,41 +116,81 @@ const SignupOwner = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="bg-white shadow-md rounded-lg p-6 sm:p-10 w-full max-w-4xl flex flex-col sm:flex-row items-center">
+    <div className="flex items-center justify-center min-h-screen bg-teal-50 px-4">
+      <div className="bg-white shadow-md shadow-teal-500/50 border border-teal-500 rounded-lg p-6 sm:p-10 w-full max-w-4xl flex flex-col sm:flex-row items-center">
         <div className="hidden sm:flex w-1/2 justify-center">
-          <img src="/images/car1.jpg" alt="Car" className="w-80 h-80 rounded-full object-cover" />
+          <img
+            src="/images/car1.jpg"
+            alt="Car"
+            className="w-80 h-80 rounded-full object-cover border border-teal-500"
+          />
         </div>
 
         <div className="w-full sm:w-1/2">
-          <h2 className="text-2xl font-bold text-center mb-6">Become A Host Now</h2>
+          <h2 className="text-2xl font-bold text-center text-black mb-6">Become A Host Now</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             {errors?.fullName && <span className="text-red-500 text-sm">{errors.fullName}</span>}
-            <input name="fullName" type="text" placeholder="Full Name" className="w-full p-2 border border-gray-300 rounded" value={formData.fullName} onChange={handleChange} />
+            <input
+              name="fullName"
+              type="text"
+              placeholder="Full Name"
+              className="w-full p-2 border border-teal-500 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-black placeholder:text-black/60"
+              value={formData.fullName}
+              onChange={handleChange}
+            />
 
             {errors?.email && <span className="text-red-500 text-sm">{errors.email}</span>}
-            <input name="email" type="email" placeholder="Email" className="w-full p-2 border border-gray-300 rounded" value={formData.email} onChange={handleChange} />
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              className="w-full p-2 border border-teal-500 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-black placeholder:text-black/60"
+              value={formData.email}
+              onChange={handleChange}
+            />
 
             {errors?.password && <span className="text-red-500 text-sm">{errors.password}</span>}
-            <input name="password" type="password" placeholder="Password" className="w-full p-2 border border-gray-300 rounded" value={formData.password} onChange={handleChange} />
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              className="w-full p-2 border border-teal-500 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-black placeholder:text-black/60"
+              value={formData.password}
+              onChange={handleChange}
+            />
 
             {errors?.confirmPassword && <span className="text-red-500 text-sm">{errors.confirmPassword}</span>}
-            <input name="confirmPassword" type="password" placeholder="Confirm Password" className="w-full p-2 border border-gray-300 rounded" value={formData.confirmPassword} onChange={handleChange} />
+            <input
+              name="confirmPassword"
+              type="password"
+              placeholder="Confirm Password"
+              className="w-full p-2 border border-teal-500 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-black placeholder:text-black/60"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
 
             {errors?.commission && <span className="text-red-500 text-sm">{errors.commission}</span>}
-            <br />
-            <label htmlFor="commission" className='text-sm text-amber-500'>Specify the commission percentage.</label>
-            <input name="commission" type="text" placeholder="Commission" className="w-full p-2 border border-gray-300 rounded" value={formData.commission} onChange={handleChange} />
+            <label htmlFor="commission" className="text-sm text-black">Specify the commission percentage.</label>
+            <input
+              name="commission"
+              type="text"
+              placeholder="Commission"
+              className="w-full p-2 border border-teal-500 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-black placeholder:text-black/60"
+              value={formData.commission}
+              onChange={handleChange}
+            />
 
-            <p className="text-sm text-gray-600 text-center">Already have an account? <NavLink to={'/login'}>
-              <span className="font-bold cursor-pointer">Login Now</span>
-            </NavLink>
+            <p className="text-sm text-black text-center">
+              Already have an account?{" "}
+              <NavLink to={'/login'}>
+                <span className="font-bold text-teal-500 hover:text-teal-600 cursor-pointer">Login Now</span>
+              </NavLink>
             </p>
-            <button className="w-full bg-black text-white py-3 rounded hover:bg-gray-900 cursor-pointer">Sign Up</button>
+            <button className="w-full bg-teal-500 text-white py-3 rounded hover:bg-teal-600 cursor-pointer">Sign Up</button>
           </form>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 

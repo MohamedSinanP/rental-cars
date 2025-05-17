@@ -9,7 +9,6 @@ const userSubscriptionSchema = new Schema<IUserSubscriptionModel>(
     status: { type: String, required: true },
     currentPeriodStart: { type: Date, required: true },
     currentPeriodEnd: { type: Date, required: true },
-    cancelAtPeriodEnd: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

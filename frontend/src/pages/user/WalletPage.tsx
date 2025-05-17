@@ -189,7 +189,7 @@ const WalletPage: React.FC = () => {
   return (
     <>
       <NavBar />
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="flex min-h-screen bg-gray-50 pt-20">
         {/* Mobile sidebar toggle button */}
         <button
           className="lg:hidden fixed z-30 top-4 left-4 p-2 rounded-md bg-white shadow-md"

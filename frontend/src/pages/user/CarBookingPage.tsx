@@ -15,7 +15,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY as string);
 
-interface BookingFormData {
+export interface BookingFormData {
   pickupDateTime: string;
   dropoffDateTime: string;
   pickupLocation: string;
@@ -392,7 +392,7 @@ const CarBookingPage: React.FC = () => {
   return (
     <>
       <NavBar />
-      <div className="max-w-6xl mx-auto bg-white">
+      <div className="max-w-6xl mx-auto bg-white pt-20">
         <div className="flex flex-col md:flex-row">
           <div className="w-full md:w-1/3 p-4 bg-gray-50">
             <div className="mb-4">

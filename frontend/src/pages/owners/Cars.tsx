@@ -53,7 +53,6 @@ const Cars: React.FC = () => {
       if (error instanceof Error) {
         setError(error.message);
         toast.error(error.message);
-
       } else {
         setError('Failed to fetch cars. Please try again.');
         toast.error('Failed to fetch cars. Please try again.');
@@ -87,7 +86,7 @@ const Cars: React.FC = () => {
         if (error instanceof Error) {
           toast.error(error.message);
         } else {
-          toast.error('Failed to fetch bookings');
+          toast.error('Failed to delete car');
         }
       }
     }
@@ -103,8 +102,10 @@ const Cars: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
-      <div className="flex-1 p-6 lg:p-8">
+      <div className="fixed top-0 left-0 w-64 h-full z-10">
+        <Sidebar />
+      </div>
+      <div className="flex-1 ml-64 p-6 lg:p-8 overflow-auto">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-bold text-gray-900">My Cars</h2>

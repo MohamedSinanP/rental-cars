@@ -14,15 +14,19 @@ const PrivateRoute = ({ allowedRoles }: PrivateRouteProps) => {
   const checking = useAuthCheck();
 
   useEffect(() => {
-    if (user && ['owner', 'user'].includes(user.role || '') && user.isBlocked) {
-      toast.error("You are blocked");
+    if (user && ['owner', 'user'].includes(user.role || '')) {
+      if (user.isBlocked) {
+        toast.error("You are blocked");
+      } else if (!user.isVerified) {
+        toast.warning("Please verify your account to continue");
+      }
     }
   }, [user]);
 
   if (checking) {
     return (
       <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-teal-500"></div>
       </div>
     );
   }
@@ -31,11 +35,15 @@ const PrivateRoute = ({ allowedRoles }: PrivateRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (user && ['owner', 'user'].includes(user.role || '') && user.isBlocked) {
+  if (['owner', 'user'].includes(user.role || '') && user.isBlocked) {
     return <Navigate to="/login" replace />;
   }
 
-  if (user && !allowedRoles.includes(user.role || '')) {
+  if (['owner', 'user'].includes(user.role || '') && !user.isVerified) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!allowedRoles.includes(user.role || '')) {
     return <Navigate to="/unauthorized" replace />;
   }
 

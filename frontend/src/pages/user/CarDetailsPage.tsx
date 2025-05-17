@@ -83,7 +83,6 @@ const CarDetailsPage: React.FC = () => {
       return;
     }
 
-    // Calculate average rating
     const sum = reviewsArray.reduce((acc, review) => acc + review.rating, 0);
     const avg = sum / reviewsArray.length;
     setAverageRating(Math.round(avg * 10) / 10);
@@ -134,7 +133,6 @@ const CarDetailsPage: React.FC = () => {
 
     if (isLuxuryCar) {
       const userSub = await checkUserSubscription();
-      console.log(userSub, "yes yo do");
 
       if (!userSub) {
         toast.error("This is a premium car. You need a subscription to book it.");
@@ -221,7 +219,7 @@ const CarDetailsPage: React.FC = () => {
   return (
     <>
       <NavBar />
-      <div className="max-w-6xl mx-auto px-4 py-6 bg-white">
+      <div className="max-w-6xl mx-auto px-4 py-6 bg-white pt-20">
         {/* Breadcrumb */}
         <div className="text-sm text-gray-500 mb-6">
           <span>

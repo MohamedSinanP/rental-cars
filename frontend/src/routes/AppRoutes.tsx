@@ -40,10 +40,8 @@ import SalesReportPage from "../pages/admin/SalerReportPage";
 import UnauthorizedPage from "../pages/errors/UnauthorizedPage";
 import NotFoundPage from "../pages/errors/notFoundPage";
 import SubscriptionHistory from "../pages/user/SubscriptionHistoryPage";
-
-// Fallback / Errors
-// import Unauthorized from "../pages/Unauthorized";
-// import NotFound from "../pages/NotFound";
+import UserWishlist from "../pages/user/UserWishlist";
+import AboutUsPage from "../pages/user/AboutUsPage";
 
 const AppRoutes = () => {
   return (
@@ -60,6 +58,8 @@ const AppRoutes = () => {
       <Route path='/auth/google' element={<GoogleAuthCallback />} />
       <Route path='/unauthorized' element={<UnauthorizedPage />} />
       <Route path='/not-found' element={<NotFoundPage />} />
+      <Route path='/about' element={<AboutUsPage />} />
+
 
       {/* Routes for owner */}
       < Route element={<PrivateRoute allowedRoles={['owner']} />}>
@@ -77,6 +77,7 @@ const AppRoutes = () => {
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/greetings/:id" element={<BookingSuccessPage />} />
         <Route path="/subscription-history" element={<SubscriptionHistory />} />
+        <Route path="/wishlist" element={<UserWishlist />} />
       </Route>
 
       { /* Routes for the user */}

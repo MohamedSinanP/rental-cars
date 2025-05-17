@@ -59,6 +59,12 @@ import ReviewRepository from "../repositories/review.repository";
 import ReviewController from "../controllers/review.controller";
 import IReviewService from "../interfaces/services/review.service";
 import ReviewService from "../services/review.service";
+import { Wishlist } from "../models/wishlist.model";
+import WishlistController from "../controllers/wishlist.controller";
+import IWishlistService from "../interfaces/services/wishlist.service";
+import WishlistService from "../services/wishlist.service";
+import IWishlitRepository from "../interfaces/repositories/wishlist.repository";
+import WishlistRepository from "../repositories/wishlist.repository";
 
 
 export const container = new Container();
@@ -73,6 +79,7 @@ container.bind<AdminController>(TYPES.IAdminController).to(AdminController).inSi
 container.bind<SubscriptionController>(TYPES.ISubscriptionController).to(SubscriptionController).inSingletonScope();
 container.bind<DashboardController>(TYPES.IDashboardController).to(DashboardController).inSingletonScope();
 container.bind<ReviewController>(TYPES.IReviewController).to(ReviewController).inSingletonScope();
+container.bind<WishlistController>(TYPES.IWishlistController).to(WishlistController).inSingletonScope();
 
 
 // repositories
@@ -86,6 +93,7 @@ container.bind<IUserSubsRepository>(TYPES.IUserSubsRepository).to(UserSubsReposi
 container.bind<IAddressRepository>(TYPES.IAddressRepository).to(AddressRepository).inSingletonScope();
 container.bind<IWalletRepository>(TYPES.IWalletRepository).to(WalletRepository).inSingletonScope();
 container.bind<IReviewRepository>(TYPES.IReviewRepository).to(ReviewRepository).inSingletonScope();
+container.bind<IWishlitRepository>(TYPES.IWishlistRepository).to(WishlistRepository).inSingletonScope();
 
 
 
@@ -101,6 +109,7 @@ container.bind<IOwnerService>(TYPES.IOwnerService).to(OwnerService).inSingletonS
 container.bind<ISubscriptionService>(TYPES.ISubscriptionService).to(SubscriptionService).inSingletonScope();
 container.bind<IDashboardService>(TYPES.IDashboardService).to(DashboardService).inSingletonScope();
 container.bind<IReviewService>(TYPES.IReviewService).to(ReviewService).inSingletonScope();
+container.bind<IWishlistService>(TYPES.IWishlistService).to(WishlistService).inSingletonScope();
 
 
 
@@ -115,6 +124,7 @@ container.bind<typeof UserSubscription>(TYPES.UserSubsModel).toConstantValue(Use
 container.bind<typeof Address>(TYPES.AddressModel).toConstantValue(Address);
 container.bind<typeof Wallet>(TYPES.WalletModel).toConstantValue(Wallet);
 container.bind<typeof Review>(TYPES.ReviewModel).toConstantValue(Review);
+container.bind<typeof Wishlist>(TYPES.WishlistModel).toConstantValue(Wishlist);
 
 
 export const authController = container.get<AuthController>(TYPES.IAuthController);
@@ -126,3 +136,4 @@ export const adminController = container.get<AdminController>(TYPES.IAdminContro
 export const subscriptionController = container.get<SubscriptionController>(TYPES.ISubscriptionController);
 export const dashboardController = container.get<DashboardController>(TYPES.IDashboardController);
 export const reviewController = container.get<ReviewController>(TYPES.IReviewController);
+export const wishlistController = container.get<WishlistController>(TYPES.IWishlistController);

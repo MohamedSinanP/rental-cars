@@ -16,7 +16,7 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   return (
     <>
-      <div className='min-h-screen'>
+      <div className='min-h-screen pt-20'>
         {/* navbar section */}
         <NavBar />
         {/* Hero section */}

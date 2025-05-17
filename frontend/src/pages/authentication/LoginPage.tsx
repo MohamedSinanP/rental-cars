@@ -96,14 +96,18 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="bg-white shadow-md rounded-lg p-6 sm:p-10 w-full max-w-4xl flex flex-col sm:flex-row items-center">
+    <div className="flex items-center justify-center min-h-screen bg-teal-50 px-4">
+      <div className="bg-white shadow-md shadow-teal-500/50 border border-teal-500 rounded-lg p-6 sm:p-10 w-full max-w-4xl flex flex-col sm:flex-row items-center">
         <div className="hidden sm:flex w-1/2 justify-center">
-          <img src="/images/car1.jpg" alt="Car" className="w-80 h-80 rounded-full object-cover" />
+          <img
+            src="/images/car1.jpg"
+            alt="Car"
+            className="w-80 h-80 rounded-full object-cover border border-teal-500"
+          />
         </div>
 
         <div className="w-full sm:w-1/2">
-          <h2 className="text-2xl font-bold text-center mb-6">Login Now</h2>
+          <h2 className="text-2xl font-bold text-center text-black mb-6">Login Now</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               {errors.email && <p className="text-red-500 text-sm m-0">{errors.email}</p>}
@@ -112,7 +116,7 @@ const LoginPage = () => {
                 name="email"
                 placeholder="Email"
                 value={formData.email}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-teal-500 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-black placeholder:text-black/60"
                 onChange={handleChange}
               />
             </div>
@@ -123,36 +127,35 @@ const LoginPage = () => {
                 name="password"
                 placeholder="Password"
                 value={formData.password}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-teal-500 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-black placeholder:text-black/60"
                 onChange={handleChange}
               />
             </div>
 
             <div className="flex">
-              <p className="text-xs font-light text-gray-600">
+              <p className="text-xs font-light text-black">
                 Don't have an account?{' '}
-                <NavLink to="/signup" className="text-sm font-medium cursor-pointer">
+                <NavLink to="/signup" className="text-sm font-medium text-teal-500 hover:text-teal-600 cursor-pointer">
                   Register Now
                 </NavLink>
               </p>
 
-              <p className="text-sm font-medium text-gray-600 ml-auto cursor-pointer">
+              <p className="text-sm font-medium text-teal-500 hover:text-teal-600 ml-auto cursor-pointer">
                 <NavLink to="/forget-password">Forgot password?</NavLink>
               </p>
             </div>
 
-            <button className="w-full bg-black text-white py-3 rounded hover:bg-gray-900 cursor-pointer">
+            <button className="w-full bg-teal-500 text-white py-3 rounded hover:bg-teal-600 cursor-pointer">
               Login
             </button>
           </form>
 
           <div className="flex items-center justify-center my-4">
-            <div className="w-1/3 border-t border-gray-300"></div>
-            <p className="mx-2 text-sm text-gray-500">OR Login with</p>
-            <div className="w-1/3 border-t border-gray-300"></div>
+            <div className="w-1/3 border-t border-teal-500"></div>
+            <p className="mx-2 text-sm text-black">OR Login with</p>
+            <div className="w-1/3 border-t border-teal-500"></div>
           </div>
-          <div className="flex items-center justify-center border border-gray-300 rounded-md px-4 py-2"
-          >
+          <div className="flex items-center justify-center border border-teal-500 rounded-md px-4 py-2">
             <GoogleLoginButton />
           </div>
         </div>

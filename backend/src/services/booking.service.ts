@@ -125,8 +125,12 @@ export default class BookingService implements IBookingService {
 
     // Check if pickupDateTime is in the past
     const currentTime = new Date();
-    if (currentTime >= new Date(booking.pickupDateTime)) {
-      throw new HttpError(StatusCode.BAD_REQUEST, "Cannot cancel booking after the scheduled pickup time.");
+
+    const pickupTime = new Date(booking.pickupDateTime);
+    const cutoffTime = new Date(pickupTime.getTime() - 60 * 60 * 1000);
+
+    if (currentTime >= cutoffTime) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "You can only cancel your booking at least 30 minutes before pickup.");
     }
 
     const updatedBooking = await this._bookingRepository.update(bookingId, { status: 'cancelled' });

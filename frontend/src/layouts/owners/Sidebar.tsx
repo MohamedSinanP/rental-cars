@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CalendarCheck, Car, LayoutDashboard, Menu, X, Settings, LogOut, History } from 'lucide-react';
+import { CalendarCheck, Car, LayoutDashboard, Menu, X, LogOut, History } from 'lucide-react';
 import Logo from '../../components/Logo';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '../../services/apis/authApi';
@@ -83,14 +83,6 @@ const Sidebar = () => {
                 <div className="flex items-center gap-x-2">
                   <History className="w-5 h-5" />
                   <span>Added History</span>
-                </div>
-              </NavLink>
-            </li>
-            <li className='m-4'>
-              <NavLink to={'/'} onClick={handleLinkClick}>
-                <div className="flex items-center gap-x-2">
-                  <Settings className="w-5 h-5" />
-                  <span>Settings</span>
                 </div>
               </NavLink>
             </li>

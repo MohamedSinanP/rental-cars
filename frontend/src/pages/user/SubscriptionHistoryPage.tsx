@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { toast } from 'react-toastify';
 import DataTable from '../../components/DataTable';
 import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
 import AccountSidebar from '../../layouts/users/AccountSidebar';
 import Pagination from '../../components/Pagination';
-import { getUserSubscriptions, cancelSubscription } from '../../services/apis/userApis';
+import ActiveSubscriptionCard from '../../components/ActiveSubscriptionCard';
+import { getUserSubscriptions, getActiveSubscription } from '../../services/apis/userApis';
 
 // Define types based on your data model
 type Subscription = {
@@ -22,11 +22,15 @@ type Subscription = {
   cancelAtPeriodEnd: boolean;
 };
 
+type ActiveSubscription = Subscription | null;
 
 const SubscriptionHistory: React.FC = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [activeSubscription, setActiveSubscription] = useState<ActiveSubscription>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [activeSubLoading, setActiveSubLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeSubError, setActiveSubError] = useState<string | null>(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -36,14 +40,14 @@ const SubscriptionHistory: React.FC = () => {
   const limit = 6;
 
   useEffect(() => {
+    fetchActiveSubscription();
     fetchSubscriptions(currentPage, limit);
 
-    // Check screen size on mount and resize
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
-    handleResize(); // Initial check
+    handleResize();
     window.addEventListener('resize', handleResize);
 
     return () => {
@@ -51,35 +55,50 @@ const SubscriptionHistory: React.FC = () => {
     };
   }, [currentPage]);
 
+  const fetchActiveSubscription = async () => {
+    try {
+      setActiveSubLoading(true);
+      const result = await getActiveSubscription();
+      if (Object.keys(result.data).length > 0) {
+        setActiveSubscription(result.data);
+        setActiveSubError(null);
+      } else {
+        return;
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setActiveSubError(error.message);
+      } else {
+        setActiveSubError('Failed to load active subscription. Please try again later.');
+      }
+    } finally {
+      setActiveSubLoading(false);
+    }
+  };
+
   const fetchSubscriptions = async (page: number, limit: number) => {
     try {
       setLoading(true);
-      // Assuming your API supports pagination parameters
       const result = await getUserSubscriptions(page, limit);
 
-      // Update state with paginated data
       setSubscriptions(result.data.data);
       setCurrentPage(result.data.currentPage);
       setTotalPages(result.data.totalPages);
       setError(null);
-    } catch (error) {
-      console.error('Error fetching subscriptions:', error);
-      setError('Failed to load subscription history. Please try again later.');
-      toast.error('Failed to load subscription history');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Failed to load subscription history. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancelSubscription = async (subscription: Subscription) => {
-    try {
-      await cancelSubscription(subscription._id);
-      toast.success('Subscription cancelled successfully');
-      fetchSubscriptions(currentPage, limit);
-    } catch (error) {
-      console.error('Error cancelling subscription:', error);
-      toast.error('Failed to cancel subscription');
-    }
+  const handleCancelSuccess = () => {
+    fetchActiveSubscription();
+    fetchSubscriptions(currentPage, limit);
   };
 
   const formatDate = (dateString: string) => {
@@ -91,7 +110,7 @@ const SubscriptionHistory: React.FC = () => {
     });
   };
 
-  // Responsive columns configuration
+  // Responsive columns configuration - removed the cancel action
   const columns = [
     {
       key: 'subscriptionId.name',
@@ -135,23 +154,9 @@ const SubscriptionHistory: React.FC = () => {
     }
   ];
 
-  const actions = [
-    {
-      label: 'Cancel',
-      className: (item: Subscription) =>
-        item.status === 'active' && !item.cancelAtPeriodEnd
-          ? 'bg-red-50 text-red-700 hover:bg-red-100'
-          : 'hidden',
-      onClick: handleCancelSubscription,
-      isVisible: (item: Subscription) =>
-        item.status === 'active' && !item.cancelAtPeriodEnd
-    }
-  ];
 
-  // Handle page change - fetches new data from the backend
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    // Data fetching is handled by the useEffect that depends on currentPage
   };
 
   // Render card view for mobile displays
@@ -182,21 +187,118 @@ const SubscriptionHistory: React.FC = () => {
             <span>{formatDate(subscription.currentPeriodEnd)}</span>
           </div>
         </div>
+      </div>
+    );
+  };
 
-        {subscription.status === 'active' && !subscription.cancelAtPeriodEnd && (
-          <button
-            onClick={() => handleCancelSubscription(subscription)}
-            className="w-full text-center px-3 py-2 rounded bg-red-50 text-red-700 hover:bg-red-100 text-sm font-medium"
-          >
-            Cancel Subscription
-          </button>
-        )}
+  // Render loading state for mobile subscriptions
+  const renderMobileLoadingState = () => (
+    <div className="space-y-4">
+      {[...Array(3)].map((_, index) => (
+        <div key={index} className="bg-white rounded-lg shadow p-4 animate-pulse">
+          <div className="flex justify-between items-start mb-2">
+            <div className="h-5 bg-gray-200 rounded w-2/5 mb-2"></div>
+            <div className="h-5 bg-gray-200 rounded w-1/5"></div>
+          </div>
+          <div className="space-y-2 mb-3">
+            <div className="flex justify-between">
+              <div className="h-4 bg-gray-200 rounded w-1/5"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            </div>
+            <div className="flex justify-between">
+              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+            </div>
+            <div className="flex justify-between">
+              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // Render loading state for the active subscription card
+  const renderActiveSubscriptionLoadingState = () => (
+    <div className="bg-white rounded-lg shadow p-6 mb-6 animate-pulse">
+      <div className="flex justify-between items-center mb-4">
+        <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+        <div className="h-6 bg-gray-200 rounded w-16"></div>
+      </div>
+      <div className="grid md:grid-cols-2 gap-4 mb-6">
+        {[...Array(4)].map((_, index) => (
+          <div key={index}>
+            <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+            <div className="h-6 bg-gray-200 rounded w-2/3"></div>
+          </div>
+        ))}
+      </div>
+      <div className="border-t border-gray-200 pt-4">
+        <div className="h-10 bg-gray-200 rounded w-1/4"></div>
+      </div>
+    </div>
+  );
+
+  // Render content based on loading state and device type
+  const renderContent = () => {
+    if (loading) {
+      return isMobile ? (
+        renderMobileLoadingState()
+      ) : (
+        <div className="bg-white rounded-lg shadow p-6 animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="space-y-3">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="flex items-center">
+                <div className="h-4 bg-gray-200 rounded w-1/5 mr-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/6 mr-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/6 mr-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/8 mr-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/8"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="mb-4 md:mb-6 p-3 md:p-4 bg-red-50 border border-red-200 rounded-md flex items-center text-red-700 text-sm md:text-base">
+          <AlertCircle className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
+          <p>{error}</p>
+        </div>
+      );
+    }
+
+    if (subscriptions.length === 0) {
+      return (
+        <div className="text-center py-8 bg-white rounded-lg shadow p-6 text-gray-500">
+          No subscription history found
+        </div>
+      );
+    }
+
+    // Render normal content based on device type
+    return isMobile ? (
+      subscriptions.map((subscription) => renderMobileSubscriptionCard(subscription))
+    ) : (
+      <div className="overflow-x-auto">
+        <DataTable
+          data={subscriptions}
+          columns={columns}
+          actions={[]}
+          loading={false}
+          emptyMessage="No subscription history found"
+          title="Your Subscriptions"
+        />
       </div>
     );
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gray-50 pt-20">
       <NavBar />
 
       <div className="flex flex-1 flex-col md:flex-row">
@@ -204,43 +306,25 @@ const SubscriptionHistory: React.FC = () => {
 
         <main className="flex-1 p-3 md:p-6 lg:p-8 overflow-x-hidden">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">Subscription History</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">Subscription Management</h1>
 
-            {error && (
-              <div className="mb-4 md:mb-6 p-3 md:p-4 bg-red-50 border border-red-200 rounded-md flex items-center text-red-700 text-sm md:text-base">
-                <AlertCircle className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
-                <p>{error}</p>
-              </div>
+            {/* Active Subscription Card with Loading State */}
+            {activeSubLoading ? (
+              renderActiveSubscriptionLoadingState()
+            ) : (
+              <ActiveSubscriptionCard
+                subscription={activeSubscription}
+                loading={false}
+                error={activeSubError}
+                onCancelSuccess={handleCancelSuccess}
+              />
             )}
 
-            {/* Mobile view - card layout */}
-            {isMobile && (
-              <div className="mb-4">
-                {loading ? (
-                  <div className="text-center py-8">Loading subscriptions...</div>
-                ) : subscriptions.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">No subscription history found</div>
-                ) : (
-                  subscriptions.map(subscription => renderMobileSubscriptionCard(subscription))
-                )}
-              </div>
-            )}
+            <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">Subscription History</h2>
 
-            {/* Desktop view - table layout */}
-            {!isMobile && (
-              <div className="overflow-x-auto">
-                <DataTable
-                  data={subscriptions}
-                  columns={columns}
-                  actions={actions}
-                  loading={loading}
-                  emptyMessage="No subscription history found"
-                  title="Your Subscriptions"
-                />
-              </div>
-            )}
+            {renderContent()}
 
-            {subscriptions.length > 0 && (
+            {!loading && subscriptions.length > 0 && (
               <div className="mt-4">
                 <Pagination
                   currentPage={currentPage}
@@ -267,8 +351,10 @@ const SubscriptionHistory: React.FC = () => {
                     <span className="h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-yellow-500"></span>
                   </div>
                   <div>
-                    <h3 className="font-medium text-sm md:text-base">Pending Cancellation</h3>
-                    <p className="text-xs md:text-sm text-gray-600">Your subscription will remain active until the end of the current billing period and will not renew.</p>
+                    <h3 className="font-medium text-sm md:text-base">Completed</h3>
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Your subscription has ended. You no longer have access to the subscribed services.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-2">

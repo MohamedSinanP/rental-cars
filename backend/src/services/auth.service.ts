@@ -330,6 +330,13 @@ export default class AuthService implements IAuthService {
       throw new HttpError(StatusCode.NOT_FOUND, "User not found")
     };
 
+    if (user.googleId) {
+      throw new HttpError(
+        StatusCode.BAD_REQUEST,
+        "This account was created using Google. You can't reset the password."
+      );
+    }
+
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenExpiresAt = new Date(Date.now() + 10 * 60 * 60 * 1000);
     if (user.role === Role.USER) {
@@ -344,18 +351,31 @@ export default class AuthService implements IAuthService {
 
   async resetPassword(token: string, newPwd: string): Promise<void> {
     let user = await this._userRepository.findOne({ resetToken: token });
+    let isOwner = false;
+
     if (!user) {
       user = await this._ownerRepository.findOne({ resetToken: token });
-    };
+      isOwner = true;
+    }
 
     if (!user || !user.resetTokenExpiresAt || new Date() > user.resetTokenExpiresAt) {
       throw new HttpError(StatusCode.NOT_FOUND, "Invalid or expired token");
-    };
+    }
 
     const hashedPwd = await bcrypt.hash(newPwd, 10);
 
-    await this._userRepository.update(String(user._id), { password: hashedPwd, resetToken: null, resetTokenExpiresAt: null });
-  };
+    const updateData = {
+      password: hashedPwd,
+      resetToken: null,
+      resetTokenExpiresAt: null,
+    };
+
+    if (isOwner) {
+      await this._ownerRepository.update(String(user._id), updateData);
+    } else {
+      await this._userRepository.update(String(user._id), updateData);
+    }
+  }
 
   async rotateRefreshToken(refreshToken: string): Promise<{ newAccessToken: string; newRefreshToken: string; }> {
     if (!refreshToken) throw new HttpError(401, "No refresh token provided");

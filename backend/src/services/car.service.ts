@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import axios from 'axios';
 import ICarService from "../interfaces/services/car.service";
 import { fetchAddressFromCoordinates } from "../utils/geolocation";
-import { ICarModel } from "../types/car";
+import { CarFilter, ICarModel } from "../types/car";
 import ICar from "../types/car";
 import TYPES from "../di/types";
 import ICarRepository from "../interfaces/repositories/car.repository";
@@ -115,8 +115,8 @@ export default class CarService implements ICarService {
     return cars;
   };
 
-  async fetchCarsWithoutDistance(page: number, limit: number): Promise<PaginatedData<ICarModel>> {
-    const { data, total } = await this._carRepository.findPaginated(page, limit);
+  async fetchCarsWithoutDistance(page: number, limit: number, filters: CarFilter): Promise<PaginatedData<ICarModel>> {
+    const { data, total } = await this._carRepository.findPaginated(page, limit, filters);
     if (!data) {
       throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.")
     };
@@ -128,14 +128,14 @@ export default class CarService implements ICarService {
     };
   };
 
-  async fetchCarsWithDistance(userId: string, page: number, limit: number): Promise<PaginatedData<ICarModel>> {
+  async fetchCarsWithDistance(userId: string, page: number, limit: number, filters: CarFilter): Promise<PaginatedData<ICarModel>> {
     const userLocation = await this._userService.getUserLocation(userId);
 
     if (!userLocation) {
       throw new HttpError(StatusCode.BAD_REQUEST, "User location not found.");
     };
 
-    const { data, total } = await this._carRepository.findPaginatedWithDistance(userLocation, page, limit);
+    const { data, total } = await this._carRepository.findPaginatedWithDistance(userLocation, page, limit, filters);
 
     const totalPages = Math.ceil(total / limit);
     return {
@@ -246,5 +246,15 @@ export default class CarService implements ICarService {
 
   async _llmQuery(prompt: string): Promise<string> {
     return extractDocumentDataWithLLM(prompt);
-  }
+  };
+
+  async getMaxPriceAndDistance(): Promise<{ maxPrice: number; maxDistance: number }> {
+    const maxPriceResult = await this._carRepository.findMaxPrice();
+    const maxDistance = 1000;
+
+    return {
+      maxPrice: maxPriceResult || 5000,
+      maxDistance
+    };
+  };
 };

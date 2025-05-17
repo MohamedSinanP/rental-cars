@@ -1,4 +1,3 @@
-// models/wallet.model.ts
 import { Schema, model } from 'mongoose';
 import { IWalletModel } from '../types/user';
 

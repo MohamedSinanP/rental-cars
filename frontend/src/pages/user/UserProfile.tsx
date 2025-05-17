@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
@@ -26,6 +26,7 @@ const UserProfile: React.FC = () => {
   const [uploading, setUploading] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>('');
   const [userRole, setUserRole] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Basic Info Form
   const {
@@ -206,10 +207,18 @@ const UserProfile: React.FC = () => {
     }
   };
 
+  const triggerFileInput = () => {
+    console.log("i am working");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <>
       <NavBar />
-      <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
+      <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 pt-20">
         <AccountSidebar />
 
         <div className="flex-1 p-4 sm:p-6 lg:p-8 w-full mt-16 lg:mt-0">
@@ -244,20 +253,22 @@ const UserProfile: React.FC = () => {
                   </div>
                 )}
 
-                <label
-                  htmlFor="profile-upload"
+                <button
+                  onClick={triggerFileInput}
+                  type="button"
                   className="absolute bottom-0 right-0 w-9 h-9 bg-teal-600 rounded-full flex items-center justify-center cursor-pointer shadow-md hover:bg-teal-700 transition-colors"
                 >
                   <Camera size={18} className="text-white" />
-                  <input
-                    type="file"
-                    id="profile-upload"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploading}
-                  />
-                </label>
+                </button>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                />
               </div>
 
               <div className="text-center md:text-left">

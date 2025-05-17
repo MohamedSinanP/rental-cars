@@ -46,6 +46,8 @@ export default class UserConroller implements IUserController {
   async setUserLocation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.params.id;
+      console.log(userId);
+
       const { location } = req.body;
       const updatedUser = await this._userService.setUserLocation(userId, location);
       res.status(StatusCode.OK).json(HttpResponse.success(updatedUser));

@@ -31,7 +31,7 @@ const app = express();
 connectDB();
 
 // Middlewares
-app.use('/user/webhook', express.raw({ type: 'application/json' }));
+app.use('/api/user/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({

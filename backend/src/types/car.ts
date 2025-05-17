@@ -58,3 +58,16 @@ export interface ICarModel extends Document {
   maintenanceInterval: number;
   isListed: boolean;
 }
+
+export interface CarFilter {
+  carType: string[];
+  transmission: string[];
+  fuelType: string[];
+  seats: string[];
+  fuelOption: string[];
+  minPrice: number;
+  maxPrice: number;
+  search: string;
+  minDistance?: number;
+  maxDistance?: number;
+}

@@ -7,14 +7,15 @@ import {
   LogOut,
   ChevronRight,
   Menu,
-  X
+  X,
+  Heart
 } from 'lucide-react';
 import { logout } from '../../services/apis/authApi';
 import { toast } from 'react-toastify';
 
 const AccountSidebar: React.FC = () => {
   const navigate = useNavigate();
-  const [activeItem, setActiveItem] = useState('My Profile');
+  const [activeItem, setActiveItem] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const menuItems = [
@@ -22,6 +23,7 @@ const AccountSidebar: React.FC = () => {
     { id: 'rentals', icon: <Car className="w-5 h-5" />, text: 'My Rentals', path: '/rentals' },
     { id: 'wallet', icon: <Wallet className="w-5 h-5" />, text: 'Wallet', path: '/wallet' },
     { id: 'subscription history', icon: <Wallet className="w-5 h-5" />, text: 'My Subscription', path: '/subscription-history' },
+    { id: 'wishlist', icon: <Heart className="w-5 h-5" />, text: 'Wishlist', path: '/wishlist' },
   ];
 
   const toggleMobileMenu = () => {

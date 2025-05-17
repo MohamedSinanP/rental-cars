@@ -13,4 +13,5 @@ export default interface ISubscriptionController {
   changeUserSubscriptionStatus(req: Request, res: Response, next: NextFunction): Promise<void>;
   getUserAllSubscriptions(req: Request, res: Response, next: NextFunction): Promise<void>;
   cancelUserSub(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getUserActiveSub(req: Request, res: Response, next: NextFunction): Promise<void>;
 };

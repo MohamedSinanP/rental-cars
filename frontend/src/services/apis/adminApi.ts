@@ -1,63 +1,30 @@
 import { blockOrUnblockUser } from "../../redux/slices/authSlice";
 import { store } from "../../redux/store";
 import { getApiErrorMessage } from "../../utils/handleApiError";
-import api from "./api"
+import api from "./api";
 
-
+/* -------------------------- User & Owner Management -------------------------- */
 
 export const fetchUsers = async (page: number, limit: number, search: string) => {
   try {
     const response = await api.get('/admin/fetch-users', {
-      params: {
-        page,
-        limit,
-        search
-      },
+      params: { page, limit, search },
     });
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
-  };
+  }
 };
 
 export const fetchOwners = async (page: number, limit: number, search: string) => {
   try {
     const response = await api.get('/admin/fetch-owners', {
-      params: {
-        page,
-        limit,
-        search
-      },
+      params: { page, limit, search },
     });
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
-  };
-};
-
-export const fetchVerificationPendingCars = async () => {
-  try {
-    const response = await api.get('/admin/pending-cars');
-    return response.data;
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error));
-  };
-};
-export const carVerifyApi = async (id: string) => {
-  try {
-    const response = await api.patch(`/admin/verify-car/${id}`);
-    return response.data;
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error));
-  };
-};
-export const carVerificationRejectionApi = async (id: string, rejectionReason: string) => {
-  try {
-    const response = await api.patch(`/admin/reject-car/${id}`, { rejectionReason });
-    return response.data;
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error));
-  };
+  }
 };
 
 export const blockUser = async (userId: string) => {
@@ -67,8 +34,9 @@ export const blockUser = async (userId: string) => {
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
-  };
-}
+  }
+};
+
 export const blockOwner = async (ownerId: string) => {
   try {
     const response = await api.patch(`/admin/block-owner/${ownerId}`);
@@ -76,16 +44,46 @@ export const blockOwner = async (ownerId: string) => {
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
-  };
+  }
 };
 
+/* -------------------------- Car Verification -------------------------- */
+
+export const fetchVerificationPendingCars = async () => {
+  try {
+    const response = await api.get('/admin/pending-cars');
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};
+
+export const carVerifyApi = async (carId: string) => {
+  try {
+    const response = await api.patch(`/admin/verify-car/${carId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};
+
+export const carVerificationRejectionApi = async (carId: string, rejectionReason: string) => {
+  try {
+    const response = await api.patch(`/admin/reject-car/${carId}`, { rejectionReason });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};
+
+/* -------------------------- Subscription -------------------------- */
 export const addSubscription = async (data: FormData) => {
   try {
     const response = await api.post('/admin/add-subscription', data);
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
-  };
+  }
 };
 
 export const fetchSubscriptions = async () => {
@@ -94,7 +92,7 @@ export const fetchSubscriptions = async () => {
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
-  };
+  }
 };
 
 export const updateSubscription = async (subId: string, data: FormData) => {
@@ -103,88 +101,13 @@ export const updateSubscription = async (subId: string, data: FormData) => {
     return response.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
-  };
+  }
 };
+
 export const fetchUserSubscriptions = async (page: number, limit: number, search: string) => {
   try {
     const response = await api.get('/admin/users-subscriptions', {
-      params: {
-        page,
-        limit,
-        search
-      }
-    });
-    console.log(response.data);
-
-    return response.data;
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error));
-  };
-};
-export const updateSubscriptionStatus = async (subId: string, status: string) => {
-  try {
-    const response = await api.patch(`/admin/change-user-subscription-status/${subId}`, { status });
-    return response.data;
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error));
-  };
-};
-
-export const getStatsForAdmin = async () => {
-  try {
-    const response = await api.get('/admin/get-stats');
-    return response.data;
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error));
-  };
-};
-
-
-export const getRentalStatsForAdmin = async (type: string, year: number, from?: string, to?: string) => {
-  try {
-    const response = await api.get('/admin/rental-stats', {
-      params: {
-        type,
-        year,
-        from,
-        to
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error));
-  };
-};
-export const getRentalForAdmin = async (page: number, limit: number, type: string, year: number, from?: string, to?: string, month?: number) => {
-  try {
-    const response = await api.get('/admin/rentals', {
-      params: {
-        page,
-        limit,
-        type,
-        year,
-        from,
-        to,
-        month
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error));
-  };
-};
-
-export const getSalesReportPdf = async (type: string, year: number, from?: string, to?: string, month?: number) => {
-  try {
-    const response = await api.get('/admin/sales-report-pdf', {
-      params: {
-        type,
-        year,
-        from,
-        to,
-        month
-      },
-      responseType: 'arraybuffer'
+      params: { page, limit, search },
     });
     return response.data;
   } catch (error) {
@@ -192,3 +115,75 @@ export const getSalesReportPdf = async (type: string, year: number, from?: strin
   }
 };
 
+export const updateSubscriptionStatus = async (subId: string, status: string) => {
+  try {
+    const response = await api.patch(`/admin/change-user-subscription-status/${subId}`, { status });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};
+
+/* -------------------------- Admin Dashboard -------------------------- */
+export const getStatsForAdmin = async () => {
+  try {
+    const response = await api.get('/admin/get-stats');
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};
+
+/* -------------------------- Rental Reports -------------------------- */
+export const getRentalStatsForAdmin = async (
+  type: string,
+  year: number,
+  from?: string,
+  to?: string
+) => {
+  try {
+    const response = await api.get('/admin/rental-stats', {
+      params: { type, year, from, to },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};
+
+export const getRentalForAdmin = async (
+  page: number,
+  limit: number,
+  type: string,
+  year: number,
+  from?: string,
+  to?: string,
+  month?: number
+) => {
+  try {
+    const response = await api.get('/admin/rentals', {
+      params: { page, limit, type, year, from, to, month },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};
+
+export const getSalesReportPdf = async (
+  type: string,
+  year: number,
+  from?: string,
+  to?: string,
+  month?: number
+) => {
+  try {
+    const response = await api.get('/admin/sales-report-pdf', {
+      params: { type, year, from, to, month },
+      responseType: 'arraybuffer',
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+};

@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { bookingController, carController, reviewController, subscriptionController, userController } from "../di/container";
+import { bookingController, carController, reviewController, subscriptionController, userController, wishlistController } from "../di/container";
 import { attachUserIfExists } from "../middlewares/attachUserIfExist";
 const router = express.Router();
 
@@ -35,6 +35,13 @@ router.post('/create-subscription', authenticate(["user"]), subscriptionControll
 router.post('/webhook', subscriptionController.handleWebhook.bind(subscriptionController));
 router.get('/subscriptions/all-stats', authenticate(["user"]), subscriptionController.getUserAllSubscriptions.bind(subscriptionController));
 router.patch('/subscriptions/:id/cancel', authenticate(["user"]), subscriptionController.cancelUserSub.bind(subscriptionController));
+router.get('/subscriptions/active', authenticate(["user"]), subscriptionController.getUserActiveSub.bind(subscriptionController));
+
+// wishlist related routes
+router.post('/wishlist', authenticate(["user"]), wishlistController.addToWishlist.bind(wishlistController));
+router.delete('/wishlist/:id', authenticate(["user"]), wishlistController.removeFromWishlist.bind(wishlistController));
+router.get('/wishlist', authenticate(["user"]), wishlistController.getWishlist.bind(wishlistController));
+router.get('/wishlist/paginated', authenticate(["user"]), wishlistController.getUserWishlist.bind(wishlistController));
 
 
 export default router;

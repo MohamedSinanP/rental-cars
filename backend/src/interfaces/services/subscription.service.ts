@@ -16,4 +16,6 @@ export default interface ISubscriptionService {
   updateUserSubStatus(userId: string, status: string): Promise<IUserSubscriptionModel>;
   getUserAllSubscriptions(userId: string, page: number, limit: number): Promise<PaginatedData<IUserSubscriptionModel>>;
   cancelUserSub(subId: string): Promise<IUserSubscriptionModel>;
+  getUserActiveSub(userId: string): Promise<IUserSubscriptionModel | null>;
+  markExpiredSubscriptionsAsCompleted(): Promise<number>;
 };

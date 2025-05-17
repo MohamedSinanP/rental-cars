@@ -37,11 +37,6 @@ const UserSubscriptionPage = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
 
-  // Log component mount
-  useEffect(() => {
-    console.log('UserSubscriptionPage mounted');
-  }, []);
-
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -60,12 +55,9 @@ const UserSubscriptionPage = () => {
   // Fetch subscription data
   useEffect(() => {
     const fetchSubscriptionData = async () => {
-      console.log('Starting fetchSubscriptionData', { currentPage, debouncedSearchTerm });
       try {
         setLoading(true);
-        console.log('Fetching subscriptions...');
         const result = await fetchUserSubscriptions(currentPage, limit, debouncedSearchTerm);
-        console.log('API result:', result);
 
         // Ensure data is an array, default to empty array if not
         setSubscriptions(result.data.data);
@@ -193,19 +185,42 @@ const UserSubscriptionPage = () => {
     {
       label: 'Update Status',
       onClick: () => { },
-      render: (subscription) => (
-        <select
-          value={subscription.status}
-          onChange={(e) => handleStatusUpdate(subscription._id, e.target.value)}
-          className="px-3 py-1 rounded text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
-        >
-          {['active', 'cancelled', 'completed'].map((status) => (
-            <option key={status} value={status}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </option>
-          ))}
-        </select>
-      )
+      render: (subscription) => {
+        const isActive = subscription.status.toLowerCase() === 'active';
+        const isDisabled = !isActive;
+
+        return (
+          <div className="relative inline-block">
+            <select
+              value={subscription.status}
+              onChange={(e) => handleStatusUpdate(subscription._id, e.target.value)}
+              disabled={isDisabled}
+              className={`px-3 py-1 rounded text-sm font-medium ${isDisabled
+                ? 'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70'
+                : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                } focus:outline-none focus:ring-2 focus:ring-teal-500`}
+            >
+              <option value="active">Active</option>
+              {isActive && (
+                <>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="completed">Completed</option>
+                </>
+              )}
+              {!isActive && (
+                <option value={subscription.status}>
+                  {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
+                </option>
+              )}
+            </select>
+            {isDisabled && (
+              <div className="mt-1 text-xs text-gray-500">
+                {subscription.status === 'cancelled' ? 'Cannot modify cancelled subscription' : 'Cannot modify completed subscription'}
+              </div>
+            )}
+          </div>
+        );
+      }
     }
   ];
 

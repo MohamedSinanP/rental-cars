@@ -5,7 +5,7 @@ import TYPES from "../di/types";
 import ICarService from "../interfaces/services/car.service";
 import { HttpResponse } from "../utils/http.response";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
-import ICar from "../types/car";
+import ICar, { CarFilter } from "../types/car";
 import { UploadedFile } from "express-fileupload";
 import { StatusCode } from "../types/types";
 
@@ -159,24 +159,60 @@ export default class CarController implements ICarController {
     }
   }
 
+  // CarController.ts
   async getAllCars(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 6;
       const { user } = req as AuthenticatedRequest;
 
+      // Extract filter parameters from request query
+      const filters: CarFilter = {
+        carType: req.query.carType as string[] || [],
+        transmission: req.query.transmission as string[] || [],
+        fuelType: req.query.fuelType as string[] || [],
+        seats: req.query.seats as string[] || [],
+        fuelOption: req.query.fuelOption as string[] || [],
+        minPrice: parseInt(req.query.minPrice as string) || 0,
+        maxPrice: parseInt(req.query.maxPrice as string) || 5000,
+        search: req.query.search as string || ''
+      };
+
+      // Handle min and max distance filters if provided
+      if (req.query.minDistance) {
+        const minDistance = parseInt(req.query.minDistance as string);
+        if (!isNaN(minDistance)) {
+          filters.minDistance = minDistance;
+        }
+      }
+
+      if (req.query.maxDistance) {
+        const maxDistance = parseInt(req.query.maxDistance as string);
+        if (!isNaN(maxDistance)) {
+          filters.maxDistance = maxDistance;
+        }
+      }
+
+      // Get max values from the service
+      const maxValues = await this._carService.getMaxPriceAndDistance();
+
       let result;
       if (user) {
-        result = await this._carService.fetchCarsWithDistance(user.userId, page, limit);
+        result = await this._carService.fetchCarsWithDistance(user.userId, page, limit, filters);
       } else {
-        result = await this._carService.fetchCarsWithoutDistance(page, limit);
+        result = await this._carService.fetchCarsWithoutDistance(page, limit, filters);
       }
-      res.status(StatusCode.OK).json(HttpResponse.success(result));
+
+      // Add max values to the response
+      res.status(StatusCode.OK).json(HttpResponse.success({
+        ...result,
+        maxPrice: maxValues.maxPrice,
+        maxDistance: maxValues.maxDistance
+      }));
     } catch (error) {
       next(error);
-    };
-  };
-
+    }
+  }
   async carDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = req.params.id;

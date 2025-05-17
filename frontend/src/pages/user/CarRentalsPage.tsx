@@ -177,7 +177,7 @@ const CarRentalsPage: React.FC = () => {
   return (
     <>
       <NavBar />
-      <div className="bg-gray-100 min-h-screen p-4">
+      <div className="bg-gray-100 min-h-screen p-4 pt-24">
         <div className="max-w-6xl mx-auto">
           {/* Breadcrumb */}
           <div className="mb-6">

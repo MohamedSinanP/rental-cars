@@ -188,3 +188,14 @@ export interface ISubscription {
   billingCycle: 'monthly' | 'yearly';
   isActive: boolean;
 }
+
+
+export interface CarFilters {
+  carType?: string[];
+  transmission?: string[];
+  fuelType?: string[];
+  seats?: string[];
+  fuel?: string[];
+  priceRange?: [number, number];
+  distanceRange?: [number, number];
+}
