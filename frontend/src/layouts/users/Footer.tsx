@@ -1,17 +1,21 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Logo from "../../components/Logo";
-import { FooterLink } from "../../types/types";
 
+type FooterLink = {
+  name: string;
+  href: string;
+  external?: boolean;
+};
 
 const Footer: React.FC = () => {
   const sections: { title: string; links: FooterLink[] }[] = [
     {
       title: "Company",
       links: [
-        { name: "About Us", href: "/about" },
-        { name: "Careers", href: "#" },
-        { name: "News", href: "#" },
+        { name: "About Us", href: "/about-us" },
+        { name: "Careers", href: "/careers" },
+        { name: "News", href: "/news" },
       ],
     },
     {
