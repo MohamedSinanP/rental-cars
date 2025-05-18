@@ -4,7 +4,7 @@ import fileUpload from "express-fileupload";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import passport from "passport";
-import "./cron/booking.cron";
+import "./cron/tasks.cron";
 import { subscriptionController } from "./di/container";
 
 dotenv.config();

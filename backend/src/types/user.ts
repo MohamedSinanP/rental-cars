@@ -1,6 +1,5 @@
 import mongoose, { Document } from "mongoose";
-import { Role } from "./types";
-import ICar from "./car";
+import ICar, { CarDTO, ICarModel } from "./car";
 
 export default interface IUser {
   _id?: string;
@@ -59,7 +58,7 @@ export interface IUserGoogle {
 };
 
 export interface userData {
-  _id?: string;
+  id?: string;
   userName?: string;
   email?: string;
   password?: string;
@@ -94,7 +93,21 @@ export interface ISubscription {
   isActive: boolean;
 }
 
-export interface ISubscriptionModel extends ISubscription, Document { };
+export interface ISubscriptionModel extends ISubscription, Document {
+  _id: mongoose.Types.ObjectId;
+};
+
+export interface SubscriptionDTO {
+  id: string;
+  name: string;
+  description: string;
+  features: string[];
+  stripeProductId: string;
+  stripePriceId: string;
+  price: number;
+  billingCycle: 'monthly' | 'yearly';
+  isActive: boolean;
+}
 
 export interface IUserSubscription {
   userId: string;
@@ -115,6 +128,16 @@ export interface IUserSubscriptionModel extends Document {
   currentPeriodEnd: Date;
 };
 
+export interface UserSubDTO {
+  id: string;
+  userId: string | UserResponseDTO;
+  subscriptionId: string | SubscriptionDTO;
+  stripeSubscriptionId: string;
+  status: string;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+}
+
 export interface IAddress {
   userId: string;
   name: string;
@@ -124,7 +147,17 @@ export interface IAddress {
 };
 
 export interface IAddressModel extends Document {
+  _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+}
+
+export interface AddressDTO {
+  id: string;
+  userId: string | UserResponseDTO;
   name: string;
   email: string;
   phoneNumber: string;
@@ -149,6 +182,12 @@ export interface IWalletModel extends Document {
   balance: number;
 };
 
+export interface WalleteDTO {
+  userId: string | UserResponseDTO;
+  transactions: TTransaction[];
+  balance: number;
+}
+
 export interface IReview {
   userId: string
   carId: string;
@@ -157,11 +196,20 @@ export interface IReview {
 };
 
 export interface IReviewModel extends Document {
+  _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   carId: mongoose.Types.ObjectId;
   rating: number;
   comment: string;
 };
+
+export interface ReviewDTO {
+  id: string;
+  userId: string | UserResponseDTO;
+  carId: string | CarDTO;
+  rating: number;
+  comment: string;
+}
 
 export interface UserResponseDTO {
   id: string;
@@ -183,6 +231,7 @@ export interface IWishlist {
 }
 
 export interface IWishlistModel extends Document {
+  _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   cars: {
     car: mongoose.Types.ObjectId;
@@ -192,7 +241,7 @@ export interface IWishlistModel extends Document {
 
 export type WishlistPaginatedItem = {
   addedAt: Date;
-  car: ICar;
+  car: ICarModel;
 };
 
 
@@ -201,3 +250,23 @@ export interface IUserWishlistPaginatedResponse {
   totalPages: number;
   currentPage: number;
 };
+
+export type WishlistPaginatedItemDTO = {
+  addedAt: Date;
+  car: CarDTO;
+};
+
+export interface IUserWishlistPaginatedResponseDTO {
+  data: WishlistPaginatedItemDTO[];
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface WishlistDTO {
+  id: string;
+  userId: string | UserResponseDTO,
+  cars: {
+    car: string | CarDTO,
+    addedAt: Date
+  }[],
+}

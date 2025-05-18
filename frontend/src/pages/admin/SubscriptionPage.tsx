@@ -87,7 +87,7 @@ const SubscriptionPage = () => {
     if (mode === 'edit') {
       setSubscriptions(prev =>
         prev.map(sub =>
-          sub._id === newSubscription._id
+          sub.id === newSubscription.id
             ? newSubscription
             : sub
         )

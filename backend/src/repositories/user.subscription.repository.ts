@@ -19,7 +19,6 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
     return await this._userSubsModel.findOne({
       userId,
       status: 'active',
-      cancelAtPeriodEnd: false,
     })
       .sort({ currentPeriodEnd: -1 })
       .populate('subscriptionId')
@@ -45,6 +44,7 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
     const total = await this._userSubsModel.countDocuments();
     return { data, total };
   };
+
   async findLatestActiveByUserId(userId: string): Promise<IUserSubscriptionModel | null> {
     return await this._userSubsModel.findOne({
       userId,
@@ -52,6 +52,7 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
       cancelAtPeriodEnd: false,
     }).sort({ currentPeriodEnd: -1 });
   };
+
   async getTotalSubscriptionEarnings(): Promise<number> {
     const result = await this._userSubsModel.aggregate([
       {

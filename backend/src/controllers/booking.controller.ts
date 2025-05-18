@@ -4,9 +4,8 @@ import IBookingService from "../interfaces/services/booking.service";
 import IBookingController from "../interfaces/controllers/booking.controller";
 import { Request, Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
-import { IBooking, IBookingPopulated } from "../types/booking";
+import { IBooking } from "../types/booking";
 import { HttpResponse } from "../utils/http.response";
-import { stat } from "fs";
 import { StatusCode } from "../types/types";
 import { generateInvoicePDF } from "../utils/invoiceGenerator";
 import { generateSalesReportPDF } from "../utils/salesReportGenerator";
@@ -50,6 +49,8 @@ export default class BookingController implements IBookingController {
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId!;
       const userRentals = await this._bookingService.fetchUserRentals(userId, page, limit);
+      console.log("rentals : ", userRentals);
+
       res.status(StatusCode.OK).json(HttpResponse.success(userRentals));
     } catch (error) {
       next(error);

@@ -1,7 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 
-
-
 export default interface IAdminController {
   fetchUsers(req: Request, res: Response, next: NextFunction): Promise<void>;
   fethcOwners(req: Request, res: Response, next: NextFunction): Promise<void>;
@@ -10,5 +8,4 @@ export default interface IAdminController {
   rejectCar(req: Request, res: Response, next: NextFunction): Promise<void>;
   blockOrUnblockUser(req: Request, res: Response, next: NextFunction): Promise<void>;
   blockOrUnblockOwner(req: Request, res: Response, next: NextFunction): Promise<void>;
-
 }

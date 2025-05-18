@@ -26,7 +26,7 @@ const CarVerification: React.FC = () => {
   const handleVerify = async (id: string) => {
     try {
       await carVerifyApi(id);
-      setCars((prev) => prev.filter((car) => car._id !== id));
+      setCars((prev) => prev.filter((car) => car.id !== id));
     } catch (error) {
       console.error("Verification failed:", error);
     }
@@ -43,7 +43,7 @@ const CarVerification: React.FC = () => {
 
     try {
       await carVerificationRejectionApi(selectedCarId, rejectionReason)
-      setCars((prev) => prev.filter((car) => car._id !== selectedCarId));
+      setCars((prev) => prev.filter((car) => car.id !== selectedCarId));
     } catch (error) {
       console.error("Rejection failed:", error);
     } finally {
@@ -70,7 +70,7 @@ const CarVerification: React.FC = () => {
           </div>
         ) : (
           cars.map((car) => (
-            <div key={car._id} className="bg-white shadow-md rounded-lg p-6 mb-4">
+            <div key={car.id} className="bg-white shadow-md rounded-lg p-6 mb-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h2 className="text-xl font-semibold">
@@ -127,13 +127,13 @@ const CarVerification: React.FC = () => {
                     <div className="flex gap-2 mt-4">
                       <button
                         className="bg-teal-400 text-white px-4 py-2 rounde transition"
-                        onClick={() => handleVerify(car._id)}
+                        onClick={() => handleVerify(car.id)}
                       >
                         Mark as Verified
                       </button>
                       <button
                         className="border border-red-500 text-red-500 px-4 py-2 rounded hover:bg-red-100 transition"
-                        onClick={() => openRejectModal(car._id)}
+                        onClick={() => openRejectModal(car.id)}
                       >
                         Reject
                       </button>

@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import IBookingService from "../interfaces/services/booking.service";
-import { BasicSalesInfo, IBooking, IBookingModel, IBookingPopulated } from "../types/booking";
+import { BasicSalesInfo, BookingDTO, IBooking, IBookingModel, IBookingPopulated } from "../types/booking";
 import TYPES from "../di/types";
 import IBookingRepository from "../interfaces/repositories/booking.repository";
 import { HttpError } from "../utils/http.error";
@@ -8,9 +8,9 @@ import { PaginatedData, StatusCode } from "../types/types";
 import IAddressRepository from "../interfaces/repositories/address.repository";
 import ICarRepository from "../interfaces/repositories/car.repository";
 import IWalletRepository from "../interfaces/repositories/wallet.repository";
-import { Types, UpdateResult } from "mongoose";
-import IOwnerRepository from "../interfaces/repositories/owner.repository";
+import { Types } from "mongoose";
 import IUserSubsRepository from "../interfaces/repositories/user.subscription.repository";
+import { toBookingDTO } from "../utils/helperFunctions";
 
 
 @injectable()
@@ -23,14 +23,15 @@ export default class BookingService implements IBookingService {
     @inject(TYPES.IUserSubsRepository) private _userSubsRepository: IUserSubsRepository
   ) { };
 
-  async createBooking(data: IBooking): Promise<IBookingModel> {
+  async createBooking(data: IBooking): Promise<BookingDTO> {
     const { userId, carId, pickupDateTime, dropoffDateTime, userDetails } = data;
     const { name, email, phoneNumber, address } = userDetails;
     const isBooked = await this._bookingRepository.isBooked(carId, pickupDateTime, dropoffDateTime);
     if (isBooked) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Car is already booked for the selected time period");
     };
-    const bookedCar = await this._carRepository.findOne({ _id: carId }, [{ path: 'ownerId' }]);
+    const carObjId = new Types.ObjectId(carId)
+    const bookedCar = await this._carRepository.findOne({ _id: carObjId }, [{ path: 'ownerId' }]);
     const DEFAULT_COMMISSION_PERCENTAGE = 10;
 
     let commissionPercentage = DEFAULT_COMMISSION_PERCENTAGE;
@@ -50,7 +51,7 @@ export default class BookingService implements IBookingService {
       ownerEarning
     };
 
-    let booking;
+    let booking: IBookingModel | null;
     if (data.paymentMethod === 'wallet') {
       const userObjId = new Types.ObjectId(userId)
       const userWallet = await this._walletRepository.findOne({ userId: userObjId });
@@ -71,60 +72,74 @@ export default class BookingService implements IBookingService {
     if (!booking) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't add your booking");
     }
-    return booking;
+    return toBookingDTO(booking);
   }
 
-  async fetchUserRentals(id: string, page: number, limit: number): Promise<PaginatedData<IBookingModel>> {
-    const { data, total } = await this._bookingRepository.findPaginated(id, page, limit)
-      ;
+  async fetchUserRentals(id: string, page: number, limit: number): Promise<PaginatedData<BookingDTO>> {
+    const { data, total } = await this._bookingRepository.findPaginated(id, page, limit);
+
     if (!data) {
-      throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.")
-    };
+      throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.");
+    }
+
     const totalPages = Math.ceil(total / limit);
+
     return {
-      data,
+      data: data.map(toBookingDTO),
       totalPages,
       currentPage: page,
     };
-  };
+  }
 
 
-  async getCarBookingsOfOwner(id: string, page: number, limit: number): Promise<PaginatedData<IBookingModel>> {
+  async getCarBookingsOfOwner(id: string, page: number, limit: number): Promise<PaginatedData<BookingDTO>> {
     const { data, total } = await this._bookingRepository.findAllByOwnerId(id, page, limit);
+
     if (!data) {
-      throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.")
-    };
+      throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.");
+    }
+
     const totalPages = Math.ceil(total / limit);
+
     return {
-      data,
+      data: data.map(toBookingDTO),
       totalPages,
       currentPage: page,
     };
-  };
+  }
 
-  async changeBookingStatus(bookingId: string, status: "active" | "cancelled" | "completed"): Promise<IBookingModel> {
-    const updatedBooking = await this._bookingRepository.update(bookingId, { status: status });
+  async changeBookingStatus(
+    bookingId: string,
+    status: "active" | "cancelled" | "completed"
+  ): Promise<BookingDTO> {
+    const updatedBooking = await this._bookingRepository.update(bookingId, { status });
     if (!updatedBooking) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't update booking status");
     }
-    return updatedBooking;
-  };
 
-  async getLatestBooking(bookingId: string): Promise<IBookingModel> {
+    if (status === "completed" || status === "cancelled") {
+      await this._carRepository.update(updatedBooking.carId.toString(), {
+        status: "Available",
+      });
+    }
+
+    return toBookingDTO(updatedBooking);
+  }
+
+  async getLatestBooking(bookingId: string): Promise<BookingDTO> {
     const latestBooking = await this._bookingRepository.findById(bookingId);
     if (!latestBooking) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't update booking status");
     }
-    return latestBooking;
+    return toBookingDTO(latestBooking);
   };
 
-  async cancelBooking(bookingId: string): Promise<IBookingModel> {
+  async cancelBooking(bookingId: string): Promise<BookingDTO> {
     const booking = await this._bookingRepository.findById(bookingId);
     if (!booking) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Booking not found.");
     }
 
-    // Check if pickupDateTime is in the past
     const currentTime = new Date();
 
     const pickupTime = new Date(booking.pickupDateTime);
@@ -155,7 +170,7 @@ export default class BookingService implements IBookingService {
     if (!populatedBooking) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Cannot cancel your booking..");
     };
-    return populatedBooking;
+    return toBookingDTO(populatedBooking);
   };
 
   async getBookingById(bookingId: string): Promise<IBookingPopulated> {

@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { BaseRepository } from "./base.repository";
 import TYPES from "../di/types";
 import { Model } from "mongoose";
-import { IUserSubscription, IUserSubscriptionModel, IWalletModel, TTransaction, TWallet } from "../types/user";
+import { IWalletModel, TTransaction } from "../types/user";
 import IWalletRepository from "../interfaces/repositories/wallet.repository";
 
 

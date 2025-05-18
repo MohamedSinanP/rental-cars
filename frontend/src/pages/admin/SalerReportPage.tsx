@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 
 // Interface for DataItem that matches what DataTable expects
 interface DataItem {
-  _id: string;
+  id: string;
   ownerId: { userName: string };
   carId: { carName: string };
   bookingDate: string;
@@ -27,7 +27,7 @@ interface SummaryData {
 
 // Define types for API response data
 interface BookingData {
-  _id: string;
+  id: string;
   ownerId: {
     userName: string;
   };
@@ -106,7 +106,7 @@ const SalesReportPage = () => {
         if (result && result.data) {
           const bookings = result.data.data || [];
           const mappedData: DataItem[] = bookings.map((booking: BookingData) => ({
-            _id: booking._id,
+            id: booking.id,
             ownerId: booking.ownerId,
             carId: booking.carId,
             bookingDate: booking.bookingDate,
@@ -142,7 +142,7 @@ const SalesReportPage = () => {
       if (result && result.data && result.data.data) {
         const bookings = result.data.data;
         const mappedData: DataItem[] = bookings.map((booking: BookingData) => ({
-          _id: booking._id,
+          id: booking.id,
           ownerId: booking.ownerId,
           carId: booking.carId,
           bookingDate: booking.bookingDate,
@@ -205,7 +205,6 @@ const SalesReportPage = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      toast.success('Sales report downloaded successfully');
     } catch (error) {
       console.error('Error downloading sales report:', error);
       toast.error('Failed to download the sales report. Please try again.');
@@ -329,19 +328,19 @@ const SalesReportPage = () => {
                     <div className="flex rounded-md overflow-hidden border border-gray-200">
                       <button
                         onClick={() => handleFilterChange('yearly')}
-                        className={`px-3 py-1 text-sm ${timeFilter === 'yearly' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
+                        className={`px-3 py-1 text-sm cursor-pointer ${timeFilter === 'yearly' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
                       >
                         Yearly
                       </button>
                       <button
                         onClick={() => handleFilterChange('monthly')}
-                        className={`px-3 py-1 text-sm ${timeFilter === 'monthly' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
+                        className={`px-3 py-1 text-sm cursor-pointer ${timeFilter === 'monthly' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
                       >
                         Monthly
                       </button>
                       <button
                         onClick={() => handleFilterChange('custom')}
-                        className={`px-3 py-1 text-sm ${timeFilter === 'custom' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
+                        className={`px-3 py-1 text-sm cursor-pointer ${timeFilter === 'custom' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
                       >
                         Custom
                       </button>
@@ -411,7 +410,7 @@ const SalesReportPage = () => {
                 <div className="flex justify-end">
                   <button
                     onClick={downloadSalesReport}
-                    className="bg-teal-600 text-white px-3 py-1 rounded-md text-sm flex items-center shadow-sm hover:bg-teal-700 transition-colors"
+                    className="bg-teal-600 text-white px-3 py-1 rounded-md text-sm flex items-center shadow-sm hover:bg-teal-700 transition-colors cursor-pointer"
                     disabled={salesData.length === 0 || loading}
                   >
                     <Download className="w-4 h-4 mr-1" />

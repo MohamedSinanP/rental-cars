@@ -1,17 +1,16 @@
 import bcrypt from 'bcrypt';
 import { inject, injectable } from "inversify";
 import IUserService from "../interfaces/services/user.service";
-import { IAddressModel, IWalletModel, userData } from "../types/user";
+import { AddressDTO, IAddressModel, IWalletModel, userData, UserResponseDTO, WalleteDTO } from "../types/user";
 import TYPES from "../di/types";
 import IUserRepository from "../interfaces/repositories/user.repository";
 import { HttpError } from "../utils/http.error";
-import { IUserModel } from "../types/user";
 import { PaginatedData, StatusCode } from "../types/types";
 import { fetchAddressFromCoordinates } from "../utils/geolocation";
 import IAddressRepository from "../interfaces/repositories/address.repository";
 import IWalletRepository from "../interfaces/repositories/wallet.repository";
 import { Types } from "mongoose";
-import { throwDeprecation } from 'process';
+import { toAddressDTO, toUserDTO } from '../utils/helperFunctions';
 
 @injectable()
 export default class UserService implements IUserService {
@@ -27,7 +26,7 @@ export default class UserService implements IUserService {
       throw new HttpError(StatusCode.UNAUTHORIZED, "User not found");
     };
     return {
-      _id: user._id.toString(),
+      id: user._id.toString(),
       userName: user.userName,
       email: user.email,
       role: user.role,
@@ -36,22 +35,22 @@ export default class UserService implements IUserService {
     };
   };
 
-  async getUserDetails(userId: string): Promise<IUserModel> {
+  async getUserDetails(userId: string): Promise<UserResponseDTO> {
     const user = await this._userRepository.getUserDetails(userId);
     if (!user) {
       throw new HttpError(StatusCode.BAD_REQUEST, "User not found");
     };
-    return user;
+    return toUserDTO(user);
   };
 
-  async fetchAllUsers(page: number, limit: number, search: string): Promise<PaginatedData<IUserModel>> {
+  async fetchAllUsers(page: number, limit: number, search: string): Promise<PaginatedData<UserResponseDTO>> {
     const { data, total } = await this._userRepository.findPaginated(page, limit, search);
     if (!data) {
       throw new HttpError(StatusCode.BAD_REQUEST, "User not found");
     };
     const totalPages = Math.ceil(total / limit);
     return {
-      data,
+      data: data.map(toUserDTO),
       totalPages,
       currentPage: page,
     };
@@ -62,18 +61,14 @@ export default class UserService implements IUserService {
     return address;
   }
 
-  async setUserLocation(userId: string, location: { type: "Point"; coordinates: [number, number]; address: string; }): Promise<userData> {
+  async setUserLocation(userId: string, location: { type: "Point"; coordinates: [number, number]; address: string; }): Promise<UserResponseDTO> {
+    console.log("userId: ", userId);
+
     const updatedUser = await this._userRepository.update(userId, { location: location });
     if (!updatedUser) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't update user");
     };
-    return {
-      userName: updatedUser.userName,
-      email: updatedUser.email,
-      isBlocked: updatedUser.isBlocked,
-      isVerified: updatedUser.isVerified,
-      location: updatedUser.location
-    };
+    return toUserDTO(updatedUser);
   };
 
   async getUserLocation(userId: string): Promise<[number, number]> {
@@ -90,7 +85,7 @@ export default class UserService implements IUserService {
     return user.location.coordinates as [number, number];
   };
 
-  async blockOrUnblockUser(userId: string): Promise<IUserModel> {
+  async blockOrUnblockUser(userId: string): Promise<UserResponseDTO> {
     const user = await this._userRepository.findById(userId);
     if (!user) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't find user");
@@ -103,27 +98,31 @@ export default class UserService implements IUserService {
     if (!updatedUser) {
       throw new HttpError(StatusCode.INTERNAL_SERVER_ERROR, "Failed to block user");
     }
-    return updatedUser;
+    return toUserDTO(updatedUser);
   };
 
-  async getUserAddresses(userId: string): Promise<IAddressModel[]> {
+  async getUserAddresses(userId: string): Promise<AddressDTO[]> {
     const addresses = await this._addressRepository.getUserAddresses(userId);
     if (!addresses) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Failed to fetch your address.");
     };
-    return addresses
+    return addresses.map(toAddressDTO)
   };
 
-  async getUserWallet(userId: string): Promise<IWalletModel> {
+  async getUserWallet(userId: string): Promise<WalleteDTO> {
     const userObjId = new Types.ObjectId(userId);
     const wallet = await this._walletRepository.findOne({ userId: userObjId });
     if (!wallet) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Failed to fetch your wallet.");
     };
-    return wallet;
+    return {
+      userId: wallet.userId.toString(),
+      transactions: wallet.transactions,
+      balance: wallet.balance
+    };
   };
 
-  async updateUser(userId: string, userName: string, email: string): Promise<Partial<IUserModel>> {
+  async updateUser(userId: string, userName: string, email: string): Promise<Partial<UserResponseDTO>> {
     const updatedUser = await this._userRepository.update(userId, { userName, email });
     if (!updatedUser) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't update your information");

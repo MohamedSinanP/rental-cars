@@ -60,7 +60,6 @@ const AppRoutes = () => {
       <Route path='/not-found' element={<NotFoundPage />} />
       <Route path='/about' element={<AboutUsPage />} />
 
-
       {/* Routes for owner */}
       < Route element={<PrivateRoute allowedRoles={['owner']} />}>
         <Route path="/owner/dashboard" element={<OwnerDashboardPage />} />

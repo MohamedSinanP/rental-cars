@@ -102,6 +102,21 @@ export default class CarController implements ICarController {
     };
   };
 
+  async toggleCarListing(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { user } = req as AuthenticatedRequest;
+      const ownerId = user?.userId;
+      const carId = req.params.carId;
+      const updatedCar = await this._carService.toggleCarListing(ownerId, carId);
+
+      res
+        .status(StatusCode.OK)
+        .json(HttpResponse.success(updatedCar, "Car listing status updated successfully"));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   async reuploadCarDocs(req: FileUploadRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const carId = req.params.id;
@@ -159,7 +174,6 @@ export default class CarController implements ICarController {
     }
   }
 
-  // CarController.ts
   async getAllCars(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
@@ -213,6 +227,7 @@ export default class CarController implements ICarController {
       next(error);
     }
   }
+
   async carDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = req.params.id;

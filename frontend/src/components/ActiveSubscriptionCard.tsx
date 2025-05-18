@@ -6,16 +6,15 @@ import { useNavigate } from 'react-router-dom';
 
 // Define types
 type ActiveSubscription = {
-  _id: string;
+  id: string;
   subscriptionId: {
-    _id: string;
+    id: string;
     name: string;
     price: number;
   };
   status: string;
   currentPeriodStart: string;
   currentPeriodEnd: string;
-  cancelAtPeriodEnd: boolean;
 } | null;
 
 type ActiveSubscriptionCardProps = {
@@ -49,7 +48,7 @@ const ActiveSubscriptionCard: React.FC<ActiveSubscriptionCardProps> = ({
     if (!subscription) return;
 
     try {
-      const result = await cancelSubscription(subscription._id);
+      const result = await cancelSubscription(subscription.id);
       toast.success(result.message);
       setShowConfirmation(false);
       onCancelSuccess();
@@ -106,6 +105,9 @@ const ActiveSubscriptionCard: React.FC<ActiveSubscriptionCardProps> = ({
     );
   }
 
+  // Check if subscription can be cancelled (only active subscriptions)
+  const canCancel = subscription.status === 'active';
+
   // Render active subscription card
   return (
     <div className="bg-white rounded-lg shadow mb-6">
@@ -122,7 +124,7 @@ const ActiveSubscriptionCard: React.FC<ActiveSubscriptionCardProps> = ({
               Completed
             </span>
           )}
-          {subscription.status !== 'cancelled' && subscription.status !== 'completed' && (
+          {subscription.status === 'active' && (
             <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
               Active
             </span>
@@ -147,7 +149,8 @@ const ActiveSubscriptionCard: React.FC<ActiveSubscriptionCardProps> = ({
             <p>{formatDate(subscription.currentPeriodEnd)}</p>
           </div>
         </div>
-        {!subscription.cancelAtPeriodEnd && (
+
+        {canCancel && (
           <div className="border-t border-gray-200 pt-4">
             <button
               onClick={confirmCancel}

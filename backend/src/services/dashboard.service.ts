@@ -6,9 +6,10 @@ import IOwnerRepository from "../interfaces/repositories/owner.repository";
 import IBookingRepository from "../interfaces/repositories/booking.repository";
 import { IAdminDashboardData, IOwnerDashboardData, PaginatedData, StatusCode } from "../types/types";
 import IUserSubsRepository from "../interfaces/repositories/user.subscription.repository";
-import { IBookingModel, RentalStatsForAdmin, RentalStatsForOwner } from "../types/booking";
+import { BookingDTO, RentalStatsForAdmin, RentalStatsForOwner } from "../types/booking";
 import { HttpError } from "../utils/http.error";
 import ICarRepository from "../interfaces/repositories/car.repository";
+import { toBookingDTO } from "../utils/helperFunctions";
 
 @injectable()
 export default class DashboardService implements IDashboardService {
@@ -68,14 +69,14 @@ export default class DashboardService implements IDashboardService {
     return retnalStats;
   };
 
-  async getAllRentalsForAdmin(page: number, limit: number, type: string, year: number, from: string, to: string): Promise<PaginatedData<IBookingModel>> {
+  async getAllRentalsForAdmin(page: number, limit: number, type: string, year: number, from: string, to: string): Promise<PaginatedData<BookingDTO>> {
     const { data, total } = await this._bookingRepository.getAllRentalsForAdmin(page, limit, type, year, from, to);
     if (!data) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Bookings not found");
     };
     const totalPages = Math.ceil(total / limit);
     return {
-      data,
+      data: data.map(toBookingDTO),
       totalPages,
       currentPage: page
     };

@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import ISubscriptionService from "../interfaces/services/subscription.service";
 import TYPES from "../di/types";
 import ISubscriptionRepository from "../interfaces/repositories/subscription.repository";
-import { ISubscription, ISubscriptionModel, IUserSubscriptionModel } from "../types/user";
+import { ISubscription, SubscriptionDTO, UserSubDTO } from "../types/user";
 import { HttpError } from "../utils/http.error";
 import { PaginatedData, StatusCode } from "../types/types";
 import stripe from "../config/stripe";
@@ -11,6 +11,7 @@ import Stripe from "stripe";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 import IUserSubsRepository from "../interfaces/repositories/user.subscription.repository";
 import { Types } from "mongoose";
+import { toSubscriptionDTO, toUserSubscriptionDTO } from "../utils/helperFunctions";
 
 @injectable()
 export default class SubscriptionService implements ISubscriptionService {
@@ -19,37 +20,37 @@ export default class SubscriptionService implements ISubscriptionService {
     @inject(TYPES.IUserSubsRepository) private _userSubsRepository: IUserSubsRepository,
     @inject(TYPES.IUserSubsRepository) private _userSubscriptionRepository: IUserSubsRepository
   ) { };
-  async createSubscription(data: ISubscription): Promise<ISubscriptionModel> {
+  async createSubscription(data: ISubscription): Promise<SubscriptionDTO> {
     const subscription = await this._subscriptionRepository.addSubscription(data);
     if (!subscription) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't add new subscription");
     };
-    return subscription;
+    return toSubscriptionDTO(subscription);
   };
 
-  async getSubscriptions(): Promise<ISubscriptionModel[]> {
+  async getSubscriptions(): Promise<SubscriptionDTO[]> {
     const subscriptions = await this._subscriptionRepository.findAll();
     if (!subscriptions) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't find subscriptions");
     }
-    return subscriptions
+    return subscriptions.map(toSubscriptionDTO);
   };
 
-  async editSubscription(subId: string, data: Partial<ISubscription>): Promise<ISubscription> {
+  async editSubscription(subId: string, data: Partial<ISubscription>): Promise<SubscriptionDTO> {
     const updatedSubscription = await this._subscriptionRepository.update(subId, data);
     if (!updatedSubscription) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't update the subscription");
     }
-    return updatedSubscription;
+    return toSubscriptionDTO(updatedSubscription);
   };
 
-  async getActiveSubscriptions(): Promise<ISubscription[]> {
+  async getActiveSubscriptions(): Promise<SubscriptionDTO[]> {
     const activeSubs = await this._subscriptionRepository.findAll({ isActive: true });
     if (!activeSubs) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't get subscriptions");
     };
 
-    return activeSubs;
+    return activeSubs.map(toSubscriptionDTO);
   };
 
   async makeSubscription(req: Request, priceId: string, subId: string): Promise<string> {
@@ -135,7 +136,7 @@ export default class SubscriptionService implements ISubscriptionService {
     };
   };
 
-  async getUserSubscription(req: Request): Promise<IUserSubscriptionModel | null> {
+  async getUserSubscription(req: Request): Promise<UserSubDTO | null> {
     const { user } = req as AuthenticatedRequest;
     const userId = user?.userId!;
     let userSub;
@@ -144,16 +145,10 @@ export default class SubscriptionService implements ISubscriptionService {
     if (!userSub) {
       return null;
     }
-    if (userSub.currentPeriodEnd <= new Date()) {
-      userSub = await this._userSubsRepository.update(
-        userSub._id.toString(),
-        { status: 'completed' },
-      );
-    };
-    return userSub;
+    return toUserSubscriptionDTO(userSub);
   };
 
-  async getUsersSubscriptions(page: number, limit: number, search: string): Promise<PaginatedData<IUserSubscriptionModel>> {
+  async getUsersSubscriptions(page: number, limit: number, search: string): Promise<PaginatedData<UserSubDTO>> {
     const { data, total } = await this._userSubsRepository.findUsersSubscriptions(page, limit, search);
 
     if (!data) {
@@ -161,13 +156,13 @@ export default class SubscriptionService implements ISubscriptionService {
     };
     const totalPages = Math.ceil(total / limit);
     return {
-      data,
+      data: data.map(toUserSubscriptionDTO),
       totalPages,
       currentPage: page,
     };
   };
 
-  async updateUserSubStatus(subId: string, status: string): Promise<IUserSubscriptionModel> {
+  async updateUserSubStatus(subId: string, status: string): Promise<UserSubDTO> {
     if (status === 'cancelled') {
       return await this.cancelUserSub(subId);
     }
@@ -175,23 +170,23 @@ export default class SubscriptionService implements ISubscriptionService {
     if (!updatedUseSub) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't update user subscription status");
     }
-    return updatedUseSub;
+    return toUserSubscriptionDTO(updatedUseSub);
   };
 
-  async getUserAllSubscriptions(userId: string, page: number, limit: number): Promise<PaginatedData<IUserSubscriptionModel>> {
+  async getUserAllSubscriptions(userId: string, page: number, limit: number): Promise<PaginatedData<UserSubDTO>> {
     const { data, total } = await this._userSubsRepository.getUserSubs(userId, page, limit);
     if (!total) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't find your subscriptions");
     }
     const totalPages = Math.ceil(total / limit);
     return {
-      data,
+      data: data.map(toUserSubscriptionDTO),
       totalPages,
       currentPage: page,
     };
   }
 
-  async cancelUserSub(subId: string): Promise<IUserSubscriptionModel> {
+  async cancelUserSub(subId: string): Promise<UserSubDTO> {
     const existingSub = await this._userSubsRepository.findById(subId);
     if (!existingSub) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Subscription not found");
@@ -205,12 +200,15 @@ export default class SubscriptionService implements ISubscriptionService {
     if (!cancelledSub) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't cancel your subscriptoin.")
     }
-    return cancelledSub;
+    return toUserSubscriptionDTO(cancelledSub);
   };
 
-  async getUserActiveSub(userId: string): Promise<IUserSubscriptionModel | null> {
+  async getUserActiveSub(userId: string): Promise<UserSubDTO | null> {
     const activeSub = await this._userSubsRepository.getUserActiveSubscription(userId);
-    return activeSub;
+    if (!activeSub) {
+      return null;
+    }
+    return toUserSubscriptionDTO(activeSub);
   };
 
   async markExpiredSubscriptionsAsCompleted(): Promise<number> {

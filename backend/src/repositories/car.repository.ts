@@ -48,13 +48,13 @@ export class CarRepository extends BaseRepository<ICarModel> implements ICarRepo
 
   async findPaginated(page: number, limit: number, filters: CarFilter): Promise<{ data: ICarModel[]; total: number; }> {
     const skip = (page - 1) * limit;
-    const query = this.buildFilterQuery(filters);
+    const query = { isListed: true, ...this.buildFilterQuery(filters) };
 
     const data = await this._carModel.find(query).skip(skip).limit(limit);
     const total = await this._carModel.countDocuments(query);
 
     return { data, total };
-  };
+  }
 
   async findPaginatedWithDistance(userLocation: [number, number], page: number, limit: number, filters: CarFilter) {
     const skip = (page - 1) * limit;
@@ -64,7 +64,7 @@ export class CarRepository extends BaseRepository<ICarModel> implements ICarRepo
       near: { type: "Point", coordinates: userLocation },
       distanceField: "distance",
       spherical: true,
-      query: { isVerified: true, ...filterQuery }
+      query: { isVerified: true, isListed: true, ...filterQuery }
     };
 
     if (filters.maxDistance !== undefined) {
@@ -111,7 +111,7 @@ export class CarRepository extends BaseRepository<ICarModel> implements ICarRepo
         near: { type: "Point", coordinates: userLocation },
         distanceField: "distance",
         spherical: true,
-        query: { isVerified: true, ...filterQuery }
+        query: { isVerified: true, isListed: true, ...filterQuery }
       };
 
       if (filters.maxDistance !== undefined) {
@@ -144,7 +144,7 @@ export class CarRepository extends BaseRepository<ICarModel> implements ICarRepo
       const total = countResult.length > 0 ? countResult[0].total : 0;
       return { data: result, total };
     } else {
-      let countQuery = { isVerified: true, ...filterQuery };
+      let countQuery = { isVerified: true, isListed: true, ...filterQuery };
 
       if (filters.search) {
         countQuery = {

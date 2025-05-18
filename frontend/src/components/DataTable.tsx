@@ -3,7 +3,7 @@ import LoadingSpinner from './LoadingSpinner';
 
 // Define a minimal DataItem type
 export type DataItem = {
-  _id: string;
+  id: string;
 };
 
 // Update Column and Action to use T extends DataItem
@@ -95,10 +95,10 @@ const DataTable = <T extends DataItem>({
             </thead>
             <tbody className="divide-y divide-gray-200">
               {data.map((item) => (
-                <tr key={item._id} className={rowClassName(item)}>
+                <tr key={item.id} className={rowClassName(item)}>
                   {columns.map((column) => (
                     <td
-                      key={`${item._id}-${String(column.key)}`}
+                      key={`${item.id}-${String(column.key)}`}
                       className={`px-6 py-4 whitespace-nowrap ${column.className || ''}`}
                     >
                       {column.render

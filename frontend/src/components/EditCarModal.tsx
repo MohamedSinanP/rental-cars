@@ -110,7 +110,7 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ isOpen, onClose, carData, o
       const formData = new FormData();
 
       // Append car ID for update
-      formData.append("carId", carData._id);
+      formData.append("carId", carData.id);
 
       formData.append("carName", data.name);
       formData.append("carModel", data.model);

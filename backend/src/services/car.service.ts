@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import axios from 'axios';
 import ICarService from "../interfaces/services/car.service";
 import { fetchAddressFromCoordinates } from "../utils/geolocation";
-import { CarFilter, ICarModel } from "../types/car";
+import { CarDTO, CarFilter, ICarModel } from "../types/car";
 import ICar from "../types/car";
 import TYPES from "../di/types";
 import ICarRepository from "../interfaces/repositories/car.repository";
@@ -14,6 +14,8 @@ import { PaginatedData, StatusCode } from "../types/types";
 import IUserService from "../interfaces/services/user.service";
 import { performOCR } from "../utils/ocr";
 import { extractDocumentDataWithLLM } from "../utils/llm";
+import { mapToCarDTO } from "../utils/helperFunctions";
+import { StatTimer } from "pdfjs-dist/types/src/display/display_utils";
 
 @injectable()
 export default class CarService implements ICarService {
@@ -31,7 +33,7 @@ export default class CarService implements ICarService {
     rcDoc: UploadedFile;
     insuranceDoc: UploadedFile;
     pucDoc: UploadedFile;
-  }): Promise<ICarModel> {
+  }): Promise<CarDTO> {
 
     // upload all the docs to the cloudinary
     const rcDocUrl = await uploadPDFToCloudinary(data.rcDoc, "documents");
@@ -45,14 +47,15 @@ export default class CarService implements ICarService {
       pucDoc: pucDocUrl
     }
 
-    return await this._carRepository.addCar(carToAdd);
+    const createdCar = await this._carRepository.addCar(carToAdd);
+    return mapToCarDTO(createdCar);
   };
 
   async editCar(carId: string, data: Partial<ICar> & {
     rcDoc?: UploadedFile;
     insuranceDoc?: UploadedFile;
     pucDoc?: UploadedFile;
-  }): Promise<ICarModel> {
+  }): Promise<CarDTO> {
     const carToEdit: Partial<ICar> = { ...data };
 
     if (data.rcDoc) {
@@ -73,14 +76,36 @@ export default class CarService implements ICarService {
       delete carToEdit.pucDoc;
     }
 
-    return await this._carRepository.editCar(carId, carToEdit);
+    const updatedCar = await this._carRepository.editCar(carId, carToEdit);
+    return mapToCarDTO(updatedCar);
+  };
+
+  async toggleCarListing(ownerId: string, carId: string): Promise<CarDTO> {
+    const car = await this._carRepository.findById(carId);
+
+    if (!car) {
+      throw new HttpError(StatusCode.NOT_FOUND, "Car not found",);
+    }
+
+    if (car.ownerId.toString() !== ownerId) {
+      throw new HttpError(StatusCode.FORBIDDEN, "Unauthorized access",);
+    }
+
+    const updatedCar = await this._carRepository.update(carId, {
+      isListed: !car.isListed
+    });
+
+    if (!updatedCar) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Can't change your car listing status.")
+    }
+    return mapToCarDTO(updatedCar);
   };
 
   async reuploadCarDocs(carId: string, carDocs: {
     rcDoc: UploadedFile;
     insuranceDoc: UploadedFile;
     pucDoc: UploadedFile;
-  }): Promise<ICarModel> {
+  }): Promise<CarDTO> {
 
     const rcDocUrl = await uploadPDFToCloudinary(carDocs.rcDoc, "documents");
     const pucDocUrl = await uploadPDFToCloudinary(carDocs.pucDoc, "documents");
@@ -91,44 +116,44 @@ export default class CarService implements ICarService {
     if (!updatedCar) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't update your car docs");
     };
-    return updatedCar;
+    return mapToCarDTO(updatedCar);
   }
 
-  async fetchOwnerVerifedCars(userId: string, page: number, limit: number): Promise<PaginatedData<ICarModel>> {
+  async fetchOwnerVerifedCars(userId: string, page: number, limit: number): Promise<PaginatedData<CarDTO>> {
     const { data, total } = await this._carRepository.findByOwner(userId, page, limit);
     if (!data) {
       throw new HttpError(StatusCode.UNAUTHORIZED, "Can't find cars with your details.")
     }
     const totalPages = Math.ceil(total / limit);
     return {
-      data,
-      totalPages,
+      data: data.map(mapToCarDTO),
+      totalPages: Math.ceil(total / limit),
       currentPage: page
     };
   };
 
-  async fetchOwnerCars(userId: string): Promise<ICarModel[]> {
+  async fetchOwnerCars(userId: string): Promise<CarDTO[]> {
     const cars = await this._carRepository.findAll({ ownerId: userId });
     if (!cars) {
       throw new HttpError(StatusCode.UNAUTHORIZED, "Can't find cars with your details.")
     }
-    return cars;
+    return cars.map(mapToCarDTO);
   };
 
-  async fetchCarsWithoutDistance(page: number, limit: number, filters: CarFilter): Promise<PaginatedData<ICarModel>> {
+  async fetchCarsWithoutDistance(page: number, limit: number, filters: CarFilter): Promise<PaginatedData<CarDTO>> {
     const { data, total } = await this._carRepository.findPaginated(page, limit, filters);
     if (!data) {
       throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.")
     };
     const totalPages = Math.ceil(total / limit);
     return {
-      data,
+      data: data.map(mapToCarDTO),
       totalPages,
       currentPage: page,
     };
   };
 
-  async fetchCarsWithDistance(userId: string, page: number, limit: number, filters: CarFilter): Promise<PaginatedData<ICarModel>> {
+  async fetchCarsWithDistance(userId: string, page: number, limit: number, filters: CarFilter): Promise<PaginatedData<CarDTO>> {
     const userLocation = await this._userService.getUserLocation(userId);
 
     if (!userLocation) {
@@ -139,22 +164,22 @@ export default class CarService implements ICarService {
 
     const totalPages = Math.ceil(total / limit);
     return {
-      data,
+      data: data.map(mapToCarDTO),
       totalPages,
       currentPage: page
     };
   }
 
 
-  async fetchCarDetails(id: string): Promise<ICarModel> {
+  async fetchCarDetails(id: string): Promise<CarDTO> {
     const car = await this._carRepository.findById(id);
     if (!car) {
       throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.");
     };
-    return car;
+    return mapToCarDTO(car);
   };
 
-  async fetchSimilarCars(id: string): Promise<ICarModel[]> {
+  async fetchSimilarCars(id: string): Promise<CarDTO[]> {
     const car = await this._carRepository.findById(id);
     if (!car) {
       throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.");
@@ -164,10 +189,10 @@ export default class CarService implements ICarService {
       carType: type,
       _id: { $ne: id }
     });
-    return cars
+    return cars.map(mapToCarDTO);
   };
 
-  async fetchPendingCars(): Promise<ICarModel[]> {
+  async fetchPendingCars(): Promise<CarDTO[]> {
     const cars = await this._carRepository.findAll({
       isVerified: false,
       verificationRejected: false,
@@ -175,18 +200,18 @@ export default class CarService implements ICarService {
     if (!cars) {
       throw new HttpError(StatusCode.NOT_FOUND, "Can't get the cars.");
     }
-    return cars;
+    return cars.map(mapToCarDTO);
   };
 
-  async verifyCar(carId: string): Promise<ICarModel> {
+  async verifyCar(carId: string): Promise<CarDTO> {
     const updatedCar = await this._carRepository.update(String(carId), { isVerified: true });
     if (!updatedCar) {
       throw new HttpError(StatusCode.NOT_FOUND, "Can't update car details");
     }
-    return updatedCar;
+    return mapToCarDTO(updatedCar);
   };
 
-  async rejectCar(carId: string, rejectionReason: string): Promise<ICarModel> {
+  async rejectCar(carId: string, rejectionReason: string): Promise<CarDTO> {
     const updatedCar = await this._carRepository.update(String(carId), {
       verificationRejected: true,
       rejectionReason
@@ -194,7 +219,7 @@ export default class CarService implements ICarService {
     if (!updatedCar) {
       throw new HttpError(StatusCode.NOT_FOUND, "Can't update car details");
     }
-    return updatedCar;
+    return mapToCarDTO(updatedCar);
   };
 
   async getCarDocsDetails(carId: string, userMessage: string): Promise<string> {
@@ -211,23 +236,27 @@ export default class CarService implements ICarService {
 
 
     const prompt = `
-    The following are scanned documents of a car:
-    
-    --- RC Document ---
-    ${rcText}
-    
-    --- PUC Document ---
-    ${pucText}
-    
-    --- Insurance Document ---
-    ${insuranceText}
-    
-    The car owner asked:
-    "${userMessage}"
-    
-    Please answer based on the above documents only.
-    `;
+You are an AI assistant analyzing scanned car documents. Use the contents below to answer a user query.
 
+--- RC Document ---
+${rcText}
+
+--- PUC Document ---
+${pucText}
+
+--- Insurance Document ---
+${insuranceText}
+
+The user asked:
+"${userMessage}"
+
+Instructions:
+- If the answer is present in the documents, use it.
+- If a document section is empty, **assume it's missing** and then respond using **general vehicle/domain knowledge**.
+- When assuming, clearly say: "Based on general knowledge..." or "Assuming based on standard practices..."
+
+Respond in 1-2 lines. Begin with "Answer:".
+`;
     const llmResponse = await this._llmQuery(prompt);
     return llmResponse;
   }

@@ -21,6 +21,15 @@ export const updateCar = async (data: FormData) => {
   }
 };
 
+export const toggleListing = async (carId: string) => {
+  try {
+    const response = await api.patch(`/owner/cars/${carId}/toggle-listing`);
+    return response.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error));
+  }
+}
+
 export const reuploadCarDocs = async (carId: string, data: FormData) => {
   try {
     const response = await api.patch(`/owner/cars/reupload-docs/${carId}`, data);

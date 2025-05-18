@@ -69,7 +69,7 @@ const ReuploadDocsModal: React.FC<ReuploadDocsModalProps> = ({ isOpen, onClose, 
       formData.append("pucDoc", data.pucDocument[0]);
       formData.append("insuranceDoc", data.insuranceDocument[0]);
 
-      const result = await reuploadCarDocs(car._id, formData);
+      const result = await reuploadCarDocs(car.id, formData);
       toast.success(result.message);
       reset();
       onClose();

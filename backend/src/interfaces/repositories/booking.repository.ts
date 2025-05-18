@@ -1,4 +1,4 @@
-import { FilterQuery, UpdateResult } from "mongoose";
+import { FilterQuery } from "mongoose";
 import { BasicSalesInfo, IBooking, IBookingModel, IBookingPopulated, RentalStatsForAdmin, RentalStatsForOwner } from "../../types/booking";
 import IBaseRepository from "./base.repository";
 

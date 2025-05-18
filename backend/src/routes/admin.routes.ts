@@ -4,10 +4,13 @@ import { authenticate } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
+// users managment (owners and consumers)
 router.get('/fetch-users', authenticate(["admin"]), adminController.fetchUsers.bind(adminController));
 router.patch('/block-user/:id', authenticate(["admin"]), adminController.blockOrUnblockUser.bind(adminController));
 router.get('/fetch-owners', authenticate(["admin"]), adminController.fethcOwners.bind(adminController));
 router.patch('/block-owner/:id', authenticate(["admin"]), adminController.blockOrUnblockOwner.bind(adminController));
+
+// car verification and etc routes
 router.get('/pending-cars', authenticate(["admin"]), adminController.getPendingCars.bind(adminController));
 router.patch('/verify-car/:id', authenticate(["admin"]), adminController.verifyCar.bind(adminController));
 router.patch('/reject-car/:id', authenticate(["admin"]), adminController.rejectCar.bind(adminController));

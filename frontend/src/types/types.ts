@@ -67,7 +67,7 @@ export interface CarFormData {
   carImages: File[];
 }
 export interface ICar {
-  _id: string;
+  id: string;
   ownerId: string;
   carName: string;
   carModel: string;
@@ -95,11 +95,12 @@ export interface ICar {
   rejectionReason: string;
   carImages: string[];
   review?: string[];
+  isListed?: boolean;
   distance?: number;
 };
 
 export interface IBooking {
-  _id?: string;
+  id?: string;
   userId?: string | User;
   carId: string | ICar;
   ownerId: string | User;
@@ -135,7 +136,7 @@ export interface IBookingWithPopulatedData extends Omit<IBooking, 'userId' | 'ca
 }
 
 export interface CarDocument {
-  _id: string;
+  id: string;
   carName: string;
   carModel: string;
   registrationNumber: string;
@@ -152,7 +153,7 @@ export interface CarDocument {
 };
 
 export type IUsers = {
-  _id: string;
+  id: string;
   userName: string;
   email: string;
   role: string;
@@ -178,7 +179,7 @@ export interface UserInput {
 };
 
 export interface ISubscription {
-  _id?: string;
+  id?: string;
   name: string;
   description: string;
   features: string[];

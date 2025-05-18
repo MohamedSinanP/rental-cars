@@ -54,4 +54,5 @@ export interface OwnerResponseDTO {
   role: string;
   isBlocked?: boolean;
   isVerified?: boolean;
+  commission?: number;
 }

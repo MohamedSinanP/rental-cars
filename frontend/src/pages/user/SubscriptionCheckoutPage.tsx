@@ -33,7 +33,7 @@ const SubscriptionCheckout = () => {
   const handlePlanSelect = async (plan: ISubscription) => {
     try {
       const priceId = plan.stripePriceId;
-      const subId = plan._id!;
+      const subId = plan.id!;
       const result = await makeSubscription(priceId, subId);
       console.log(result, "this is what>>>>>>");
 

@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 
 export default interface ISubscriptionController {
   createSubscription(req: Request, res: Response, next: NextFunction): Promise<void>;

@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { BaseRepository } from "./base.repository";
 import TYPES from "../di/types";
 import { Model } from "mongoose";
-import { IReviewModel, ISubscription, ISubscriptionModel } from "../types/user";
+import { IReviewModel } from "../types/user";
 import IReviewRepository from "../interfaces/repositories/reveiw.repository";
 
 

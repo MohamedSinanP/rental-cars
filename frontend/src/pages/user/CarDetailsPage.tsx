@@ -151,7 +151,7 @@ const CarDetailsPage: React.FC = () => {
         return;
       }
     }
-    navigate(`/car/booking/${car._id}`);
+    navigate(`/car/booking/${car.id}`);
   };
 
   const handleReviewSubmit = async () => {
@@ -463,7 +463,7 @@ const CarDetailsPage: React.FC = () => {
             <div className="relative">
               <div className="flex overflow-x-auto gap-4 pb-4 hide-scrollbar">
                 {similarCars.map((similarCar: SimilarCar) => (
-                  <div key={similarCar._id} className="min-w-[250px] border rounded-lg p-2 relative">
+                  <div key={similarCar.id} className="min-w-[250px] border rounded-lg p-2 relative">
                     <button className="absolute top-4 right-4 z-10 bg-white p-1 rounded-full">
                       <Heart size={16} className="text-gray-400" />
                     </button>
@@ -489,7 +489,7 @@ const CarDetailsPage: React.FC = () => {
                     </div>
                     <button
                       className="w-full bg-teal-400 text-white text-sm py-1 rounded mt-2"
-                      onClick={() => navigate(`/car/${similarCar._id}`)}
+                      onClick={() => navigate(`/car/${similarCar.id}`)}
                     >
                       View More
                     </button>

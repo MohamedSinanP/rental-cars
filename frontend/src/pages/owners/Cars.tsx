@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Edit, Trash2 } from 'lucide-react';
-import axios from 'axios';
 import Sidebar from '../../layouts/owners/Sidebar';
 import CarModal from '../../components/CarModal';
 import { toast } from 'react-toastify';
-import { getCars } from '../../services/apis/ownerApi';
+import { getCars, toggleListing } from '../../services/apis/ownerApi';
 import { ICar } from '../../types/types';
 import EditCarModal from '../../components/EditCarModal';
 import { formatINR } from '../../utils/commonUtilities';
@@ -40,12 +39,14 @@ const Cars: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const limit = 4;
 
   const fetchCars = useCallback(async () => {
     try {
       const result = await getCars(currentPage, limit);
       const fetchedCars = Array.isArray(result.data.data) ? result.data.data : [];
+
       setCars(fetchedCars);
       setCurrentPage(result.data.currentPage);
       setTotalPages(result.data.totalPages);
@@ -58,38 +59,49 @@ const Cars: React.FC = () => {
         toast.error('Failed to fetch cars. Please try again.');
       }
     }
-  }, [currentPage]);
+  }, [currentPage, refreshTrigger]); // Add refreshTrigger to dependencies
 
   useEffect(() => {
     fetchCars();
   }, [fetchCars]);
 
+  // Update selected car when cars list changes
+  useEffect(() => {
+    if (selectedCar && cars.length > 0) {
+      const updatedSelectedCar = cars.find(car => car.id === selectedCar.id);
+      if (updatedSelectedCar) {
+        setSelectedCar(updatedSelectedCar);
+      }
+    }
+  }, [cars, selectedCar]);
+
   const handleCarUpdated = (updatedCar: ICar) => {
     setCars((prev) =>
-      prev.map((car) => (car._id === updatedCar._id ? updatedCar : car))
+      prev.map((car) => (car.id === updatedCar.id ? updatedCar : car))
     );
     setSelectedCar(updatedCar);
     toast.success('Car updated successfully');
   };
 
   const handleDelete = async (carId: string) => {
-    if (window.confirm('Are you sure you want to delete this car?')) {
-      try {
-        await axios.delete(`/api/cars/${carId}`);
-        const updatedCars = cars.filter((car) => car._id !== carId);
-        setCars(updatedCars);
-        if (selectedCar?._id === carId) {
-          setSelectedCar(null);
-        }
-        toast.success('Car deleted successfully');
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error('Failed to delete car');
-        }
+    try {
+      await toggleListing(carId);
+      // Force refresh after toggling listing status
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+        toast.error(error.message);
+      } else {
+        setError('Failed to change listing status cars. Please try again.');
+        toast.error('Failed to change listing status cars. Please try again.');
       }
     }
+  };
+
+  // Manual refresh function
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
   };
 
   if (error && cars.length === 0) {
@@ -111,7 +123,7 @@ const Cars: React.FC = () => {
             <h2 className="text-3xl font-bold text-gray-900">My Cars</h2>
             <div className="flex gap-3">
               <button
-                onClick={fetchCars}
+                onClick={handleRefresh}
                 className="px-5 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm cursor-pointer"
               >
                 Refresh
@@ -133,9 +145,9 @@ const Cars: React.FC = () => {
                 {cars.length > 0 ? (
                   cars.map((car) => (
                     <CarListItem
-                      key={car._id}
+                      key={car.id}
                       car={car}
-                      isSelected={selectedCar?._id === car._id}
+                      isSelected={selectedCar?.id === car.id}
                       onSelect={() => setSelectedCar(car)}
                     />
                   ))
@@ -160,8 +172,8 @@ const Cars: React.FC = () => {
                     Car Information
                   </h3>
 
-                  {/* Verification Alert - Only shown when conditions are met */}
-                  {!selectedCar.isVerified && !selectedCar.verificationRejected && (
+                  {/* Verification Alert - Only show when car is NOT verified */}
+                  {!(selectedCar.isVerified === true && selectedCar.verificationRejected === false) ? (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
@@ -174,7 +186,7 @@ const Cars: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                  )}
+                  ) : null}
 
                   <div className="flex items-center gap-6 mb-6">
                     <img
@@ -245,13 +257,13 @@ const Cars: React.FC = () => {
                       <Edit size={16} /> Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(selectedCar._id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
+                      onClick={() => handleDelete(selectedCar.id)}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
                     >
-                      <Trash2 size={16} /> List/Unlist
+                      <Trash2 size={16} /> {selectedCar.isListed ? 'Unlist' : 'List'}
                     </button>
                   </div>
-                  <DocumentSearch carId={selectedCar._id} />
+                  <DocumentSearch carId={selectedCar.id} />
                 </div>
               ) : (
                 <div className="bg-white rounded-xl shadow-sm p-8 text-center text-gray-600">

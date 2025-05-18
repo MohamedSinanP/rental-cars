@@ -4,14 +4,16 @@ import { bookingController, carController, reviewController, subscriptionControl
 import { attachUserIfExists } from "../middlewares/attachUserIfExist";
 const router = express.Router();
 
-
-router.get('/profile', authenticate(['user']), userController.fetchUser.bind(userController));
-router.get('/details', authenticate(['user']), userController.getUserDetails.bind(userController));
-router.get('/cars', attachUserIfExists, carController.getAllCars.bind(carController));
+// public routes for users
 router.get('/car-details/:id', carController.carDetails.bind(carController));
 router.get('/cars/similar/:id', carController.similarCars.bind(carController));
 router.get('/reverse-geocode', userController.fetchUserLocationAddress.bind(userController));
 router.patch('/location/:id', userController.setUserLocation.bind(userController));
+
+// user account related routes
+router.get('/profile', authenticate(['user']), userController.fetchUser.bind(userController));
+router.get('/details', authenticate(['user']), userController.getUserDetails.bind(userController));
+router.get('/cars', attachUserIfExists, carController.getAllCars.bind(carController));
 router.get('/wallet', authenticate(["user"]), userController.getUserWallet.bind(userController));
 router.put('/update-profile', authenticate(["user"]), userController.updateProfile.bind(userController));
 router.put('/update-password', authenticate(["user"]), userController.updatePassword.bind(userController));

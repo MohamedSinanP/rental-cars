@@ -1,7 +1,32 @@
 import mongoose, { Document, Types } from "mongoose";
-import IUser from "./user";
-import ICar from "./car";
-import IOwner from "./owner";
+import IUser, { UserResponseDTO } from "./user";
+import ICar, { CarDTO } from "./car";
+import IOwner, { OwnerResponseDTO } from "./owner";
+
+export interface BookingDTO {
+  id: string;
+  userId: string | UserResponseDTO;
+  carId: string | CarDTO;
+  ownerId: string | OwnerResponseDTO;
+  userDetails: {
+    name: string;
+    email: string;
+    phoneNumber: string;
+    address: string;
+  };
+  pickupLocation: string;
+  dropoffLocation: string;
+  pickupDateTime: Date;
+  dropoffDateTime: Date;
+  totalPrice: number;
+  paymentStatus: string;
+  paymentMethod: string;
+  status: string;
+  commissionPercentage: number;
+  adminCommissionAmount: number;
+  ownerEarning: number;
+}
+
 
 export interface IBooking {
   _id?: string;
@@ -13,11 +38,6 @@ export interface IBooking {
     email: string;
     name: string;
     phoneNumber: string;
-  };
-  carLocation?: {
-    address?: string;
-    latitude?: number;
-    longitude?: string;
   };
   pickupLocation: string;
   dropoffLocation: string;
@@ -36,6 +56,7 @@ export interface IBooking {
   ownerEarning?: number;
 };
 export interface IBookingModel extends Document {
+  _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   carId: mongoose.Types.ObjectId;
   ownerId: mongoose.Types.ObjectId;
@@ -44,11 +65,6 @@ export interface IBookingModel extends Document {
     email: string;
     name: string;
     phoneNumber: string;
-  };
-  carLocation?: {
-    address?: string;
-    latitude?: number;
-    longitude?: string;
   };
   pickupLocation: string;
   dropoffLocation: string;

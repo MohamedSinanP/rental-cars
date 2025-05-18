@@ -2,8 +2,7 @@ import { inject, injectable } from "inversify";
 import { BaseRepository } from "./base.repository";
 import TYPES from "../di/types";
 import mongoose, { Model, Types } from "mongoose";
-import { IUserSubscription, IUserSubscriptionModel, IWalletModel, IWishlistModel, TTransaction, TWallet, WishlistPaginatedItem } from "../types/user";
-import IWalletRepository from "../interfaces/repositories/wallet.repository";
+import { IWishlistModel, WishlistPaginatedItem } from "../types/user";
 import IWishlitRepository from "../interfaces/repositories/wishlist.repository";
 
 
@@ -12,6 +11,7 @@ export default class WishlistRepository extends BaseRepository<IWishlistModel> i
   constructor(@inject(TYPES.WishlistModel) private _wishlistModel: Model<IWishlistModel>) {
     super(_wishlistModel);
   };
+
   async addCarToWishlist(userId: string, carId: string): Promise<IWishlistModel | null> {
     const userObjectId = new Types.ObjectId(userId);
     const carObjectId = new Types.ObjectId(carId);
@@ -38,6 +38,8 @@ export default class WishlistRepository extends BaseRepository<IWishlistModel> i
   }
 
   async removeCarFromWishlist(userId: string, carId: string): Promise<IWishlistModel | null> {
+
+    console.log(" total : ", userId, carId);
     const userObjectId = new Types.ObjectId(userId);
     const carObjectId = new Types.ObjectId(carId);
 

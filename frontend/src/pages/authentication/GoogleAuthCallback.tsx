@@ -20,6 +20,7 @@ const GoogleAuthCallback = () => {
       const fetchUserAndHandleLocation = async () => {
         try {
           const result = await getUser(token);
+          console.log("result : ", result);
 
           dispatch(setAuth({
             user: {
@@ -33,7 +34,7 @@ const GoogleAuthCallback = () => {
           }));
           try {
             const { location } = await getUserLocation();
-            await sendUserLocation(result.data._id, location);
+            await sendUserLocation(result.data.id, location);
           } catch (locationError) {
             console.error("Could not handle user location:", locationError);
           }

@@ -39,7 +39,7 @@ const OwnerBookingsPage: React.FC = () => {
 
   const handleStatusChange = async (bookingId: string, newStatus: 'active' | 'cancelled' | 'completed') => {
     try {
-      const booking = bookings.find(b => b._id === bookingId);
+      const booking = bookings.find(b => b.id === bookingId);
       if (booking && booking.status !== 'active') {
         toast.error('Cannot change status of a cancelled or completed booking');
         return;
@@ -49,7 +49,7 @@ const OwnerBookingsPage: React.FC = () => {
       console.log("this is the status result", result.data);
 
       setBookings(bookings.map(booking =>
-        booking._id === bookingId ? { ...booking, status: newStatus } : booking
+        booking.id === bookingId ? { ...booking, status: newStatus } : booking
       ));
       toast.success('Booking status updated successfully');
     } catch (error: unknown) {
@@ -64,7 +64,7 @@ const OwnerBookingsPage: React.FC = () => {
   };
 
   const viewBooking = (bookingId: string) => {
-    const booking = bookings.find(b => b._id === bookingId);
+    const booking = bookings.find(b => b.id === bookingId);
     if (booking) {
       setSelectedBooking(booking);
       setIsModalOpen(true);
@@ -98,10 +98,10 @@ const OwnerBookingsPage: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {bookings.map((booking) => (
-                <tr key={booking._id} className="hover:bg-gray-50">
+                <tr key={booking.id} className="hover:bg-gray-50">
                   <td className="px-3 py-2 whitespace-nowrap text-xs md:text-sm text-gray-900">
-                    <span className="hidden md:inline">{booking._id}</span>
-                    <span className="md:hidden">{booking._id!.substring(0, 6)}...</span>
+                    <span className="hidden md:inline">{booking.id}</span>
+                    <span className="md:hidden">{booking.id!.substring(0, 6)}...</span>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-xs md:text-sm text-gray-900">{booking.carId?.carName || 'N/A'}</td>
                   <td className="px-3 py-2 whitespace-nowrap text-xs md:text-sm text-gray-900">{booking.userDetails.name}</td>
@@ -116,14 +116,14 @@ const OwnerBookingsPage: React.FC = () => {
                   <td className="px-3 py-2 whitespace-nowrap text-xs md:text-sm text-gray-900">
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => viewBooking(booking._id!)}
+                        onClick={() => viewBooking(booking.id!)}
                         className="px-2 py-1 bg-teal-400 text-white text-xs rounded hover:bg-teal-400 cursor-pointer"
                       >
                         View
                       </button>
                       <select
                         value={booking.status}
-                        onChange={(e) => handleStatusChange(booking._id!, e.target.value as 'active' | 'cancelled' | 'completed')}
+                        onChange={(e) => handleStatusChange(booking.id!, e.target.value as 'active' | 'cancelled' | 'completed')}
                         className="px-1 py-1 text-xs border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={booking.status !== 'active'}
                         title={booking.status !== 'active' ? 'Cannot change status of cancelled or completed bookings' : ''}

@@ -73,7 +73,7 @@ const LoginPage = () => {
       } else if (result.data.userDetails.user.role === "user") {
         try {
           const { location } = await getUserLocation();
-          await sendUserLocation(result.data.userDetails._id, location);
+          await sendUserLocation(result.data.userDetails.id, location);
         } catch (locationError) {
           console.error("Could not fetch location:", locationError);
         } finally {

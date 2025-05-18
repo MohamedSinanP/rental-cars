@@ -1,6 +1,4 @@
 import { inject, injectable } from "inversify";
-import IAdminRepository from "../interfaces/repositories/admin.repository";
-import { IAdminModel } from "../models/admin.model";
 import { BaseRepository } from "./base.repository";
 import TYPES from "../di/types";
 import { Model } from "mongoose";

@@ -8,14 +8,14 @@ import Pagination from '../../components/Pagination';
 
 // Define the interface for user subscription
 interface IUserSubscription {
-  _id: string;
+  id: string;
   userId: {
-    _id: string;
+    id: string;
     userName: string;
     email: string;
   };
   subscriptionId: {
-    _id: string;
+    id: string;
     name: string;
     price: number;
   };
@@ -88,7 +88,7 @@ const UserSubscriptionPage = () => {
       // Update local state
       setSubscriptions(prev =>
         prev.map(sub =>
-          sub._id === subscriptionId ? { ...sub, status: newStatus } : sub
+          sub.id === subscriptionId ? { ...sub, status: newStatus } : sub
         )
       );
 
@@ -193,7 +193,7 @@ const UserSubscriptionPage = () => {
           <div className="relative inline-block">
             <select
               value={subscription.status}
-              onChange={(e) => handleStatusUpdate(subscription._id, e.target.value)}
+              onChange={(e) => handleStatusUpdate(subscription.id, e.target.value)}
               disabled={isDisabled}
               className={`px-3 py-1 rounded text-sm font-medium ${isDisabled
                 ? 'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70'

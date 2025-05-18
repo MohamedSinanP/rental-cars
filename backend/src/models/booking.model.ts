@@ -24,11 +24,6 @@ const bookingSchema = new Schema<IBookingModel>({
     name: { type: String, required: true },
     phoneNumber: { type: String, required: true },
   },
-  carLocation: {
-    address: String,
-    latitude: Number,
-    longitude: String,
-  },
   pickupLocation: { type: String, required: true },
   dropoffLocation: { type: String, required: true },
   pickupDateTime: { type: Date, required: true },

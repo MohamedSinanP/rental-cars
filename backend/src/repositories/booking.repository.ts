@@ -1,5 +1,5 @@
-import mongoose, { FilterQuery, Model, Types, UpdateResult } from "mongoose";
-import { BasicSalesInfo, IBooking, IBookingModel, IBookingPopulated, RentalStatsForAdmin, RentalStatsForOwner, SalesInformation } from "../types/booking";
+import mongoose, { FilterQuery, Model, Types } from "mongoose";
+import { BasicSalesInfo, IBooking, IBookingModel, IBookingPopulated, RentalStatsForAdmin, RentalStatsForOwner } from "../types/booking";
 import { BaseRepository } from "./base.repository";
 import TYPES from "../di/types";
 import { inject, injectable } from "inversify";
@@ -30,9 +30,11 @@ export class BookingRepository extends BaseRepository<IBookingModel> implements 
       .populate('carId')
       .populate('ownerId')
       .populate('userId')
-      .skip(skip).limit(limit);
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    const total = await this._bookingModel.countDocuments();
+    const total = await this._bookingModel.countDocuments({ ownerId });
     return { data, total };
   };
 

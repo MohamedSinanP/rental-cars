@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 
 // Define types based on your data model
 type Car = {
-  _id: string;
+  id: string;
   carName: string;
   carModel: string;
   carType: string;
@@ -33,7 +33,7 @@ type WishlistItem = {
 
 // Define a transformed type for DataTable compatibility
 type TransformedWishlistItem = DataItem & {
-  _id: string; // Mapped from car._id
+  id: string; // Mapped from car.id
   car: Car; // Full car object
   addedAt: string;
 };
@@ -73,7 +73,7 @@ const UserWishlist: React.FC = () => {
       const result = await getUserWishlist(page, limit);
 
       const transformedItems: TransformedWishlistItem[] = result.data.data.map((item: WishlistItem) => ({
-        _id: item.car._id,
+        id: item.car.id,
         car: item.car,
         addedAt: item.addedAt,
       }));
@@ -96,7 +96,7 @@ const UserWishlist: React.FC = () => {
 
   const handleRemoveFromWishlist = async (item: TransformedWishlistItem) => {
     try {
-      await removeFromWishlist(item._id);
+      await removeFromWishlist(item.id);
       fetchWishlist(currentPage, limit);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -108,7 +108,7 @@ const UserWishlist: React.FC = () => {
   };
 
   const handleRentCar = (item: TransformedWishlistItem) => {
-    navigate(`/cars/booking/${item._id}`);
+    navigate(`/cars/booking/${item.id}`);
   };
 
   const formatDate = (dateString: string) => {
@@ -213,7 +213,7 @@ const UserWishlist: React.FC = () => {
   // Render card view for mobile displays
   const renderMobileWishlistCard = (item: TransformedWishlistItem) => {
     return (
-      <div key={item._id} className="bg-white rounded-lg shadow p-4 mb-4">
+      <div key={item.id} className="bg-white rounded-lg shadow p-4 mb-4">
         <div className="flex space-x-3">
           <div className="w-24 h-20 flex-shrink-0 overflow-hidden rounded-md">
             <img

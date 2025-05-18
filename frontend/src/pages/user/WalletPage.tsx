@@ -64,7 +64,7 @@ const WalletPage: React.FC = () => {
         const result = await getUserWallet(currentPage, limit);
         const transformedTransactions: Transaction[] = result.data.transactions.map((transaction: RawTransaction) => ({
           ...transaction,
-          _id: transaction.transactionId, // Add _id field required by DataItem
+          id: transaction.transactionId, // Add id field required by DataItem
           date: new Date(transaction.date)
         }));
 

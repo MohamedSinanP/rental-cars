@@ -45,7 +45,6 @@ const CarRentalsPage: React.FC = () => {
   const handleInvoiceDownload = async (id: string) => {
     try {
       const result = await downloadInvoice(id);
-      console.log(result, "PDF data received");
       const blob = new Blob([result], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
 
@@ -73,10 +72,10 @@ const CarRentalsPage: React.FC = () => {
 
   const handleRentalUpdate = (updatedRental: IBookingWithPopulatedData): void => {
     setRentals(rentals.map(rental =>
-      rental._id === updatedRental._id ? updatedRental : rental
+      rental.id === updatedRental.id ? updatedRental : rental
     ));
 
-    if (selectedRental && selectedRental._id === updatedRental._id) {
+    if (selectedRental && selectedRental.id === updatedRental.id) {
       setSelectedRental(updatedRental);
     }
   };
@@ -138,7 +137,7 @@ const CarRentalsPage: React.FC = () => {
   const actions: Action<BookingDataItem>[] = [
     {
       label: 'Invoice Down',
-      onClick: (item: BookingDataItem) => handleInvoiceDownload(item._id!),
+      onClick: (item: BookingDataItem) => handleInvoiceDownload(item.id!),
       className: 'bg-teal-400 text-white hover:bg-teal-500',
       // Only show for completed bookings
       isVisible: (item: BookingDataItem) => Boolean(item.status && item.status.toLowerCase() === 'completed')
@@ -215,7 +214,7 @@ const CarRentalsPage: React.FC = () => {
                   </div>
                 ) : (
                   rentals.map((rental) => (
-                    <div key={rental._id} className="bg-white rounded-lg shadow p-4">
+                    <div key={rental.id} className="bg-white rounded-lg shadow p-4">
                       <div className="flex items-center space-x-3 mb-3">
                         <img
                           src={rental.carId.carImages?.[0]}
@@ -252,7 +251,7 @@ const CarRentalsPage: React.FC = () => {
                       <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                         {rental.status && rental.status.toLowerCase() === 'completed' && (
                           <button
-                            onClick={() => handleInvoiceDownload(rental._id!)}
+                            onClick={() => handleInvoiceDownload(rental.id!)}
                             className="bg-teal-400 text-white px-4 py-2 rounded text-sm w-full sm:w-auto text-center"
                           >
                             Invoice Down

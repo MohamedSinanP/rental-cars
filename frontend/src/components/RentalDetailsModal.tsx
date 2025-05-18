@@ -33,7 +33,7 @@ const RentalDetailsModal: React.FC<RentalDetailsModalProps> = ({
       setIsCancelling(true);
       setCancelError(null);
 
-      const result = await cancelBooking(rental._id);
+      const result = await cancelBooking(rental.id);
       const updatedRental = result.data;
       if (onRentalUpdate) {
         onRentalUpdate(updatedRental);

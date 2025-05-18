@@ -97,7 +97,6 @@ export default function CarListingPage() {
 
   const fetchCars = async (isInitial: boolean = false): Promise<void> => {
     try {
-      console.log('fetchCars called', { isInitial, currentPage, filters: debouncedFilters });
       setLoading(true);
 
       const filtersToUse: CarFilters = {
@@ -113,11 +112,6 @@ export default function CarListingPage() {
       );
 
       const data: ICar[] = Array.isArray(result) ? result : result.data.data || [];
-      console.log('Cars fetched:', data);
-
-      if (!data.length) {
-        console.warn('No cars found in response');
-      }
 
       if (isInitial) {
         if (result.data.maxPrice && maxPrice === null) {
@@ -144,7 +138,6 @@ export default function CarListingPage() {
   useEffect(() => {
     if (isMounted.current) return;
     isMounted.current = true;
-    console.log('Initial fetch useEffect triggered');
     fetchCars(true);
 
     // Load wishlist from localStorage if exists
@@ -155,15 +148,6 @@ export default function CarListingPage() {
   }, []);
 
   useEffect(() => {
-    if (!isInitialFetchDone) {
-      console.log('Filter/pagination useEffect skipped: initial fetch not done');
-      return;
-    }
-    console.log('Filter/pagination useEffect triggered', {
-      debouncedSearchQuery,
-      debouncedFilters,
-      currentPage,
-    });
     fetchCars(false);
   }, [debouncedSearchQuery, debouncedFilters, currentPage, isInitialFetchDone]);
 
@@ -178,8 +162,9 @@ export default function CarListingPage() {
 
       try {
         const result = await getWishlist();
+
         if (result && result.data && result.data.cars) {
-          const carIds = result.data.cars.map((item: any) => item.car._id || item.car);
+          const carIds = result.data.cars.map((item: any) => item.car.id || item.car);
           setWishlist(carIds);
         }
       } catch (error) {
@@ -225,7 +210,6 @@ export default function CarListingPage() {
       const updatedFilter = isChecked
         ? [...prevFilters[filterKey], value]
         : prevFilters[filterKey].filter((item) => item !== value);
-      console.log('Filters updated:', { [filterKey]: updatedFilter });
       return { ...prevFilters, [filterKey]: updatedFilter };
     });
     setCurrentPage(1);
@@ -551,18 +535,18 @@ export default function CarListingPage() {
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {cars.map((car) => (
-                  <div key={car._id || car.carName} className="border rounded-lg bg-white overflow-hidden relative shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <div key={car.id || car.carName} className="border rounded-lg bg-white overflow-hidden relative shadow-sm hover:shadow-md transition-shadow duration-200">
                     {/* Wishlist Heart Icon */}
                     <button
                       className="absolute top-2 right-2 p-2 rounded-full transition-all z-10"
                       onClick={(e) => {
                         e.stopPropagation();
-                        car._id && toggleWishlist(car._id);
+                        car.id && toggleWishlist(car.id);
                       }}
                     >
                       <Heart
                         size={20}
-                        className={`${car._id && isWishlisted(car._id) ? 'text-teal-500 fill-teal-500 cursor-pointer' : 'text-gray-500 fill-white cursor-pointer'} transition-colors duration-200 `}
+                        className={`${car.id && isWishlisted(car.id) ? 'text-teal-500 fill-teal-500 cursor-pointer' : 'text-gray-500 fill-white cursor-pointer'} transition-colors duration-200 `}
                       />
                     </button>
 
@@ -587,7 +571,7 @@ export default function CarListingPage() {
                       </div>
                       <button
                         className="mt-3 w-full bg-teal-400 text-white py-2 rounded-md text-sm hover:bg-teal-500 transition-all duration-200"
-                        onClick={() => navigate(`/car-details/${car._id}`)}
+                        onClick={() => navigate(`/car-details/${car.id}`)}
                       >
                         View More
                       </button>

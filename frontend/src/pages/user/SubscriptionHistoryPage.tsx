@@ -10,16 +10,15 @@ import { getUserSubscriptions, getActiveSubscription } from '../../services/apis
 
 // Define types based on your data model
 type Subscription = {
-  _id: string;
+  id: string;
   subscriptionId: {
-    _id: string;
+    id: string;
     name: string;
     price: number;
   };
   status: string;
   currentPeriodStart: string;
   currentPeriodEnd: string;
-  cancelAtPeriodEnd: boolean;
 };
 
 type ActiveSubscription = Subscription | null;
@@ -59,6 +58,7 @@ const SubscriptionHistory: React.FC = () => {
     try {
       setActiveSubLoading(true);
       const result = await getActiveSubscription();
+
       if (Object.keys(result.data).length > 0) {
         setActiveSubscription(result.data);
         setActiveSubError(null);
@@ -80,6 +80,7 @@ const SubscriptionHistory: React.FC = () => {
     try {
       setLoading(true);
       const result = await getUserSubscriptions(page, limit);
+      console.log("result : ", result);
 
       setSubscriptions(result.data.data);
       setCurrentPage(result.data.currentPage);
@@ -110,7 +111,7 @@ const SubscriptionHistory: React.FC = () => {
     });
   };
 
-  // Responsive columns configuration - removed the cancel action
+  // Responsive columns configuration
   const columns = [
     {
       key: 'subscriptionId.name',
@@ -146,14 +147,14 @@ const SubscriptionHistory: React.FC = () => {
       render: (item: Subscription) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.status === 'active' ? 'bg-green-100 text-green-800' :
           item.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-            'bg-yellow-100 text-yellow-800'
+            item.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+              'bg-yellow-100 text-yellow-800'
           }`}>
           {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
         </span>
       )
     }
   ];
-
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -162,12 +163,13 @@ const SubscriptionHistory: React.FC = () => {
   // Render card view for mobile displays
   const renderMobileSubscriptionCard = (subscription: Subscription) => {
     return (
-      <div key={subscription._id} className="bg-white rounded-lg shadow p-4 mb-4">
+      <div key={subscription.id} className="bg-white rounded-lg shadow p-4 mb-4">
         <div className="flex justify-between items-start mb-2">
           <span className="font-medium text-base">{subscription.subscriptionId.name}</span>
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${subscription.status === 'active' ? 'bg-green-100 text-green-800' :
             subscription.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-              'bg-yellow-100 text-yellow-800'
+              subscription.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                'bg-yellow-100 text-yellow-800'
             }`}>
             {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
           </span>
@@ -347,8 +349,8 @@ const SubscriptionHistory: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-start space-x-2">
-                  <div className="h-5 w-5 md:h-6 md:w-6 rounded-full bg-yellow-100 flex items-center justify-center mt-0.5 flex-shrink-0">
-                    <span className="h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-yellow-500"></span>
+                  <div className="h-5 w-5 md:h-6 md:w-6 rounded-full bg-blue-100 flex items-center justify-center mt-0.5 flex-shrink-0">
+                    <span className="h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-blue-500"></span>
                   </div>
                   <div>
                     <h3 className="font-medium text-sm md:text-base">Completed</h3>

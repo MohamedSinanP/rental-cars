@@ -7,6 +7,7 @@ import IUserService from "../interfaces/services/user.service";
 import { HttpResponse } from "../utils/http.response";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 
+@injectable()
 export default class UserConroller implements IUserController {
   constructor(@inject(TYPES.IUserService) private _userService: IUserService) { };
   async fetchUser(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -27,6 +28,7 @@ export default class UserConroller implements IUserController {
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId!;
       const userDetails = await this._userService.getUserDetails(userId);
+
       res.status(StatusCode.OK).json(HttpResponse.success(userDetails));
     } catch (error) {
       next(error);

@@ -54,7 +54,7 @@ interface ISubscription {
 }
 
 interface IUserAddress {
-  _id: string;
+  id: string;
   userId: string;
   name: string;
   email: string;
@@ -205,7 +205,7 @@ const CarBookingPage: React.FC = () => {
   // Handle address selection change
   useEffect(() => {
     if (selectedAddressId && selectedAddressId !== 'new') {
-      const selectedAddress = userAddresses.find(addr => addr._id === selectedAddressId);
+      const selectedAddress = userAddresses.find(addr => addr.id === selectedAddressId);
       if (selectedAddress) {
         setValue('fullName', selectedAddress.name);
         setValue('email', selectedAddress.email);
@@ -354,7 +354,7 @@ const CarBookingPage: React.FC = () => {
       };
 
       const result = await carBookingApi(bookingData);
-      const bookingId = result.data._id;
+      const bookingId = result.data.id;
       toast.success(result.message);
       navigate(`/greetings/${bookingId}`);
     } catch (error: unknown) {
@@ -564,7 +564,7 @@ const CarBookingPage: React.FC = () => {
                       className="w-full border rounded p-2 pr-8 outline-none appearance-none"
                     >
                       {userAddresses.map(address => (
-                        <option key={address._id} value={address._id}>
+                        <option key={address.id} value={address.id}>
                           {address.name} - {address.address.substring(0, 30)}...
                         </option>
                       ))}

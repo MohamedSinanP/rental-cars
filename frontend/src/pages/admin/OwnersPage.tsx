@@ -33,12 +33,12 @@ const OwnersPage = () => {
 
   const handleToggleBlock = async (user: IUsers) => {
     try {
-      const result = await blockOwner(user._id);
+      const result = await blockOwner(user.id);
       const updatedUser = result.data;
 
       setUsers((prevUsers) =>
         prevUsers.map((u) =>
-          u._id === user._id ? { ...u, ...updatedUser } : u
+          u.id === user.id ? { ...u, ...updatedUser } : u
         )
       );
     } catch (error: unknown) {

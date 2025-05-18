@@ -6,7 +6,7 @@
 /////////////////// review related types for the user ////////////////////////
 
 export interface SimilarCar {
-  _id: string;
+  id: string;
   carName: string;
   seats: string;
   pricePerDay: number;
@@ -15,14 +15,14 @@ export interface SimilarCar {
 }
 
 export interface Review {
-  _id: string;
+  id: string;
   carId: string;
   comment: string;
   rating: number;
   createdAt: string;
   updatedAt: string;
   userId: {
-    _id: string;
+    id: string;
     userName: string;
     profilePic: string;
     email: string;

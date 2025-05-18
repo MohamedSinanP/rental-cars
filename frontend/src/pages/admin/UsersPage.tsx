@@ -33,12 +33,12 @@ const UsersPage = () => {
 
   const handleToggleBlock = async (user: IUsers) => {
     try {
-      const result = await blockUser(user._id);
+      const result = await blockUser(user.id);
       const updatedUser = result.data;
 
       setUsers((prevUsers) =>
         prevUsers.map((u) =>
-          u._id === user._id ? { ...u, ...updatedUser } : u
+          u.id === user.id ? { ...u, ...updatedUser } : u
         )
       );
     } catch (error: unknown) {

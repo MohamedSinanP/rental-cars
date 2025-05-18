@@ -6,7 +6,7 @@ import { addSubscription, updateSubscription } from '../services/apis/adminApi';
 
 // Define your subscription data type
 export type Subscription = {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   features: string[];
@@ -17,7 +17,7 @@ export type Subscription = {
   isActive: boolean;
 };
 
-type SubscriptionFormData = Omit<Subscription, '_id' | 'features'>;
+type SubscriptionFormData = Omit<Subscription, 'id' | 'features'>;
 
 type SubscriptionModalProps = {
   isOpen: boolean;
@@ -149,13 +149,13 @@ const SubscriptionModal = ({
 
       let result;
       if (isEditing && currentSubscription) {
-        result = await updateSubscription(currentSubscription._id, formData);
+        result = await updateSubscription(currentSubscription.id, formData);
         toast.success(result.message || 'Subscription updated successfully');
-        onSubmit({ ...data, features, _id: currentSubscription._id }, "edit");
+        onSubmit({ ...data, features, id: currentSubscription.id }, "edit");
       } else {
         result = await addSubscription(formData);
         toast.success(result.message || 'Subscription created successfully');
-        onSubmit({ ...data, features, _id: result._id }, "add");
+        onSubmit({ ...data, features, id: result.id }, "add");
       }
 
       // Reset and close modal

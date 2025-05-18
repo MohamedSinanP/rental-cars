@@ -51,8 +51,13 @@ export async function extractDocumentDataWithLLM(prompt: string): Promise<string
         messages: [
           {
             role: 'system',
-            content:
-              'You are a helpful assistant for answering questions based on scanned car documents (RC, PUC, insurance).',
+            content: `
+      You are a car document assistant. Your job is to answer only with a short, direct reply that starts with "Answer:".
+      Do not explain your reasoning. Do not repeat the user's question.
+      Only give the final response based on the documents or context.
+      Your answers must always be under 2 lines.
+    `.trim(),
+
           },
           {
             role: 'user',
@@ -60,7 +65,7 @@ export async function extractDocumentDataWithLLM(prompt: string): Promise<string
           },
         ],
         temperature: 0.3,
-        models: [modelId, 'anthropic/claude-3.5-sonnet', 'openai/gpt-4o'], // Fallback models
+        models: [modelId, 'anthropic/claude-3.5-sonnet', 'openai/gpt-4o'],
       }),
     });
 
