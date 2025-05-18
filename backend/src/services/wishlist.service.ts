@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import IWishlistService from "../interfaces/services/wishlist.service";
 import TYPES from "../di/types";
 import IWishlitRepository from "../interfaces/repositories/wishlist.repository";
-import { IUserWishlistPaginatedResponse, IUserWishlistPaginatedResponseDTO, IWishlistModel, WishlistDTO } from "../types/user";
+import { IUserWishlistPaginatedResponseDTO, WishlistDTO } from "../types/user";
 import { HttpError } from "../utils/http.error";
 import { StatusCode } from "../types/types";
 import { mapToCarDTO, toWishlistDTO } from "../utils/helperFunctions";

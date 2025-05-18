@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import axios from 'axios';
 import ICarService from "../interfaces/services/car.service";
 import { fetchAddressFromCoordinates } from "../utils/geolocation";
-import { CarDTO, CarFilter, ICarModel } from "../types/car";
+import { CarDTO, CarFilter } from "../types/car";
 import ICar from "../types/car";
 import TYPES from "../di/types";
 import ICarRepository from "../interfaces/repositories/car.repository";
@@ -15,7 +15,6 @@ import IUserService from "../interfaces/services/user.service";
 import { performOCR } from "../utils/ocr";
 import { extractDocumentDataWithLLM } from "../utils/llm";
 import { mapToCarDTO } from "../utils/helperFunctions";
-import { StatTimer } from "pdfjs-dist/types/src/display/display_utils";
 
 @injectable()
 export default class CarService implements ICarService {

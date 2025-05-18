@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { inject, injectable } from "inversify";
 import IUserService from "../interfaces/services/user.service";
-import { AddressDTO, IAddressModel, IWalletModel, userData, UserResponseDTO, WalleteDTO } from "../types/user";
+import { AddressDTO, userData, UserResponseDTO, WalleteDTO } from "../types/user";
 import TYPES from "../di/types";
 import IUserRepository from "../interfaces/repositories/user.repository";
 import { HttpError } from "../utils/http.error";
