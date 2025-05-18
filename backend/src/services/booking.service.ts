@@ -109,6 +109,7 @@ export default class BookingService implements IBookingService {
     }
     return updatedBooking;
   };
+
   async getLatestBooking(bookingId: string): Promise<IBookingModel> {
     const latestBooking = await this._bookingRepository.findById(bookingId);
     if (!latestBooking) {
@@ -137,6 +138,7 @@ export default class BookingService implements IBookingService {
     if (!updatedBooking) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Cannot cancel your booking..");
     };
+    await this._carRepository.update(updatedBooking.carId.toString(), { status: "Available" });
 
     const refundAmount = booking.totalPrice;
     const transactionId = `refund-${booking._id}`;

@@ -36,16 +36,20 @@ export class BookingRepository extends BaseRepository<IBookingModel> implements 
     return { data, total };
   };
 
-  async findPaginated(id: string, page: number, limit: number): Promise<{ data: IBookingModel[]; total: number; }> {
+  async findPaginated(id: string, page: number, limit: number): Promise<{ data: IBookingModel[]; total: number }> {
     const skip = (page - 1) * limit;
     const data = await this._bookingModel.find({ userId: id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate('carId')
       .populate('ownerId')
-      .populate('userId')
-      .skip(skip).limit(limit);
-    const total = await this._bookingModel.countDocuments();
+      .populate('userId');
+
+    const total = await this._bookingModel.countDocuments({ userId: id });
+
     return { data, total };
-  };
+  }
 
   async isBooked(carId: string, pickupDateTime: Date, dropoffDateTime: Date): Promise<IBookingModel | null> {
     const carObjId = new Types.ObjectId(carId)

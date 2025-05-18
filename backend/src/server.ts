@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import passport from "passport";
 import "./cron/booking.cron";
+import { subscriptionController } from "./di/container";
 
 dotenv.config();
 
@@ -30,8 +31,10 @@ const app = express();
 // Connect database
 connectDB();
 
+// wehook router 
+app.post('/api/user/webhook', express.raw({ type: 'application/json' }), subscriptionController.handleWebhook.bind(subscriptionController));
+
 // Middlewares
-app.use('/api/user/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({

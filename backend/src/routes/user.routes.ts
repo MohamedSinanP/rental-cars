@@ -32,7 +32,6 @@ router.get('/invoice/:id', authenticate(['user']), bookingController.invoiceForU
 router.get('/subscriptions', subscriptionController.getActiveSubscriptions.bind(subscriptionController));
 router.get('/subscription', authenticate(["user"]), subscriptionController.getUserSubscription.bind(subscriptionController));
 router.post('/create-subscription', authenticate(["user"]), subscriptionController.makeSubscription.bind(subscriptionController));
-router.post('/webhook', subscriptionController.handleWebhook.bind(subscriptionController));
 router.get('/subscriptions/all-stats', authenticate(["user"]), subscriptionController.getUserAllSubscriptions.bind(subscriptionController));
 router.patch('/subscriptions/:id/cancel', authenticate(["user"]), subscriptionController.cancelUserSub.bind(subscriptionController));
 router.get('/subscriptions/active', authenticate(["user"]), subscriptionController.getUserActiveSub.bind(subscriptionController));

@@ -206,6 +206,7 @@ export default class AuthService implements IAuthService {
 
     const email = profile.emails[0].value;
     let user = await this._userRepository.findByEmail(email);
+
     if (!user) {
       user = await this._userRepository.register({
         userName: profile.displayName,
@@ -215,12 +216,16 @@ export default class AuthService implements IAuthService {
         isBlocked: false,
         isVerified: true,
       });
-    };
+    }
+
+    if (user.isBlocked) {
+      throw new HttpError(StatusCode.FORBIDDEN, "Your account is blocked.");
+    }
 
     const accessToken = this._jwtService.generateAccessToken(user.id.toString(), user.role);
     const refreshToken = this._jwtService.generateRefreshToken(user.id.toString(), user.role);
 
-    await this._userRepository.update(String(user._id), { refreshToken: refreshToken });
+    await this._userRepository.update(String(user._id), { refreshToken });
 
     return {
       accessToken,
@@ -234,7 +239,8 @@ export default class AuthService implements IAuthService {
         isVerified: user.isVerified,
       }
     };
-  };
+  }
+
 
 
   async verifyOtp(email: string, otp: string, res: Response): Promise<IJwtToken> {

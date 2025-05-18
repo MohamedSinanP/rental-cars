@@ -10,7 +10,6 @@ import { Request } from "express";
 import Stripe from "stripe";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 import IUserSubsRepository from "../interfaces/repositories/user.subscription.repository";
-import IUserRepository from "../interfaces/repositories/user.repository";
 import { Types } from "mongoose";
 
 @injectable()
