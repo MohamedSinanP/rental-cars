@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import NavBar from '../layouts/users/NavBar'
 import Footer from '../layouts/users/Footer'
 import {
@@ -11,9 +11,20 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/24/solid'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { RootState } from '../redux/store'
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const role = useSelector((state: RootState) => state.auth.user?.role);
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+
+  useEffect(() => {
+    if (accessToken && role) {
+      if (role === 'admin') navigate('/admin/dashboard');
+      else if (role === 'owner') navigate('/owner/dashboard');
+    }
+  }, [accessToken, role, navigate]);
   return (
     <>
       <div className='min-h-screen pt-20'>

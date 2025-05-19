@@ -170,7 +170,6 @@ export default class SubscriptionController implements ISubscriptionController {
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId;
       const activeUserSub = await this._subscriptionService.getUserActiveSub(userId);
-      console.log(activeUserSub);
 
       if (!activeUserSub) {
         res.status(StatusCode.OK).json(HttpResponse.success({}));
