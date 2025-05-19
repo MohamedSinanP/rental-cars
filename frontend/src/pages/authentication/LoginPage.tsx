@@ -34,7 +34,7 @@ const LoginPage = () => {
 
     if (!formData.email.trim()) {
       validationErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(formData.email)) {
       validationErrors.email = 'Invalid email format';
     }
 
