@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
-import { DollarSign, Users, UserCog, BarChart2, Calendar, Loader } from 'lucide-react';
+import { Calendar, Loader, IndianRupee, CalendarCheck2, Car, Wallet } from 'lucide-react';
 import Sidebar from '../../layouts/owners/Sidebar';
 import { getRentalStatsForOwner, getStatsForOwner } from '../../services/apis/ownerApi';
+import { formatINR } from '../../utils/commonUtilities';
 
 // Define TypeScript interfaces for data structures
 interface ChartDataPoint {
@@ -156,37 +157,48 @@ const OwnerDashboardPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 mb-1">Total Earnings</p>
-              <h3 className="text-2xl font-bold">{statsData ? statsData.totalEarnings.toLocaleString() : '...'}</h3>
+              <h3 className="text-2xl font-bold">
+                {statsData ? formatINR(statsData.totalEarnings) : '...'}
+              </h3>
             </div>
-            <div className="bg-blue-100 p-3 rounded-full">
-              <Users className="w-6 h-6 text-blue-500" />
+            <div className="bg-teal-100 p-3 rounded-full">
+              <Wallet className="w-6 h-6 text-teal-500" />
             </div>
           </div>
+
           <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 mb-1">Total Cars</p>
-              <h3 className="text-2xl font-bold">{statsData ? statsData.totalCars.toLocaleString() : '...'}</h3>
+              <h3 className="text-2xl font-bold">
+                {statsData ? statsData.totalCars.toLocaleString() : '...'}
+              </h3>
             </div>
-            <div className="bg-blue-100 p-3 rounded-full">
-              <UserCog className="w-6 h-6 text-blue-500" />
+            <div className="bg-purple-100 p-3 rounded-full">
+              <Car className="w-6 h-6 text-purple-500" />
             </div>
           </div>
+
           <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 mb-1">Total Bookings</p>
-              <h3 className="text-2xl font-bold">${statsData ? statsData.totalBookings.toLocaleString() : '...'}</h3>
+              <h3 className="text-2xl font-bold">
+                {statsData ? statsData.totalBookings.toLocaleString() : '...'}
+              </h3>
             </div>
             <div className="bg-green-100 p-3 rounded-full">
-              <BarChart2 className="w-6 h-6 text-green-500" />
+              <CalendarCheck2 className="w-6 h-6 text-green-500" />
             </div>
           </div>
+
           <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 mb-1">Platform Commission</p>
-              <h3 className="text-2xl font-bold">${statsData ? statsData.platformCommission.toLocaleString() : '...'}</h3>
+              <h3 className="text-2xl font-bold">
+                {statsData ? formatINR(statsData.platformCommission) : '...'}
+              </h3>
             </div>
-            <div className="bg-red-100 p-3 rounded-full">
-              <DollarSign className="w-6 h-6 text-red-500" />
+            <div className="bg-yellow-100 p-3 rounded-full">
+              <IndianRupee className="w-6 h-6 text-yellow-500" />
             </div>
           </div>
         </div>
@@ -200,19 +212,19 @@ const OwnerDashboardPage: React.FC = () => {
               <div className="flex rounded-md overflow-hidden border border-gray-200">
                 <button
                   onClick={() => handleFilterChange('yearly')}
-                  className={`px-3 py-1 text-sm ${timeFilter === 'yearly' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+                  className={`px-3 py-1 text-sm ${timeFilter === 'yearly' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
                 >
                   Yearly
                 </button>
                 <button
                   onClick={() => handleFilterChange('monthly')}
-                  className={`px-3 py-1 text-sm ${timeFilter === 'monthly' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+                  className={`px-3 py-1 text-sm ${timeFilter === 'monthly' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
                 >
                   Monthly
                 </button>
                 <button
                   onClick={() => handleFilterChange('custom')}
-                  className={`px-3 py-1 text-sm ${timeFilter === 'custom' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+                  className={`px-3 py-1 text-sm ${timeFilter === 'custom' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
                 >
                   Custom
                 </button>
@@ -254,7 +266,7 @@ const OwnerDashboardPage: React.FC = () => {
                   </div>
                   <button
                     onClick={applyDateFilter}
-                    className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm flex items-center"
+                    className="bg-teal-600 text-white px-3 py-1 rounded-md text-sm flex items-center"
                   >
                     <Calendar className="w-3 h-3 mr-1" />
                     Apply
@@ -267,7 +279,7 @@ const OwnerDashboardPage: React.FC = () => {
           <div className="h-64">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <Loader className="w-8 h-8 text-blue-600 animate-spin" />
+                <Loader className="w-8 h-8 text-teal-600 animate-spin" />
               </div>
             ) : chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">

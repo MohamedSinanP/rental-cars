@@ -43,10 +43,10 @@ const SubscriptionSuccessPage: React.FC = () => {
             </p>
             <div className="mt-8">
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/subscription-history')}
                 className="w-full bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-md transition-colors"
               >
-                Go to Home
+                Go to Subscription
               </button>
             </div>
           </div>

@@ -11,6 +11,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { toast } from 'react-toastify';
+import { formatINR } from '../../utils/commonUtilities';
 
 interface Filters {
   carType: string[];
@@ -466,8 +467,8 @@ export default function CarListingPage() {
                   <div className="space-y-4 animate-slide-down">
                     <div className="relative pt-6 px-4 pb-2">
                       <div className="flex justify-between mb-2 text-sm text-gray-600">
-                        <span>${filters.priceRange[0]}</span>
-                        <span>${filters.priceRange[1] || maxPrice}</span>
+                        <span>{formatINR(filters.priceRange[0])}</span>
+                        <span>{formatINR(filters.priceRange[1] || maxPrice)}</span>
                       </div>
                       <div className="relative">
                         <div className="w-full h-2 bg-gray-200 rounded-full"></div>
@@ -566,7 +567,7 @@ export default function CarListingPage() {
                         </p>
                       )}
                       <div className="mt-2">
-                        <span className="font-bold text-lg text-gray-800">${car.pricePerHour}</span>
+                        <span className="font-bold text-lg text-gray-800">{formatINR(car.pricePerHour)}</span>
                         <span className="text-sm text-gray-600">/Day</span>
                       </div>
                       <button

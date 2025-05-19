@@ -4,6 +4,7 @@ import { ISubscription } from '../../types/types';
 import { getValidSubscriptions, makeSubscription } from '../../services/apis/userApis';
 import Footer from '../../layouts/users/Footer';
 import { toast } from 'react-toastify';
+import { formatINR } from '../../utils/commonUtilities';
 
 const SubscriptionCheckout = () => {
   const [plans, setPlans] = useState<ISubscription[]>([]);
@@ -109,7 +110,7 @@ const SubscriptionCheckout = () => {
                   <div className="bg-gradient-to-br from-teal-500 to-teal-400 text-white p-6">
                     <h2 className="text-xl md:text-2xl font-semibold mb-2 text-center">{plan.name}</h2>
                     <div className="text-4xl md:text-5xl font-bold text-center mb-2">
-                      {plan.price}
+                      {formatINR(plan.price)}
                       <span className="text-lg md:text-xl font-normal ml-1 opacity-90">{plan.billingCycle}</span>
                     </div>
                   </div>

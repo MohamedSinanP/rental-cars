@@ -8,6 +8,7 @@ import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { RatingCounts, RatingKey, Review, SimilarCar } from '../../types/user';
+import { formatINR } from '../../utils/commonUtilities';
 
 
 const CarDetailsPage: React.FC = () => {
@@ -284,8 +285,8 @@ const CarDetailsPage: React.FC = () => {
                 {car.transmission}, {car.fuelType}, {car.seats} Seats
               </p>
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 mb-4">
-                <p className="text-xl font-bold">${car.pricePerHour}/Day</p>
-                <p className="text-gray-600">◆ Deposit Amount: ${car.deposit}</p>
+                <p className="text-xl font-bold">{formatINR(car.pricePerHour)}/Day</p>
+                <p className="text-gray-600">◆ Deposit Amount: {formatINR(car.deposit)}</p>
               </div>
             </div>
 

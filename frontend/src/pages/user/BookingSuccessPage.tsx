@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getLatestBooking } from '../../services/apis/userApis';
 import NavBar from '../../layouts/users/NavBar';
 import Footer from '../../layouts/users/Footer';
+import { formatINR } from '../../utils/commonUtilities';
 
 // Define interfaces for our data structures
 interface BookingDetails {
@@ -192,7 +193,7 @@ const BookingSuccessPage: React.FC = () => {
           <div className="p-4">
             <div className="flex justify-between mb-2">
               <span className="text-gray-600">Total Paid</span>
-              <span className="font-bold">${bookingDetails.totalPrice.toFixed(2)}</span>
+              <span className="font-bold">{formatINR(bookingDetails.totalPrice)}</span>
             </div>
           </div>
         </div>

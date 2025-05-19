@@ -8,6 +8,7 @@ import AccountSidebar from '../../layouts/users/AccountSidebar';
 import Pagination from '../../components/Pagination';
 import { getUserWishlist, removeFromWishlist } from '../../services/apis/userApis';
 import { useNavigate } from 'react-router-dom';
+import { formatINR } from '../../utils/commonUtilities';
 
 // Define types based on your data model
 type Car = {
@@ -151,7 +152,7 @@ const UserWishlist: React.FC = () => {
       key: 'car.pricePerHour',
       header: 'Price',
       render: (item: TransformedWishlistItem) => (
-        <span className="font-medium">${item.car.pricePerHour.toFixed(2)}/hour</span>
+        <span className="font-medium">{formatINR(item.car.pricePerHour)}/hour</span>
       ),
     },
     {
@@ -245,7 +246,7 @@ const UserWishlist: React.FC = () => {
             <div className="space-y-1 text-sm text-gray-600 mb-3">
               <div className="flex justify-between">
                 <span>Price:</span>
-                <span className="font-medium">${item.car.pricePerHour.toFixed(2)}/hour</span>
+                <span className="font-medium">{formatINR(item.car.pricePerHour)}/hour</span>
               </div>
               <div className="flex justify-between">
                 <span>Added On:</span>

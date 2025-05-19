@@ -8,6 +8,7 @@ import Pagination from '../../components/Pagination';
 import DataTable, { DataItem, Column, Action } from '../../components/DataTable';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { formatINR } from '../../utils/commonUtilities';
 
 const CarRentalsPage: React.FC = () => {
   const [rentals, setRentals] = useState<IBookingWithPopulatedData[]>([]);
@@ -126,7 +127,7 @@ const CarRentalsPage: React.FC = () => {
       key: 'price',
       header: 'Total Price',
       render: (item: BookingDataItem) => (
-        <span className="text-sm">$ {item.totalPrice.toFixed(2)}</span>
+        <span className="text-sm"> {formatINR(item.totalPrice)}</span>
       ),
     },
   ];
@@ -242,7 +243,7 @@ const CarRentalsPage: React.FC = () => {
                         </div>
                         <div>
                           <p className="font-medium">Total Price</p>
-                          <p>$ {rental.totalPrice.toFixed(2)}</p>
+                          <p>{formatINR(rental.totalPrice)}</p>
                         </div>
                       </div>
 

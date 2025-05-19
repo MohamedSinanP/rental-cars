@@ -7,6 +7,7 @@ import AccountSidebar from '../../layouts/users/AccountSidebar';
 import Pagination from '../../components/Pagination';
 import ActiveSubscriptionCard from '../../components/ActiveSubscriptionCard';
 import { getUserSubscriptions, getActiveSubscription } from '../../services/apis/userApis';
+import { formatINR } from '../../utils/commonUtilities';
 
 // Define types based on your data model
 type Subscription = {
@@ -138,7 +139,7 @@ const SubscriptionHistory: React.FC = () => {
       key: 'subscriptionId.price',
       header: 'Price',
       render: (item: Subscription) => (
-        <span className="font-medium">${item.subscriptionId.price.toFixed(2)}/month</span>
+        <span className="font-medium">{formatINR(item.subscriptionId.price)}/month</span>
       )
     },
     {
@@ -178,7 +179,7 @@ const SubscriptionHistory: React.FC = () => {
         <div className="space-y-1 text-sm text-gray-600 mb-3">
           <div className="flex justify-between">
             <span>Price:</span>
-            <span className="font-medium">${subscription.subscriptionId.price.toFixed(2)}/month</span>
+            <span className="font-medium">{formatINR(subscription.subscriptionId.price)}/month</span>
           </div>
           <div className="flex justify-between">
             <span>Period Start:</span>

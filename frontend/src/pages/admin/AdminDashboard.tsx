@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } fro
 import { DollarSign, Users, UserCog, BarChart2, Calendar, Loader } from 'lucide-react';
 import Sidebar from '../../layouts/admin/Sidebar';
 import { getStatsForAdmin, getRentalStatsForAdmin } from '../../services/apis/adminApi';
+import { formatINR } from '../../utils/commonUtilities';
 
 // Define TypeScript interfaces for data structures
 interface ChartDataPoint {
@@ -171,7 +172,7 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 mb-1">Total Earnings</p>
-              <h3 className="text-2xl font-bold">${statsData ? statsData.totalEarnings.toLocaleString() : '...'}</h3>
+              <h3 className="text-2xl font-bold">${statsData ? formatINR(statsData.totalEarnings) : '...'}</h3>
             </div>
             <div className="bg-green-100 p-3 rounded-full">
               <BarChart2 className="w-6 h-6 text-green-500" />
@@ -180,7 +181,7 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 mb-1">Total Subscription Earnings</p>
-              <h3 className="text-2xl font-bold">${statsData ? statsData.subscriptionEarnings.toLocaleString() : '...'}</h3>
+              <h3 className="text-2xl font-bold">${statsData ? formatINR(statsData.subscriptionEarnings) : '...'}</h3>
             </div>
             <div className="bg-red-100 p-3 rounded-full">
               <DollarSign className="w-6 h-6 text-red-500" />
