@@ -20,7 +20,6 @@ export default class CarController implements ICarController {
       const ownerId = req.user?.userId!;
       const parsedLocation = JSON.parse(req.body.location);
       const parsedCarImages = JSON.parse(req.body.carImages);
-      console.log(req.body);
 
       const carData: ICar & {
         rcDoc: UploadedFile;

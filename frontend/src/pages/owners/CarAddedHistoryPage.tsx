@@ -80,10 +80,10 @@ const CarAddedHistoryPage: React.FC = () => {
         <img
           src={car.carImages[0]}
           alt={car.carName}
-          className="h-16 w-24 object-cover rounded"
+          className="h-12 w-16 sm:h-16 sm:w-24 object-cover rounded"
         />
       ),
-      className: 'w-32'
+      className: 'w-20 sm:w-32'
     },
     {
       key: 'carName',
@@ -95,7 +95,7 @@ const CarAddedHistoryPage: React.FC = () => {
       header: 'Status',
       render: (car) => (
         <span
-          className={`px-3 py-1 text-xs font-semibold rounded-full ${car.isVerified
+          className={`px-2 py-1 text-xs font-semibold rounded-full sm:px-3 ${car.isVerified
             ? 'bg-green-100 text-green-700'
             : 'bg-red-100 text-red-700'
             }`}
@@ -107,49 +107,75 @@ const CarAddedHistoryPage: React.FC = () => {
     {
       key: 'rejectionReason',
       header: 'Rejection Reason',
-      render: (car) => car.rejectionReason || '—',
-      className: 'text-gray-600'
+      render: (car) => (
+        <span className="hidden sm:inline">
+          {car.rejectionReason || '—'}
+        </span>
+      ),
+      className: 'text-gray-600 hidden sm:table-cell'
     }
   ];
 
   // Define actions for the DataTable
   const actions: Action<ICar>[] = [
     {
-      label: 'Reupload Docs',
+      label: 'Reupload',
       onClick: handleReuploadDocs,
-      className: 'bg-blue-50 text-blue-700 hover:bg-blue-100',
+      className: 'bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs sm:text-sm px-2 py-1 sm:px-3',
       isVisible: (car) => !car.isVerified // Only show for rejected cars
     }
   ];
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 p-6 bg-gray-50 min-h-screen">
-        <h2 className="text-2xl font-semibold mb-6">Car Verification History</h2>
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile header for when sidebar is closed */}
+      <div className="lg:hidden bg-white border-b border-gray-200 p-4">
+        <h1 className="text-lg font-semibold text-gray-800">Car Verification History</h1>
+      </div>
 
-        {error ? (
-          <div className="bg-red-50 text-red-700 p-4 rounded mb-6">
-            {error}
+      <div className="flex">
+        <Sidebar />
+
+        {/* Main content area with responsive padding */}
+        <div className="flex-1 w-full">
+          {/* Content wrapper with proper spacing */}
+          <div className="p-4 sm:p-6 lg:p-8">
+            {/* Desktop header */}
+            <h2 className="hidden lg:block text-2xl font-semibold mb-6 text-gray-800">
+              Car Verification History
+            </h2>
+
+            {/* Mobile header */}
+            <h2 className="block lg:hidden text-xl font-semibold mb-4 text-gray-800">
+              History
+            </h2>
+
+            {error ? (
+              <div className="bg-red-50 text-red-700 p-3 sm:p-4 rounded mb-4 sm:mb-6 text-sm sm:text-base">
+                {error}
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <DataTable
+                  data={carData}
+                  columns={columns}
+                  actions={actions}
+                  loading={loading}
+                  emptyMessage="No cars found"
+                  title=""
+                />
+              </div>
+            )}
+
+            {/* Document Reupload Modal */}
+            <ReuploadDocsModal
+              isOpen={isModalOpen}
+              onClose={handleCloseModal}
+              onSubmit={handleSubmitDocuments}
+              car={selectedCar}
+            />
           </div>
-        ) : (
-          <DataTable
-            data={carData}
-            columns={columns}
-            actions={actions}
-            loading={loading}
-            emptyMessage="No cars found"
-            title="Car Verification History"
-          />
-        )}
-
-        {/* Document Reupload Modal */}
-        <ReuploadDocsModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onSubmit={handleSubmitDocuments}
-          car={selectedCar}
-        />
+        </div>
       </div>
     </div>
   );

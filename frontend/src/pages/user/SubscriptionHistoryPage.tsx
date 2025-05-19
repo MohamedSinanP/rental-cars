@@ -59,11 +59,12 @@ const SubscriptionHistory: React.FC = () => {
       setActiveSubLoading(true);
       const result = await getActiveSubscription();
 
-      if (Object.keys(result.data).length > 0) {
+      if (result.data && Object.keys(result.data).length > 0) {
         setActiveSubscription(result.data);
         setActiveSubError(null);
       } else {
-        return;
+        setActiveSubscription(null);
+        setActiveSubError(null);
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -71,6 +72,7 @@ const SubscriptionHistory: React.FC = () => {
       } else {
         setActiveSubError('Failed to load active subscription. Please try again later.');
       }
+      setActiveSubscription(null);
     } finally {
       setActiveSubLoading(false);
     }
@@ -80,8 +82,6 @@ const SubscriptionHistory: React.FC = () => {
     try {
       setLoading(true);
       const result = await getUserSubscriptions(page, limit);
-      console.log("result : ", result);
-
       setSubscriptions(result.data.data);
       setCurrentPage(result.data.currentPage);
       setTotalPages(result.data.totalPages);
@@ -345,7 +345,7 @@ const SubscriptionHistory: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-sm md:text-base">Active Subscription</h3>
-                    <p className="text-xs md:text-sm text-gray-600">Your subscription is currently active and will automatically renew at the end of the billing period.</p>
+                    <p className="text-xs md:text-sm text-gray-600">Your subscription is currently active.</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-2">

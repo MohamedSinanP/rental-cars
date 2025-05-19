@@ -49,7 +49,6 @@ export default class BookingController implements IBookingController {
       const { user } = req as AuthenticatedRequest;
       const userId = user?.userId!;
       const userRentals = await this._bookingService.fetchUserRentals(userId, page, limit);
-      console.log("rentals : ", userRentals);
 
       res.status(StatusCode.OK).json(HttpResponse.success(userRentals));
     } catch (error) {

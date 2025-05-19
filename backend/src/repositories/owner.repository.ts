@@ -24,15 +24,6 @@ export default class OwnerRepository extends BaseRepository<IOwnerModel> impleme
     return await this._ownerModel.findOne({ email }).exec();
   };
 
-  async findByEmailAndUpdate(email: string, refreshToken: string): Promise<void> {
-    await this._ownerModel.updateOne(
-      { email },
-      {
-        $set: { otp: null, refreshToken, otpExpiresAt: null, isVerified: true }
-      }
-    ).exec();
-  };
-
   async findPaginated(page: number, limit: number, search: string): Promise<{ data: IOwnerModel[]; total: number; }> {
     const skip = (page - 1) * limit;
     const searchQuery = search

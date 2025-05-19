@@ -45,9 +45,7 @@ const OwnerBookingsPage: React.FC = () => {
         return;
       }
 
-      const result = await changeBookingStatus(bookingId, newStatus);
-      console.log("this is the status result", result.data);
-
+      await changeBookingStatus(bookingId, newStatus);
       setBookings(bookings.map(booking =>
         booking.id === bookingId ? { ...booking, status: newStatus } : booking
       ));

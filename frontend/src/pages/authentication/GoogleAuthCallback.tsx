@@ -20,8 +20,6 @@ const GoogleAuthCallback = () => {
       const fetchUserAndHandleLocation = async () => {
         try {
           const result = await getUser(token);
-          console.log("result : ", result);
-
           dispatch(setAuth({
             user: {
               userName: result.data.userName,

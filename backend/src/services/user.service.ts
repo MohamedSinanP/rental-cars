@@ -62,8 +62,6 @@ export default class UserService implements IUserService {
   }
 
   async setUserLocation(userId: string, location: { type: "Point"; coordinates: [number, number]; address: string; }): Promise<UserResponseDTO> {
-    console.log("userId: ", userId);
-
     const updatedUser = await this._userRepository.update(userId, { location: location });
     if (!updatedUser) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't update user");

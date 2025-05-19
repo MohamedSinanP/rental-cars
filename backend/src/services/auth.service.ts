@@ -189,7 +189,6 @@ export default class AuthService implements IAuthService {
     return {
       accessToken,
       user: {
-        _id: user._id.toString(),
         userName: user.userName,
         email: user.email,
         isBlocked: user.isBlocked,
@@ -243,7 +242,7 @@ export default class AuthService implements IAuthService {
 
 
 
-  async verifyOtp(email: string, otp: string, res: Response): Promise<IJwtToken> {
+  async verifyOtp(email: string, otp: string, res: Response): Promise<LoginResponse> {
     let user = await this._userRepository.findByEmail(email);
     if (!user) {
       user = await this._ownerRepository.findByEmail(email);
@@ -263,10 +262,15 @@ export default class AuthService implements IAuthService {
     const accessToken = this._jwtService.generateAccessToken(String(user._id), user.role);
     const refreshToken = this._jwtService.generateRefreshToken(String(user._id), user.role);
 
+    let updatedUser;
     if (user.role === Role.USER) {
-      await this._userRepository.findByEmailAndUpdate(user.email, refreshToken);
+      updatedUser = await this._userRepository.update(user._id.toString(), { refreshToken, isVerified: true });
     } else {
-      await this._ownerRepository.findByEmailAndUpdate(user.email, refreshToken);
+      updatedUser = await this._ownerRepository.update(user._id.toString(), { refreshToken, isVerified: true });
+    }
+
+    if (!updatedUser) {
+      throw new HttpError(StatusCode.BAD_REQUEST, "Email verification failed.")
     }
 
 
@@ -276,7 +280,16 @@ export default class AuthService implements IAuthService {
       sameSite: process.env.NODE_ENV === "production" ? 'none' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
-    return { accessToken };
+    return {
+      accessToken,
+      user: {
+        userName: updatedUser.userName,
+        email: updatedUser.email,
+        isBlocked: updatedUser.isBlocked,
+        role: updatedUser.role,
+        isVerified: updatedUser.isVerified,
+      }
+    };
   };
 
   async resendOtp(email: string): Promise<void> {

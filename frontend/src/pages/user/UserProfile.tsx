@@ -208,8 +208,6 @@ const UserProfile: React.FC = () => {
   };
 
   const triggerFileInput = () => {
-    console.log("i am working");
-
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }

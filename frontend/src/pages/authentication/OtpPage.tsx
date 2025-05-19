@@ -5,7 +5,7 @@ import { verifyOtp, resendOtp as resendOtpApi } from '../../services/apis/authAp
 import { otpData } from '../../types/types';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
-import { setAccessToken } from '../../redux/slices/authSlice';
+import { setAuth } from '../../redux/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const OtpPage: React.FC = () => {
@@ -75,7 +75,17 @@ const OtpPage: React.FC = () => {
         otp: otp,
       };
       const result = await verifyOtp(data);
-      dispatch(setAccessToken(result.data.token));
+
+      await dispatch(setAuth({
+        user: {
+          userName: result.data.userDetails.user.userName,
+          email: result.data.userDetails.user.email,
+          role: result.data.userDetails.user.role,
+          isBlocked: result.data.userDetails.user.isBlocked,
+          isVerified: result.data.userDetails.user.isVerified
+        },
+        accessToken: result.data.userDetails.accessToken,
+      }));
       toast.success(result.message);
       if (role === 'owner') {
         navigate('/owner/dashboard');

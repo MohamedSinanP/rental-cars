@@ -10,7 +10,7 @@ export default interface IAuthService {
   adminLogin(email: string, password: string, res: Response): Promise<adminLoginResponse>;
   login(email: string, password: string, res: Response): Promise<LoginResponse>;
   googleAuth(profile: GoogleProfile): Promise<LoginGoogleResponse>;
-  verifyOtp(email: string, otp: string, res: Response): Promise<IJwtToken>;
+  verifyOtp(email: string, otp: string, res: Response): Promise<LoginResponse>;
   resendOtp(email: string): Promise<void>;
   verifyEmail(email: string): Promise<void>;
   resetPassword(token: string, newPwd: string): Promise<void>;

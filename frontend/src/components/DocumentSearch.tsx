@@ -29,7 +29,6 @@ const DocumentSearch: React.FC<DocumentSearchProps> = ({ carId }) => {
 
     try {
       const result = await getCarDocsDetails(carId, searchQuery);
-      console.log('LLM result:', result);
       setSearchResults(result.data);
     } catch (err) {
       console.error('Document search failed:', err);

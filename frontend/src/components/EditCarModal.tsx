@@ -144,7 +144,6 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ isOpen, onClose, carData, o
       }
 
       const result = await updateCar(formData);
-      console.log(result.data, "this is updated car");
 
       if (onCarUpdated) {
         onCarUpdated(result.data);

@@ -35,7 +35,6 @@ const SubscriptionCheckout = () => {
       const priceId = plan.stripePriceId;
       const subId = plan.id!;
       const result = await makeSubscription(priceId, subId);
-      console.log(result, "this is what>>>>>>");
 
       window.location.href = result.url;
       toast.success(result);

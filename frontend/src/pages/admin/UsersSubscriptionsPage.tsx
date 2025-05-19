@@ -74,7 +74,6 @@ const UserSubscriptionPage = () => {
         setSubscriptions([]);
       } finally {
         setLoading(false);
-        console.log('fetchSubscriptionData completed');
       }
     };
     fetchSubscriptionData();

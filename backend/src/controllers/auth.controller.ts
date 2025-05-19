@@ -77,8 +77,8 @@ export default class AuthController implements IAuthController {
     try {
 
       const { email, otp }: { email: string, otp: string } = req.body;
-      const token = await this._authService.verifyOtp(email, otp, res);
-      res.status(StatusCode.OK).json(HttpResponse.success({ token: token.accessToken }, "OTP verified successfully"))
+      const userDetails = await this._authService.verifyOtp(email, otp, res);
+      res.status(StatusCode.OK).json(HttpResponse.success({ userDetails }, "OTP verified successfully"))
 
     } catch (error: any) {
       next(error);

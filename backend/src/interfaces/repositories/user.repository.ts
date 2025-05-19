@@ -7,6 +7,5 @@ export default interface IUserRepository extends IBaseRepository<IUserModel> {
   countUsers(): Promise<number>;
   getUserDetails(userId: string): Promise<IUserModel | null>;
   findByEmail(email: string): Promise<IUserModel | null>;
-  findByEmailAndUpdate(email: string, refreshToken: string): Promise<void>;
   findPaginated(page: number, limit: number, search: string): Promise<{ data: IUserModel[]; total: number }>;
 };

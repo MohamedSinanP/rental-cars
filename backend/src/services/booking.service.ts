@@ -24,13 +24,13 @@ export default class BookingService implements IBookingService {
   ) { };
 
   async createBooking(data: IBooking): Promise<BookingDTO> {
-    const { userId, carId, pickupDateTime, dropoffDateTime, userDetails } = data;
+    const { userId, carId, userDetails } = data;
+    const carObjId = new Types.ObjectId(carId)
     const { name, email, phoneNumber, address } = userDetails;
-    const isBooked = await this._bookingRepository.isBooked(carId, pickupDateTime, dropoffDateTime);
+    const isBooked = await this._carRepository.findOne({ _id: carObjId, status: "Booked" });
     if (isBooked) {
       throw new HttpError(StatusCode.BAD_REQUEST, "Car is already booked for the selected time period");
     };
-    const carObjId = new Types.ObjectId(carId)
     const bookedCar = await this._carRepository.findOne({ _id: carObjId }, [{ path: 'ownerId' }]);
     const DEFAULT_COMMISSION_PERCENTAGE = 10;
 
@@ -117,7 +117,18 @@ export default class BookingService implements IBookingService {
       throw new HttpError(StatusCode.BAD_REQUEST, "Can't update booking status");
     }
 
-    if (status === "completed" || status === "cancelled") {
+    if (status === "cancelled") {
+      const carId = updatedBooking.carId.toString();
+      const userId = updatedBooking.userId.toString();
+      const refundAmount = updatedBooking.totalPrice;
+      const transactionId = `refund-${updatedBooking._id}`;
+
+      await this._carRepository.update(carId, { status: "Available" });
+
+      await this._walletRepository.refundToWallet(userId, refundAmount, transactionId);
+    }
+
+    if (status === "completed") {
       await this._carRepository.update(updatedBooking.carId.toString(), {
         status: "Available",
       });

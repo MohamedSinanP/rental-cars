@@ -5,6 +5,7 @@ import { IUserModel } from "../types/user";
 import TYPES from "../di/types";
 import IUserRepository from "../interfaces/repositories/user.repository";
 import { Model } from "mongoose";
+import { IOwnerModel } from "../types/owner";
 
 @injectable()
 export default class UserRepository extends BaseRepository<IUserModel> implements IUserRepository {
@@ -26,15 +27,6 @@ export default class UserRepository extends BaseRepository<IUserModel> implement
 
   async findByEmail(email: string): Promise<IUserModel | null> {
     return await this._userModel.findOne({ email }).exec();
-  };
-
-  async findByEmailAndUpdate(email: string, refreshToken: string): Promise<void> {
-    await this._userModel.updateOne(
-      { email },
-      {
-        $set: { otp: null, refreshToken, otpExpiresAt: null, isVerified: true }
-      }
-    ).exec();
   };
 
   async findPaginated(page: number, limit: number, search: string): Promise<{ data: IUserModel[]; total: number }> {

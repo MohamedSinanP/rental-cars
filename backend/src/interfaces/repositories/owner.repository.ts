@@ -6,6 +6,5 @@ export default interface IOwnerRepository extends IBaseRepository<IOwnerModel> {
   register(data: IOwner): Promise<IOwnerModel>;
   countOwners(): Promise<number>;
   findByEmail(email: string): Promise<IOwnerModel | null>;
-  findByEmailAndUpdate(email: string, refreshToken: string): Promise<void>;
   findPaginated(page: number, limit: number, search: string): Promise<{ data: IOwnerModel[]; total: number }>;
 }

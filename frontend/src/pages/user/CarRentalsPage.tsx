@@ -27,8 +27,6 @@ const CarRentalsPage: React.FC = () => {
         const data: IBookingWithPopulatedData[] = result.data.data;
 
         setRentals(data);
-        console.log(result.data, "this is not !..");
-
         setCurrentPage(result.data.currentPage);
         setTotalPages(result.data.totalPages);
         setLoading(false);

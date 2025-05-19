@@ -300,11 +300,11 @@ const WalletPage: React.FC = () => {
               </>
             )}
           </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage} />
         </div>
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage} />
       </div>
       <Footer />
     </>

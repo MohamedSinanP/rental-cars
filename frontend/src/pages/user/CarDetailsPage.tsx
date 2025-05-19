@@ -45,7 +45,6 @@ const CarDetailsPage: React.FC = () => {
 
         // Fetch reviews of the car
         const reviewsResult = await getCarAllReview(id);
-        console.log(reviewsResult, "review data");
 
         if (reviewsResult.success && Array.isArray(reviewsResult.data)) {
           setReviews(reviewsResult.data);

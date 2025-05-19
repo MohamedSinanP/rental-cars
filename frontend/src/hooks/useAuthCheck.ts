@@ -19,12 +19,6 @@ export const useAuthCheck = () => {
 
       try {
         const response = await api.get("/auth/me");
-
-        // Additional check for admin role if needed
-        if (user?.role === 'admin') {
-          console.log("Admin validation response:", response.data);
-        }
-
         // Check if we got a successful response
         if (!response.data) {
           throw new Error("Failed to verify user session");
