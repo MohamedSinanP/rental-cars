@@ -1,4 +1,4 @@
-import { IUserSubscription, IUserSubscriptionModel } from "../../types/user";
+import { IUserSubscription, IUserSubscriptionCreate, IUserSubscriptionModel } from "../../types/user";
 import IBaseRepository from "./base.repository";
 
 export default interface IUserSubsRepository extends IBaseRepository<IUserSubscriptionModel> {
@@ -10,4 +10,6 @@ export default interface IUserSubsRepository extends IBaseRepository<IUserSubscr
   getTotalEarnings(type: string, year: number, from: string, to: string): Promise<number>;
   getUserSubs(userId: string, page: number, limit: number): Promise<{ data: IUserSubscriptionModel[]; total: number }>;
   markExpiredAsCompleted(): Promise<{ modifiedCount: number }>;
+  insertOne(data: IUserSubscriptionCreate): Promise<IUserSubscriptionModel>;
+  deleteManyStalePending(): Promise<{ deletedCount: number }>;
 };

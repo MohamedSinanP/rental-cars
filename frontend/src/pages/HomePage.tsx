@@ -13,6 +13,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { RootState } from '../redux/store'
+import InstallPrompt from '../components/InstallPrompt'
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ const HomePage: React.FC = () => {
   }, [accessToken, role, navigate]);
   return (
     <>
+      <InstallPrompt />
       <div className='min-h-screen pt-20'>
         {/* navbar section */}
         <NavBar />

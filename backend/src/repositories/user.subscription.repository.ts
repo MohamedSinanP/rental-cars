@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { BaseRepository } from "./base.repository";
 import TYPES from "../di/types";
 import { Model } from "mongoose";
-import { IUserSubscription, IUserSubscriptionModel } from "../types/user";
+import { IUserSubscription, IUserSubscriptionCreate, IUserSubscriptionModel } from "../types/user";
 import IUserSubsRepository from "../interfaces/repositories/user.subscription.repository";
 
 
@@ -156,4 +156,18 @@ export default class UserSubsRepository extends BaseRepository<IUserSubscription
 
     return { modifiedCount: result.modifiedCount };
   }
+
+  async insertOne(data: IUserSubscriptionCreate): Promise<IUserSubscriptionModel> {
+    return await this._userSubsModel.create(data);
+  };
+
+  async deleteManyStalePending(): Promise<{ deletedCount: number }> {
+    const result = await this._userSubsModel.deleteMany({
+      status: 'pending',
+      createdAt: { $lt: new Date(Date.now() - 5 * 60 * 1000) },
+    });
+
+    return { deletedCount: result.deletedCount };
+  }
+
 };

@@ -18,4 +18,5 @@ export default interface ISubscriptionService {
   cancelUserSub(subId: string): Promise<UserSubDTO>;
   getUserActiveSub(userId: string): Promise<UserSubDTO | null>;
   markExpiredSubscriptionsAsCompleted(): Promise<number>;
+  deleteStalePendingSubscriptions(): Promise<number>;
 };

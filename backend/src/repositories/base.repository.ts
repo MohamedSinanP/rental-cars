@@ -1,4 +1,4 @@
-import { Document, Model, PopulateOptions, UpdateQuery } from "mongoose";
+import { Document, FilterQuery, Model, PopulateOptions, UpdateQuery } from "mongoose";
 import { injectable } from "inversify";
 import IBaseRepository from "../interfaces/repositories/base.repository";
 
@@ -22,7 +22,7 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     return await query.exec();
   };
 
-  async findOne(query: object, populate?: PopulateOptions[]): Promise<T | null> {
+  async findOne(query: FilterQuery<T>, populate?: PopulateOptions[]): Promise<T | null> {
     let findQuery = this.model.findOne(query);
     if (populate) {
       findQuery = findQuery.populate(populate);

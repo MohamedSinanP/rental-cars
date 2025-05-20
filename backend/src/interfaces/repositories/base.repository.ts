@@ -1,4 +1,4 @@
-import { PopulateOptions, UpdateQuery } from "mongoose";
+import { FilterQuery, PopulateOptions, UpdateQuery } from "mongoose";
 
 export default interface IBaseRepository<T> {
 
@@ -9,5 +9,5 @@ export default interface IBaseRepository<T> {
   update(id: string, data: Partial<T>): Promise<T | null>;
   updateByFilter(filter: object, data: UpdateQuery<T>): Promise<T | null>;
   delete(id: string): Promise<boolean>;
-  findOne(filter: Partial<T>, populate?: PopulateOptions[]): Promise<T | null>;
+  findOne(filter: FilterQuery<T>, populate?: PopulateOptions[]): Promise<T | null>;
 }

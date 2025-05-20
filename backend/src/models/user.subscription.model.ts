@@ -5,10 +5,10 @@ const userSubscriptionSchema = new Schema<IUserSubscriptionModel>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     subscriptionId: { type: Schema.Types.ObjectId, ref: 'Subscription', required: true },
-    stripeSubscriptionId: { type: String, required: true },
+    stripeSubscriptionId: { type: String, required: false },
     status: { type: String, required: true },
-    currentPeriodStart: { type: Date, required: true },
-    currentPeriodEnd: { type: Date, required: true },
+    currentPeriodStart: { type: Date, required: false },
+    currentPeriodEnd: { type: Date, required: false },
   },
   { timestamps: true }
 );

@@ -57,18 +57,29 @@ export default class SubscriptionService implements ISubscriptionService {
     const { user } = req as AuthenticatedRequest;
     const userId = user?.userId!;
     const userObjId = new Types.ObjectId(user?.userId);
+    const subObjId = new Types.ObjectId(subId);
 
-    const existingActiveSub = await this._userSubscriptionRepository.findOne({ userId: userObjId, status: 'active' })
+    const existingSub = await this._userSubscriptionRepository.findOne({
+      userId: userObjId,
+      status: { $in: ['active', 'pending'] }
+    });
 
-    if (existingActiveSub) {
-      throw new HttpError(StatusCode.BAD_REQUEST, 'You already have an active subscription');
+    if (existingSub) {
+      throw new HttpError(StatusCode.BAD_REQUEST, 'You already have a pending or active subscription');
     }
-
 
     const subscription = await this._subscriptionRepository.findOne({ stripePriceId: priceId });
     if (!subscription) {
-      throw new HttpError(StatusCode.BAD_REQUEST, "Cant' find the choosed subscription");
-    };
+      throw new HttpError(StatusCode.BAD_REQUEST, "Can't find the chosen subscription");
+    }
+
+    // Insert a pending lock before Stripe checkout session is created
+    await this._userSubscriptionRepository.insertOne({
+      userId: userObjId,
+      subscriptionId: subObjId,
+      status: 'pending',
+      createdAt: new Date()
+    });
 
     const session = await stripe.checkout.sessions.create({
       line_items: [
@@ -215,4 +226,9 @@ export default class SubscriptionService implements ISubscriptionService {
     const result = await this._userSubsRepository.markExpiredAsCompleted();
     return result.modifiedCount;
   };
+
+  async deleteStalePendingSubscriptions(): Promise<number> {
+    const result = await this._userSubsRepository.deleteManyStalePending();
+    return result.deletedCount;
+  }
 };

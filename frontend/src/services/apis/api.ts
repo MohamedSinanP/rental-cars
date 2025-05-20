@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { store } from "../../redux/store";
 import { setAccessToken, removeAuth } from "../../redux/slices/authSlice";
 import { navigateTo } from "../../utils/navigateHelper";
+import { toast } from "react-toastify";
 
 // Axios instance
 const api = axios.create({
@@ -30,7 +31,7 @@ api.interceptors.request.use((config) => {
 let isRefreshing = false;
 let failedQueue: {
   resolve: (token: string) => void;
-  reject: (err: AxiosError | unknown) => void; // Replace `any` with `AxiosError | unknown`
+  reject: (err: AxiosError | unknown) => void;
 }[] = [];
 
 const processQueue = (error: AxiosError | unknown | null, token: string | null = null) => {
@@ -48,10 +49,14 @@ const processQueue = (error: AxiosError | unknown | null, token: string | null =
 // Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError) => { // Replace `any` with `AxiosError`
+  async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequest;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest.url !== "/auth/refresh"
+    ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
@@ -60,7 +65,7 @@ api.interceptors.response.use(
               originalRequest.headers["Authorization"] = `Bearer ${token}`;
               resolve(api(originalRequest));
             },
-            reject: (err: AxiosError | unknown) => reject(err), // Replace `any` with `AxiosError | unknown`
+            reject: (err: AxiosError | unknown) => reject(err),
           });
         });
       }
@@ -69,8 +74,10 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {},
-          { withCredentials: true },
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
+          {},
+          { withCredentials: true }
         );
         const newAccessToken = response.data.data.newAccessToken;
 
@@ -82,9 +89,11 @@ api.interceptors.response.use(
 
         return api(originalRequest);
       } catch (err) {
+        console.error("Refresh token failed:", err);
         processQueue(err, null);
         store.dispatch(removeAuth());
-        navigateTo('/login');
+        toast.error("Session expired, please login again.");
+        navigateTo("/login");
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
@@ -92,11 +101,13 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 403) {
-      console.warn("Access denied (403): You do not have permission.");
+      toast.error("Access denied.");
+      navigateTo("/unauthorized");
     }
 
     return Promise.reject(error);
   }
 );
+
 
 export default api;

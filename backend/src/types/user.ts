@@ -126,7 +126,16 @@ export interface IUserSubscriptionModel extends Document {
   status: string;
   currentPeriodStart: Date;
   currentPeriodEnd: Date;
+  createdAt: Date;
+  updatedAt: Date;
 };
+
+export interface IUserSubscriptionCreate {
+  userId: mongoose.Types.ObjectId;
+  subscriptionId: mongoose.Types.ObjectId;
+  status: string;
+  createdAt: Date;
+}
 
 export interface UserSubDTO {
   id: string;

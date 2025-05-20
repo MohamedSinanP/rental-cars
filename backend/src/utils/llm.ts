@@ -22,7 +22,7 @@ async function fetchAvailableModels(): Promise<string[]> {
     return data.data.map((model: { id: string }) => model.id);
   } catch (error) {
     console.error('Error fetching models:', error);
-    return ['auto']; // Fallback to Auto Router
+    return ['auto'];
   }
 }
 
@@ -30,12 +30,12 @@ export async function extractDocumentDataWithLLM(prompt: string): Promise<string
   try {
     // Fetch available models to ensure valid model ID
     const availableModels = await fetchAvailableModels();
-    let modelId = 'tngtech/deepseek-r1t-chimera:free'; // Your preferred model
+    let modelId = 'tngtech/deepseek-r1t-chimera:free';
 
     // Validate model ID
     if (!availableModels.includes(modelId)) {
       console.warn(`Model ${modelId} not found. Falling back to 'auto'.`);
-      modelId = 'auto'; // Use Auto Router as fallback
+      modelId = 'auto';
     }
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -43,8 +43,8 @@ export async function extractDocumentDataWithLLM(prompt: string): Promise<string
       headers: {
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'your-app-url', // Optional for leaderboard visibility
-        'X-Title': 'Your App Name', // Optional for discoverability
+        'HTTP-Referer': 'your-app-url',
+        'X-Title': 'Your App Name',
       },
       body: JSON.stringify({
         model: modelId,
