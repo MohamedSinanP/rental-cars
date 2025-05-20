@@ -69,7 +69,7 @@ export default defineConfig({
         clientsClaim: true,
         runtimeCaching: [
           {
-            urlPattern: ({ request }) => request.destination === 'image',
+            urlPattern: ({ request }: { request: Request }) => request.destination === 'image',
             handler: 'CacheFirst',
             options: {
               cacheName: 'images',
@@ -80,7 +80,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/api/'),
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
@@ -92,7 +92,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: ({ url }) => url.pathname === '/manifest.json',
+            urlPattern: ({ url }: { url: URL }) => url.pathname === '/manifest.json',
             handler: 'NetworkFirst',
             options: {
               cacheName: 'manifest-cache',
