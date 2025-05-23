@@ -156,13 +156,34 @@ const OwnerBookingsPage: React.FC = () => {
 
   return (
     <>
-      <div className="flex h-full bg-gray-100">
-        <Sidebar />
-        <div className="flex-1 p-4 md:p-6 overflow-x-auto">
-          <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">My Bookings</h1>
-          {renderBookingsContent()}
+      <div className="min-h-screen bg-gray-100">
+        {/* Fixed Sidebar */}
+        <div className="fixed top-0 left-0 h-full z-30">
+          <Sidebar />
+        </div>
+
+        {/* Main Content with left margin to account for fixed sidebar */}
+        <div className="ml-0 lg:ml-64">
+          {/* Mobile Header */}
+          <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-4 pl-16">
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
+              My Bookings
+            </h1>
+          </div>
+
+          {/* Main Content */}
+          <div className="p-4 md:p-6">
+            {/* Desktop Header */}
+            <div className="hidden lg:block mb-4 md:mb-6">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">My Bookings</h1>
+            </div>
+
+            {/* Bookings Content */}
+            {renderBookingsContent()}
+          </div>
         </div>
       </div>
+
       <RentalDetailsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

@@ -22,7 +22,6 @@ const spaFallbackPlugin: Plugin = {
       );
     };
   }
-
 };
 
 export default defineConfig({
@@ -30,6 +29,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      filename: 'sw.js',
       includeAssets: [
         'favicon.ico',
         'android-chrome-192x192.png',
@@ -62,7 +62,7 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
-      strategies: 'generateSW', // ✅ use this instead of injectManifest
+      strategies: 'generateSW',
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,jpg,svg,ico,webp}'],
         skipWaiting: true,

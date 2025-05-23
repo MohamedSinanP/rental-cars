@@ -226,7 +226,7 @@ export interface UserResponseDTO {
   email: string;
   role: string;
   isVerified: boolean;
-  isBlocked: boolean
+  isBlocked: boolean;
 };
 
 export interface IWishlistCar {
