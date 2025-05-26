@@ -15,6 +15,5 @@ router.post('/verify-reset-otp', authController.verifyResetOtp.bind(authControll
 router.patch('/reset-pwd', authController.resetPwd.bind(authController));
 router.post('/refresh', authController.refreshToken.bind(authController));
 router.post('/logout', authenticate(["user", "owner", "admin"]), authController.logout.bind(authController));
-router.get('/me', authenticate(["user", "owner", "admin"]), authController.getCurrentUser.bind(authController));
 
 export default router;

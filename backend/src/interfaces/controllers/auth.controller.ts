@@ -11,6 +11,4 @@ export default interface IAuthController {
   verifyResetOtp(req: Request, res: Response, next: NextFunction): Promise<void>;
   resetPwd(req: Request, res: Response, next: NextFunction): Promise<void>;
   logout(req: Request, res: Response, next: NextFunction): Promise<void>;
-  getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void>;
-
 }

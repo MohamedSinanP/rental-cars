@@ -16,5 +16,4 @@ export default interface IAuthService {
   resetPassword(token: string, newPwd: string): Promise<void>;
   rotateRefreshToken(refreshToken: string): Promise<{ newAccessToken: string; newRefreshToken: string }>;
   logout(req: Request, res: Response): Promise<void>;
-  getCurrentUser(userId: string): Promise<AuthCheck>;
 }

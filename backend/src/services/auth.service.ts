@@ -476,35 +476,6 @@ export default class AuthService implements IAuthService {
 
   };
 
-  async getCurrentUser(userId: string): Promise<AuthCheck> {
-    let user: IUserModel | IOwnerModel | IAdminModel | null = null;
-    user = await this._userRepository.findById(userId);
-    if (!user) {
-      user = await this._ownerRepository.findById(userId);
-    };
-    if (!user) {
-      user = await this._adminRepository.findById(userId);
-    }
-
-    if (!user) {
-      throw new HttpError(StatusCode.BAD_REQUEST, "User not found");
-    }
-    if (user.role === Role.USER || user.role === Role.OWNER) {
-      const safeUser = user as IUserModel | IOwnerModel;
-      return {
-        userName: safeUser.userName,
-        email: safeUser.email,
-        isBlocked: safeUser.isBlocked,
-        role: safeUser.role,
-        isVerified: safeUser.isVerified,
-      };
-    } else {
-      return {
-        email: user.email,
-        role: user.role,
-      };
-    };
-  };
 };
 
 

@@ -155,15 +155,4 @@ export default class AuthController implements IAuthController {
     };
   };
 
-  async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { user } = req as AuthenticatedRequest;
-      const userId = user?.userId!;
-      const currentUser = await this._authService.getCurrentUser(userId);
-      res.status(StatusCode.OK).json(HttpResponse.success(currentUser));
-    } catch (error) {
-      next(error);
-    };
-  };
-
 };
