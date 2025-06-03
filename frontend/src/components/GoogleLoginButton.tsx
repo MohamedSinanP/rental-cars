@@ -1,10 +1,10 @@
 import React from 'react';
 
 const GoogleLoginButton: React.FC = () => {
-  const SERVER_URL = import.meta.env.VITE_API_BASE_URL;
+  const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
 
   const handleLogin = () => {
-    window.location.href = `${SERVER_URL}/auth/google`
+    window.location.href = GOOGLE_AUTH_URL;
   };
 
   return (
