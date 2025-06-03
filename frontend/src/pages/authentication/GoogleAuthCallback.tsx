@@ -50,7 +50,7 @@ const GoogleAuthCallback = () => {
     }
   }, [navigate, dispatch]);
 
-  return null; // Or a loading indicator if preferred
+  return null;
 }
 
 export default GoogleAuthCallback
