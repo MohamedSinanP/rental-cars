@@ -80,18 +80,6 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/api/'),
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 24 * 60 * 60,
-              },
-              networkTimeoutSeconds: 10,
-            },
-          },
-          {
             urlPattern: ({ url }: { url: URL }) => url.pathname === '/manifest.json',
             handler: 'NetworkFirst',
             options: {
