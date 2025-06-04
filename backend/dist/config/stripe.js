@@ -8,4 +8,3 @@ const stripe = new stripe_1.default(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2025-03-31.basil',
 });
 exports.default = stripe;
-//# sourceMappingURL=stripe.js.map

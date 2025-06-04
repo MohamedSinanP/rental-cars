@@ -11,38 +11,47 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const inversify_1 = require("inversify");
-const types_js_1 = __importDefault(require("../di/types.js"));
-const http_response_js_1 = require("../utils/http.response.js");
-const types_js_2 = require("../types/types.js");
+const types_1 = __importDefault(require("../di/types"));
+const http_response_1 = require("../utils/http.response");
+const types_2 = require("../types/types");
 let PaymentController = class PaymentController {
-    paymentService;
-    constructor(paymentService) {
-        this.paymentService = paymentService;
+    constructor(_paymentService) {
+        this._paymentService = _paymentService;
     }
     ;
-    async createPaymentIntent(req, res, next) {
-        try {
-            const { amount } = req.body;
-            const { clientSecret, paymentId } = await this.paymentService.createPaymentIntentService(amount);
-            res.status(types_js_2.StatusCode.OK).json(http_response_js_1.HttpResponse.success({ clientSecret, paymentId }));
-        }
-        catch (error) {
-            next(error);
-        }
-        ;
+    createPaymentIntent(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { amount } = req.body;
+                const { clientSecret, paymentId } = yield this._paymentService.createPaymentIntentService(amount);
+                res.status(types_2.StatusCode.OK).json(http_response_1.HttpResponse.success({ clientSecret, paymentId }));
+            }
+            catch (error) {
+                next(error);
+            }
+            ;
+        });
     }
     ;
 };
 PaymentController = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)(types_js_1.default.IPaymentService)),
+    __param(0, (0, inversify_1.inject)(types_1.default.IPaymentService)),
     __metadata("design:paramtypes", [Object])
 ], PaymentController);
 exports.default = PaymentController;
 ;
-//# sourceMappingURL=payment.controller.js.map

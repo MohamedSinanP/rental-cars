@@ -22,4 +22,3 @@ const adminSchema = new mongoose_1.Schema({
     }
 }, { timestamps: true });
 exports.Admin = (0, mongoose_1.model)("Admin", adminSchema, "admin");
-//# sourceMappingURL=admin.model.js.map

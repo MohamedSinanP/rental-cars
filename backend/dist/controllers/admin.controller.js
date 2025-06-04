@@ -11,119 +11,139 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const inversify_1 = require("inversify");
-const types_js_1 = __importDefault(require("../di/types.js"));
-const http_response_js_1 = require("../utils/http.response.js");
-const types_js_2 = require("../types/types.js");
+const types_1 = __importDefault(require("../di/types"));
+const http_response_1 = require("../utils/http.response");
+const types_2 = require("../types/types");
 let AdminController = class AdminController {
-    userService;
-    ownerService;
-    carService;
-    constructor(userService, ownerService, carService) {
-        this.userService = userService;
-        this.ownerService = ownerService;
-        this.carService = carService;
+    constructor(_userService, _ownerService, _carService) {
+        this._userService = _userService;
+        this._ownerService = _ownerService;
+        this._carService = _carService;
     }
     ;
-    async fetchUsers(req, res, next) {
-        try {
-            const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 6;
-            const users = await this.userService.fetchAllUsers(page, limit);
-            res.status(types_js_2.StatusCode.OK).json(http_response_js_1.HttpResponse.success(users));
-        }
-        catch (error) {
-            next(error);
-        }
-        ;
+    fetchUsers(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const page = parseInt(req.query.page) || 1;
+                const limit = parseInt(req.query.limit) || 6;
+                const search = req.query.search || '';
+                const users = yield this._userService.fetchAllUsers(page, limit, search);
+                res.status(types_2.StatusCode.OK).json(http_response_1.HttpResponse.success(users));
+            }
+            catch (error) {
+                next(error);
+            }
+            ;
+        });
     }
     ;
-    async fethcOwners(req, res, next) {
-        try {
-            const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 6;
-            const owners = await this.ownerService.getAllOwners(page, limit);
-            res.status(types_js_2.StatusCode.OK).json(http_response_js_1.HttpResponse.success(owners));
-        }
-        catch (error) {
-            next(error);
-        }
-        ;
+    fethcOwners(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const page = parseInt(req.query.page) || 1;
+                const limit = parseInt(req.query.limit) || 6;
+                const search = req.query.search || '';
+                const owners = yield this._ownerService.getAllOwners(page, limit, search);
+                res.status(types_2.StatusCode.OK).json(http_response_1.HttpResponse.success(owners));
+            }
+            catch (error) {
+                next(error);
+            }
+            ;
+        });
     }
     ;
-    async getPendingCars(req, res, next) {
-        try {
-            const pendingCars = await this.carService.fetchPendingCars();
-            res.status(types_js_2.StatusCode.OK).json(http_response_js_1.HttpResponse.success(pendingCars));
-        }
-        catch (error) {
-            next(error);
-        }
-        ;
+    getPendingCars(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const pendingCars = yield this._carService.fetchPendingCars();
+                res.status(types_2.StatusCode.OK).json(http_response_1.HttpResponse.success(pendingCars));
+            }
+            catch (error) {
+                next(error);
+            }
+            ;
+        });
     }
     ;
-    async verifyCar(req, res, next) {
-        try {
-            const carId = req.params.id;
-            const car = await this.carService.verifyCar(carId);
-            res.status(types_js_2.StatusCode.OK).json(http_response_js_1.HttpResponse.success(car));
-        }
-        catch (error) {
-            next(error);
-        }
-        ;
+    verifyCar(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const carId = req.params.id;
+                const car = yield this._carService.verifyCar(carId);
+                res.status(types_2.StatusCode.OK).json(http_response_1.HttpResponse.success(car));
+            }
+            catch (error) {
+                next(error);
+            }
+            ;
+        });
     }
     ;
-    async rejectCar(req, res, next) {
-        try {
-            console.log("hehehehe");
-            const carId = req.params.id;
-            const { rejectionReason } = req.body;
-            const car = await this.carService.rejectCar(carId, rejectionReason);
-            res.status(types_js_2.StatusCode.OK).json(http_response_js_1.HttpResponse.success(car));
-        }
-        catch (error) {
-            next(error);
-        }
-        ;
+    rejectCar(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const carId = req.params.id;
+                const { rejectionReason } = req.body;
+                const car = yield this._carService.rejectCar(carId, rejectionReason);
+                res.status(types_2.StatusCode.OK).json(http_response_1.HttpResponse.success(car));
+            }
+            catch (error) {
+                next(error);
+            }
+            ;
+        });
     }
     ;
-    async blockOrUnblockUser(req, res, next) {
-        try {
-            const userId = req.params.id;
-            const blockedUser = await this.userService.blockOrUnblockUser(userId);
-            res.status(types_js_2.StatusCode.OK).json(http_response_js_1.HttpResponse.success(blockedUser));
-        }
-        catch (error) {
-            next(error);
-        }
-        ;
+    blockOrUnblockUser(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const userId = req.params.id;
+                const blockedUser = yield this._userService.blockOrUnblockUser(userId);
+                res.status(types_2.StatusCode.OK).json(http_response_1.HttpResponse.success(blockedUser));
+            }
+            catch (error) {
+                next(error);
+            }
+            ;
+        });
     }
     ;
-    async blockOrUnblockOwner(req, res, next) {
-        try {
-            const ownerId = req.params.id;
-            const blockedOwner = await this.ownerService.blockOrUnblockOwner(ownerId);
-            res.status(types_js_2.StatusCode.OK).json(http_response_js_1.HttpResponse.success(blockedOwner));
-        }
-        catch (error) {
-            next(error);
-        }
-        ;
+    blockOrUnblockOwner(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const ownerId = req.params.id;
+                const blockedOwner = yield this._ownerService.blockOrUnblockOwner(ownerId);
+                res.status(types_2.StatusCode.OK).json(http_response_1.HttpResponse.success(blockedOwner));
+            }
+            catch (error) {
+                next(error);
+            }
+            ;
+        });
     }
     ;
 };
 AdminController = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)(types_js_1.default.IUserService)),
-    __param(1, (0, inversify_1.inject)(types_js_1.default.IOwnerService)),
-    __param(2, (0, inversify_1.inject)(types_js_1.default.ICarService)),
+    __param(0, (0, inversify_1.inject)(types_1.default.IUserService)),
+    __param(1, (0, inversify_1.inject)(types_1.default.IOwnerService)),
+    __param(2, (0, inversify_1.inject)(types_1.default.ICarService)),
     __metadata("design:paramtypes", [Object, Object, Object])
 ], AdminController);
 exports.default = AdminController;
 ;
-//# sourceMappingURL=admin.controller.js.map

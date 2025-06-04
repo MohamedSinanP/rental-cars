@@ -57,8 +57,6 @@ export default class AuthController implements IAuthController {
 
   async handleGoogleCallback(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      console.log(" i am working good.");
-
       const profile = req.user as GoogleProfile;
       const { accessToken, refreshToken, user } = await this._authService.googleAuth(profile);
 

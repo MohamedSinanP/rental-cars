@@ -43,7 +43,6 @@ const WalletPage: React.FC = () => {
   const [walletData, setWalletData] = useState<WalletData>(initialWalletState);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterValue, setFilterValue] = useState<string>('all');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -64,7 +63,7 @@ const WalletPage: React.FC = () => {
         const result = await getUserWallet(currentPage, limit);
         const transformedTransactions: Transaction[] = result.data.transactions.map((transaction: RawTransaction) => ({
           ...transaction,
-          id: transaction.transactionId, // Add id field required by DataItem
+          id: transaction.transactionId,
           date: new Date(transaction.date)
         }));
 
@@ -72,6 +71,7 @@ const WalletPage: React.FC = () => {
           ...result.data,
           transactions: transformedTransactions
         });
+
         setCurrentPage(result.data.currentPage);
         setTotalPages(result.data.totalPages);
       } catch (error: unknown) {
@@ -89,14 +89,6 @@ const WalletPage: React.FC = () => {
     fetchWalletData();
   }, [currentPage]);
 
-  // Filter transactions based on selected filter
-  const filteredTransactions: Transaction[] = walletData.transactions.filter(transaction => {
-    if (filterValue === 'all') return true;
-    if (filterValue === 'credit') return transaction.paymentType === 'Credit' || transaction.paymentType === 'Refund';
-    if (filterValue === 'debit') return transaction.paymentType === 'Debit';
-    if (filterValue === 'pending') return transaction.status === 'Pending';
-    return true;
-  });
 
   // Define columns for the DataTable component
   const columns: DataTableColumn<Transaction>[] = [
@@ -129,15 +121,8 @@ const WalletPage: React.FC = () => {
       header: 'Amount',
       render: (item: Transaction) => (
         <span className={`font-semibold ${item.transactionAmount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-          {item.transactionAmount > 0 ? '+' : ''}${formatINR(item.transactionAmount)}
+          {item.transactionAmount > 0 ? '+' : ''}{formatINR(item.transactionAmount)}
         </span>
-      )
-    },
-    {
-      key: 'transactionId',
-      header: 'Transaction ID',
-      render: (item: Transaction) => (
-        <span className="text-gray-600 text-sm truncate max-w-xs">{item.transactionId}</span>
       )
     }
   ];
@@ -172,7 +157,7 @@ const WalletPage: React.FC = () => {
       header: 'Amount',
       render: (item: Transaction) => (
         <span className={`font-semibold text-sm ${item.transactionAmount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-          {item.transactionAmount > 0 ? '+' : ''}${Math.abs(item.transactionAmount).toFixed(2)}
+          {item.transactionAmount > 0 ? '+' : ''}{formatINR(item.transactionAmount)}
         </span>
       )
     }
@@ -243,7 +228,7 @@ const WalletPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="mb-4">
-                      <span className="text-2xl sm:text-3xl font-bold text-gray-900">${formatINR(walletData.balance)}</span>
+                      <span className="text-2xl sm:text-3xl font-bold text-gray-900">{formatINR(walletData.balance)}</span>
                     </div>
                   </div>
                 </div>
@@ -252,31 +237,12 @@ const WalletPage: React.FC = () => {
                 <div className="mb-8">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                     <h2 className="text-xl font-semibold text-gray-900 mb-2 sm:mb-0">Transaction History</h2>
-
-                    {/* Filter dropdown */}
-                    <div className="relative">
-                      <select
-                        value={filterValue}
-                        onChange={(e) => setFilterValue(e.target.value)}
-                        className="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="all">All Transactions</option>
-                        <option value="credit">Credits & Refunds</option>
-                        <option value="debit">Debits</option>
-                        <option value="pending">Pending</option>
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </div>
                   </div>
 
                   {/* DataTable Component - Responsive */}
                   <div className="hidden sm:block">
                     <DataTable
-                      data={filteredTransactions}
+                      data={walletData.transactions}
                       columns={columns}
                       emptyMessage="No transactions found"
                       loading={false}
@@ -288,7 +254,7 @@ const WalletPage: React.FC = () => {
                   {/* Mobile DataTable */}
                   <div className="sm:hidden">
                     <DataTable
-                      data={filteredTransactions}
+                      data={walletData.transactions}
                       columns={mobileColumns}
                       emptyMessage="No transactions found"
                       loading={false}

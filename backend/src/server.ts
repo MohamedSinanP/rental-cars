@@ -47,11 +47,6 @@ app.use(fileUpload({
   tempFileDir: "/tmp/",
 }));
 
-app.use((req, res, next) => {
-  console.log(`[REQUEST] ${req.method} ${req.originalUrl}`);
-  next();
-});
-
 app.use(passport.initialize());
 
 // Routes

@@ -143,177 +143,184 @@ const AdminDashboard: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
+      {/* Fixed Sidebar */}
       <Sidebar />
-      <div className="flex-1 p-8 overflow-y-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Total Users</p>
-              <h3 className="text-2xl font-bold">{statsData ? statsData.totalUsers.toLocaleString() : '...'}</h3>
-            </div>
-            <div className="bg-teal-100 p-3 rounded-full">
-              <Users className="w-6 h-6 text-teal-500" />
-            </div>
+      {/* Main Content Area - With left margin to accommodate fixed sidebar */}
+      <div className="lg:ml-64 min-h-screen">
+        <div className="p-4 lg:p-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-gray-800 mt-12 lg:mt-0">Dashboard</h1>
           </div>
-          <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Total Owners</p>
-              <h3 className="text-2xl font-bold">{statsData ? statsData.totalOwners.toLocaleString() : '...'}</h3>
-            </div>
-            <div className="bg-teal-100 p-3 rounded-full">
-              <UserCog className="w-6 h-6 text-teal-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Total Earnings</p>
-              <h3 className="text-2xl font-bold">${statsData ? formatINR(statsData.totalEarnings) : '...'}</h3>
-            </div>
-            <div className="bg-green-100 p-3 rounded-full">
-              <BarChart2 className="w-6 h-6 text-green-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Total Subscription Earnings</p>
-              <h3 className="text-2xl font-bold">${statsData ? formatINR(statsData.subscriptionEarnings) : '...'}</h3>
-            </div>
-            <div className="bg-red-100 p-3 rounded-full">
-              <DollarSign className="w-6 h-6 text-red-500" />
-            </div>
-          </div>
-        </div>
-        {/* Chart Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <h3 className="text-lg font-semibold text-gray-800">Earning Details By Commission from Owners</h3>
 
-            <div className="flex flex-col gap-3 items-end">
-              <div className="flex items-center gap-2">
-                <div className="flex rounded-md overflow-hidden border border-gray-200">
-                  <button
-                    onClick={() => handleFilterChange('yearly')}
-                    className={`px-3 py-1 text-sm ${timeFilter === 'yearly' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
-                  >
-                    Yearly
-                  </button>
-                  <button
-                    onClick={() => handleFilterChange('monthly')}
-                    className={`px-3 py-1 text-sm ${timeFilter === 'monthly' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
-                  >
-                    Monthly
-                  </button>
-                  <button
-                    onClick={() => handleFilterChange('custom')}
-                    className={`px-3 py-1 text-sm ${timeFilter === 'custom' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
-                  >
-                    Custom
-                  </button>
-                </div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Total Users</p>
+                <h3 className="text-2xl font-bold">{statsData ? statsData.totalUsers.toLocaleString() : '...'}</h3>
               </div>
+              <div className="bg-teal-100 p-3 rounded-full">
+                <Users className="w-6 h-6 text-teal-500" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Total Owners</p>
+                <h3 className="text-2xl font-bold">{statsData ? statsData.totalOwners.toLocaleString() : '...'}</h3>
+              </div>
+              <div className="bg-teal-100 p-3 rounded-full">
+                <UserCog className="w-6 h-6 text-teal-500" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Total Earnings</p>
+                <h3 className="text-2xl font-bold">${statsData ? formatINR(statsData.totalEarnings) : '...'}</h3>
+              </div>
+              <div className="bg-green-100 p-3 rounded-full">
+                <BarChart2 className="w-6 h-6 text-green-500" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Total Subscription Earnings</p>
+                <h3 className="text-2xl font-bold">${statsData ? formatINR(statsData.subscriptionEarnings) : '...'}</h3>
+              </div>
+              <div className="bg-red-100 p-3 rounded-full">
+                <DollarSign className="w-6 h-6 text-red-500" />
+              </div>
+            </div>
+          </div>
 
-              {(timeFilter === 'monthly' || timeFilter === 'yearly') && (
-                <select
-                  className="border border-gray-300 rounded-md px-2 py-1 text-sm"
-                  value={year}
-                  onChange={(e) => setYear(parseInt(e.target.value))}
-                >
-                  {Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map(y => (
-                    <option key={y} value={y}>{y}</option>
-                  ))}
-                </select>
-              )}
-              {showDateRange && (
+          {/* Chart Section */}
+          <div className="bg-white rounded-lg shadow p-6 mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+              <h3 className="text-lg font-semibold text-gray-800">Earning Details By Commission from Owners</h3>
+
+              <div className="flex flex-col gap-3 items-end">
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center">
-                    <span className="text-sm text-gray-600 mr-2">From:</span>
-                    <input
-                      type="date"
-                      className="border border-gray-300 rounded-md px-2 py-1 text-sm"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      min="2024-01-01"
-                      max={endDate}
-                    />
+                  <div className="flex rounded-md overflow-hidden border border-gray-200">
+                    <button
+                      onClick={() => handleFilterChange('yearly')}
+                      className={`px-3 py-1 text-sm ${timeFilter === 'yearly' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
+                    >
+                      Yearly
+                    </button>
+                    <button
+                      onClick={() => handleFilterChange('monthly')}
+                      className={`px-3 py-1 text-sm ${timeFilter === 'monthly' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
+                    >
+                      Monthly
+                    </button>
+                    <button
+                      onClick={() => handleFilterChange('custom')}
+                      className={`px-3 py-1 text-sm ${timeFilter === 'custom' ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'}`}
+                    >
+                      Custom
+                    </button>
                   </div>
-                  <div className="flex items-center">
-                    <span className="text-sm text-gray-600 mr-2">To:</span>
-                    <input
-                      type="date"
-                      className="border border-gray-300 rounded-md px-2 py-1 text-sm"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      min={startDate}
-                      max={`${currentYear}-12-31`}
-                    />
-                  </div>
-                  <button
-                    onClick={applyDateFilter}
-                    className="bg-teal-600 text-white px-3 py-1 rounded-md text-sm flex items-center"
+                </div>
+
+                {(timeFilter === 'monthly' || timeFilter === 'yearly') && (
+                  <select
+                    className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                    value={year}
+                    onChange={(e) => setYear(parseInt(e.target.value))}
                   >
-                    <Calendar className="w-3 h-3 mr-1" />
-                    Apply
-                  </button>
+                    {Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map(y => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                )}
+                {showDateRange && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 mr-2">From:</span>
+                      <input
+                        type="date"
+                        className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        min="2024-01-01"
+                        max={endDate}
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 mr-2">To:</span>
+                      <input
+                        type="date"
+                        className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        min={startDate}
+                        max={`${currentYear}-12-31`}
+                      />
+                    </div>
+                    <button
+                      onClick={applyDateFilter}
+                      className="bg-teal-600 text-white px-3 py-1 rounded-md text-sm flex items-center"
+                    >
+                      <Calendar className="w-3 h-3 mr-1" />
+                      Apply
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="h-64">
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader className="w-8 h-8 text-teal-600 animate-spin" />
+                </div>
+              ) : chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <defs>
+                      <linearGradient id="blueToTeal" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#4F46E5" />
+                        <stop offset="100%" stopColor="#14B8A6" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(value) => `$${value}`}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="totalCommission"
+                      name="Commission"
+                      stroke="url(#blueToTeal)"
+                      strokeWidth={2}
+                      dot={{
+                        stroke: 'url(#blueToTeal)',
+                        strokeWidth: 2,
+                        r: 4,
+                        fill: '#fff',
+                      }}
+                      activeDot={{
+                        r: 6,
+                        stroke: 'url(#blueToTeal)',
+                        strokeWidth: 2,
+                        fill: '#fff',
+                      }}
+                      isAnimationActive={true}
+                      animationDuration={1500}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">No data available for the selected period</p>
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="h-64">
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <Loader className="w-8 h-8 text-teal-600 animate-spin" />
-              </div>
-            ) : chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <defs>
-                    <linearGradient id="blueToTeal" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#4F46E5" /> {/* Indigo */}
-                      <stop offset="100%" stopColor="#14B8A6" /> {/* Teal */}
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(value) => `$${value}`}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="totalCommission"
-                    name="Commission"
-                    stroke="url(#blueToTeal)" // Use the gradient for the line
-                    strokeWidth={2}
-                    dot={{
-                      stroke: 'url(#blueToTeal)',
-                      strokeWidth: 2,
-                      r: 4,
-                      fill: '#fff',
-                    }}
-                    activeDot={{
-                      r: 6,
-                      stroke: 'url(#blueToTeal)',
-                      strokeWidth: 2,
-                      fill: '#fff',
-                    }}
-                    isAnimationActive={true}
-                    animationDuration={1500}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500">No data available for the selected period</p>
-              </div>
-            )}
           </div>
         </div>
       </div>

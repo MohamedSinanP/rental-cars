@@ -36,7 +36,7 @@ export default class CarController implements ICarController {
         ownerId,
         carImages: parsedCarImages,
         location: parsedLocation,
-        status: req.body.status,
+        status: "PendingApproval",
         features: req.body.features,
         pricePerHour: Number(req.body.pricePerHour),
         deposit: Number(req.body.deposit),

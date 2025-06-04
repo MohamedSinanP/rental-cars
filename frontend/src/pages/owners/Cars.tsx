@@ -80,7 +80,6 @@ const Cars: React.FC = () => {
     fetchCars();
   }, [fetchCars]);
 
-  // Update selected car when cars list changes
   useEffect(() => {
     if (selectedCar && cars.length > 0) {
       const updatedSelectedCar = cars.find(car => car.id === selectedCar.id);
@@ -90,7 +89,6 @@ const Cars: React.FC = () => {
     }
   }, [cars, selectedCar]);
 
-  // Auto-select first car on mobile when cars load
   useEffect(() => {
     if (cars.length > 0 && !selectedCar && window.innerWidth < 1024) {
       setSelectedCar(cars[0]);
@@ -129,7 +127,6 @@ const Cars: React.FC = () => {
 
   const handleCarSelect = (car: ICar) => {
     setSelectedCar(car);
-    // On mobile, show car details after selection
     if (window.innerWidth < 1024) {
       setShowMobileCarList(false);
     }
@@ -142,23 +139,18 @@ const Cars: React.FC = () => {
   if (error && cars.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Fixed Sidebar */}
         <div className="fixed top-0 left-0 h-full z-30">
           <Sidebar />
         </div>
-
-        {/* Main Content with left margin to account for fixed sidebar */}
-        <div className="ml-0 lg:ml-64">
-          <div className="flex items-center justify-center h-screen">
-            <div className="text-center">
-              <div className="text-red-600 text-lg mb-4">{error}</div>
-              <button
-                onClick={handleRefresh}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
+        <div className="ml-0 lg:ml-64 flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="text-red-600 text-lg mb-4">{error}</div>
+            <button
+              onClick={handleRefresh}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
           </div>
         </div>
       </div>
@@ -167,23 +159,16 @@ const Cars: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Fixed Sidebar */}
       <div className="fixed top-0 left-0 h-full z-30">
         <Sidebar />
       </div>
-
-      {/* Main Content with left margin to account for fixed sidebar */}
       <div className="ml-0 lg:ml-64">
-        {/* Mobile Header */}
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-4 pl-16">
           <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
             My Cars
           </h1>
         </div>
-
-        {/* Main Content */}
         <div className="p-4 sm:p-6 lg:p-8">
-          {/* Desktop Header */}
           <div className="hidden lg:flex justify-between items-center mb-6 xl:mb-8">
             <div>
               <h1 className="text-2xl xl:text-3xl font-bold text-gray-900 mb-2">
@@ -197,47 +182,44 @@ const Cars: React.FC = () => {
               <button
                 onClick={handleRefresh}
                 disabled={isLoading}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
               >
                 <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
                 <span className="hidden sm:inline">Refresh</span>
               </button>
               <button
                 onClick={() => setAddCarModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-sm cursor-pointer"
               >
                 <Plus size={16} />
                 <span className="hidden sm:inline">Add Car</span>
               </button>
             </div>
           </div>
-
-          {/* Mobile Action Buttons */}
           <div className="lg:hidden flex gap-2 mb-4">
             <button
               onClick={handleRefresh}
               disabled={isLoading}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm disabled:opacity-50 flex-1 justify-center"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm disabled:opacity-50 flex-1 justify-center cursor-pointer"
             >
               <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
               Refresh
             </button>
             <button
               onClick={() => setAddCarModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm flex-1 justify-center"
+              className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm flex-1 justify-center cursor-pointer"
             >
               <Plus size={16} />
               Add Car
             </button>
           </div>
-
-          {/* Content Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Car List - Mobile/Desktop Responsive */}
-            <div className={`
-              lg:col-span-4 xl:col-span-3
-              ${!showMobileCarList && selectedCar ? 'hidden lg:block' : 'block'}
-            `}>
+            <div
+              className={`
+                lg:col-span-4 xl:col-span-3
+                ${!showMobileCarList && selectedCar ? 'hidden lg:block' : 'block'}
+              `}
+            >
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">
@@ -249,7 +231,6 @@ const Cars: React.FC = () => {
                     </span>
                   )}
                 </div>
-
                 <div className="space-y-2 max-h-[60vh] lg:max-h-[70vh] overflow-y-auto">
                   {isLoading ? (
                     <div className="flex items-center justify-center py-8">
@@ -265,19 +246,11 @@ const Cars: React.FC = () => {
                       />
                     ))
                   ) : (
-                    <div className="text-center py-8">
-                      <CarIcon size={48} className="mx-auto text-gray-400 mb-4" />
-                      <p className="text-gray-500 mb-4">No cars found</p>
-                      <button
-                        onClick={() => setAddCarModalOpen(true)}
-                        className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm"
-                      >
-                        Add Your First Car
-                      </button>
+                    <div className="hidden">
+                      {/* Hide the "No cars found" message in the sidebar */}
                     </div>
                   )}
                 </div>
-
                 {totalPages > 1 && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <Pagination
@@ -289,24 +262,22 @@ const Cars: React.FC = () => {
                 )}
               </div>
             </div>
-
-            {/* Car Details - Mobile/Desktop Responsive */}
-            <div className={`
-              lg:col-span-8 xl:col-span-9
-              ${showMobileCarList && selectedCar ? 'hidden lg:block' : 'block'}
-            `}>
+            <div
+              className={`
+                lg:col-span-8 xl:col-span-9
+                ${showMobileCarList && selectedCar ? 'hidden lg:block' : 'block'}
+              `}
+            >
               {selectedCar ? (
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
-                  {/* Mobile Back Button */}
                   <div className="lg:hidden mb-4">
                     <button
                       onClick={handleBackToList}
-                      className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+                      className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
                     >
                       ← Back to Cars
                     </button>
                   </div>
-
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl lg:text-2xl font-semibold text-gray-900">
                       Car Details
@@ -314,7 +285,7 @@ const Cars: React.FC = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setEditCarModalOpen(true)}
-                        className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors text-sm"
+                        className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors text-sm cursor-pointer"
                       >
                         <Edit size={16} />
                         <span className="hidden sm:inline">Edit</span>
@@ -322,7 +293,7 @@ const Cars: React.FC = () => {
                       <button
                         onClick={() => handleDelete(selectedCar.id)}
                         disabled={isLoading}
-                        className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors text-sm disabled:opacity-50"
+                        className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors text-sm disabled:opacity-50 cursor-pointer"
                       >
                         <Trash2 size={16} />
                         <span className="hidden sm:inline">
@@ -331,8 +302,6 @@ const Cars: React.FC = () => {
                       </button>
                     </div>
                   </div>
-
-                  {/* Verification Alert */}
                   {!(selectedCar.isVerified === true && selectedCar.verificationRejected === false) && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
                       <h4 className="text-red-700 font-semibold mb-2">Car Not Verified</h4>
@@ -347,8 +316,6 @@ const Cars: React.FC = () => {
                       </p>
                     </div>
                   )}
-
-                  {/* Car Overview */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mb-6">
                     <img
                       src={selectedCar.carImages[0] || '/car-thumb.png'}
@@ -360,15 +327,13 @@ const Cars: React.FC = () => {
                         {selectedCar.carName} {selectedCar.carModel}
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">
-                        {selectedCar.carType} • {selectedCar.seats} seats • {selectedCar.transmission} • {selectedCar.fuelType}
+                        {selectedCar.carType} • {selectedCar.seats} • {selectedCar.transmission} • {selectedCar.fuelType}
                       </p>
                       <p className="text-lg font-medium text-gray-900">
                         {formatINR(selectedCar.pricePerHour)}/Hour
                       </p>
                     </div>
                   </div>
-
-                  {/* Car Images */}
                   <div className="mb-6">
                     <h4 className="font-semibold text-gray-900 mb-3">Images</h4>
                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
@@ -387,8 +352,6 @@ const Cars: React.FC = () => {
                       )}
                     </div>
                   </div>
-
-                  {/* Car Info Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                     <div className="bg-gray-50 p-3 rounded-lg">
                       <span className="text-sm font-medium text-gray-700 block">Status</span>
@@ -410,26 +373,29 @@ const Cars: React.FC = () => {
                       </span>
                     </div>
                   </div>
-
-                  {/* Document Search */}
                   <div className="border-t border-gray-200 pt-6">
                     <DocumentSearch carId={selectedCar.id} />
                   </div>
                 </div>
               ) : (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-                  <CarIcon size={64} className="mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Car Selected</h3>
-                  <p className="text-gray-600 mb-4">
-                    {cars.length > 0 ? 'Select a car to view details' : 'Add a car to get started'}
-                  </p>
-                  {cars.length === 0 && (
-                    <button
-                      onClick={() => setAddCarModalOpen(true)}
-                      className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
-                    >
-                      Add Your First Car
-                    </button>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center h-full flex items-center justify-center">
+                  {cars.length > 0 ? (
+                    <>
+                      <CarIcon size={64} className="mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Car Selected Select a car to view details</h3>
+                    </>
+                  ) : (
+                    <>
+                      <CarIcon size={64} className="mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Cars Found</h3>
+                      <p className="text-gray-600 mb-4">Add a car to get started</p>
+                      <button
+                        onClick={() => setAddCarModalOpen(true)}
+                        className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors cursor-pointer"
+                      >
+                        Add Your First Car
+                      </button>
+                    </>
                   )}
                 </div>
               )}
@@ -437,8 +403,6 @@ const Cars: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Modals */}
       <CarModal
         isOpen={addCarModalOpen}
         onClose={() => setAddCarModalOpen(false)}
@@ -449,7 +413,7 @@ const Cars: React.FC = () => {
         onClose={() => setEditCarModalOpen(false)}
         onCarUpdated={handleCarUpdated}
       />
-    </div>
+    </div >
   );
 };
 

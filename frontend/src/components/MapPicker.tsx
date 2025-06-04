@@ -1,6 +1,7 @@
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import { useState, useEffect } from 'react';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const markerIcon = L.icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
@@ -16,13 +17,9 @@ interface MapPickerProps {
 export const MapPicker = ({ selectedLocation, onLocationSelect }: MapPickerProps) => {
   const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(null);
 
-  useEffect(() => {
-    if (selectedLocation) {
-      setMarkerPosition([selectedLocation.lat, selectedLocation.lng]);
-    }
-  }, [selectedLocation]);
-
-  const LocationMarker = () => {
+  // Update map and marker when selectedLocation changes
+  const MapController = () => {
+    const map = useMap();
     useMapEvents({
       click(e) {
         const { lat, lng } = e.latlng;
@@ -31,16 +28,25 @@ export const MapPicker = ({ selectedLocation, onLocationSelect }: MapPickerProps
       },
     });
 
-    return markerPosition ? <Marker position={markerPosition} icon={markerIcon} /> : null;
+    useEffect(() => {
+      if (selectedLocation) {
+        const { lat, lng } = selectedLocation;
+        setMarkerPosition([lat, lng]);
+        map.setView([lat, lng], 13); // Zoom to location
+      }
+    }, [selectedLocation, map]);
+
+    return null;
   };
 
   return (
     <MapContainer center={[20.5937, 78.9629]} zoom={5} style={{ height: '300px', width: '100%' }}>
       <TileLayer
-        attribution="&copy; OpenStreetMap contributors"
+        attribution="© OpenStreetMap contributors"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <LocationMarker />
+      <MapController />
+      {markerPosition && <Marker position={markerPosition} icon={markerIcon} />}
     </MapContainer>
   );
 };

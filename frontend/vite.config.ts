@@ -10,12 +10,15 @@ const spaFallbackPlugin: Plugin = {
       server.middlewares.use(
         (req: IncomingMessage, _res: ServerResponse, next) => {
           if (
+            req.url?.startsWith('/api/') ||
+            req.url?.startsWith('/auth/') ||
             req.url === '/manifest.json' ||
             req.url === '/sw.js' ||
             req.url?.match(/\.(ico|png|jpg|svg|json|webp)$/)
           ) {
             return next();
           }
+
           req.url = '/index.html';
           next();
         }
@@ -89,6 +92,11 @@ export default defineConfig({
                 maxAgeSeconds: 60 * 60,
               },
             },
+          },
+          {
+            urlPattern: ({ url }: { url: URL }) =>
+              url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/'),
+            handler: 'NetworkOnly',
           },
         ],
       },

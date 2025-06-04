@@ -45,7 +45,7 @@ const LoginForm: React.FC<Props> = ({ onSubmit, showGoogle = false }) => {
       <div>
         {errors.email && <p className="text-red-500 text-sm m-0">{errors.email}</p>}
         <input
-          type="email"
+          type="text"
           name="email"
           placeholder="Email"
           value={formData.email}

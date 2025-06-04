@@ -32,4 +32,3 @@ const attachUserIfExists = (req, res, next) => {
     next();
 };
 exports.attachUserIfExists = attachUserIfExists;
-//# sourceMappingURL=attachUserIfExist.js.map

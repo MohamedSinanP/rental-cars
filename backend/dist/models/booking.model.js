@@ -23,11 +23,6 @@ const bookingSchema = new mongoose_1.Schema({
         name: { type: String, required: true },
         phoneNumber: { type: String, required: true },
     },
-    carLocation: {
-        address: String,
-        latitude: Number,
-        longitude: String,
-    },
     pickupLocation: { type: String, required: true },
     dropoffLocation: { type: String, required: true },
     pickupDateTime: { type: Date, required: true },
@@ -56,6 +51,18 @@ const bookingSchema = new mongoose_1.Schema({
         type: Number,
         required: false
     },
+    commissionPercentage: {
+        type: Number,
+        required: true
+    },
+    adminCommissionAmount: {
+        type: Number,
+        required: true
+    },
+    ownerEarning: {
+        type: Number,
+        required: true
+    },
     status: {
         type: String,
         enum: ['active', 'cancelled', 'completed'],
@@ -63,4 +70,3 @@ const bookingSchema = new mongoose_1.Schema({
 }, { timestamps: true });
 const Booking = (0, mongoose_1.model)('Booking', bookingSchema);
 exports.default = Booking;
-//# sourceMappingURL=booking.model.js.map

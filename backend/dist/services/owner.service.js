@@ -11,55 +11,67 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const inversify_1 = require("inversify");
-const types_js_1 = __importDefault(require("../di/types.js"));
-const http_error_js_1 = require("../utils/http.error.js");
-const types_js_2 = require("../types/types.js");
+const types_1 = __importDefault(require("../di/types"));
+const http_error_1 = require("../utils/http.error");
+const types_2 = require("../types/types");
+const helperFunctions_1 = require("../utils/helperFunctions");
 let OwnerService = class OwnerService {
-    _ownerRepository;
     constructor(_ownerRepository) {
         this._ownerRepository = _ownerRepository;
     }
     ;
-    async getAllOwners(page, limit) {
-        const { data, total } = await this._ownerRepository.findPaginated(page, limit);
-        if (!data) {
-            throw new http_error_js_1.HttpError(types_js_2.StatusCode.UNAUTHORIZED, "User not found");
-        }
-        ;
-        const totalPages = Math.ceil(total / limit);
-        return {
-            data,
-            totalPages,
-            currentPage: page,
-        };
+    getAllOwners(page, limit, search) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { data, total } = yield this._ownerRepository.findPaginated(page, limit, search);
+            if (!data) {
+                throw new http_error_1.HttpError(types_2.StatusCode.UNAUTHORIZED, "User not found");
+            }
+            ;
+            const totalPages = Math.ceil(total / limit);
+            return {
+                data: data.map(helperFunctions_1.toOwnerResponseDTO),
+                totalPages,
+                currentPage: page,
+            };
+        });
     }
     ;
-    async blockOrUnblockOwner(ownerId) {
-        const user = await this._ownerRepository.findById(ownerId);
-        if (!user) {
-            throw new http_error_js_1.HttpError(types_js_2.StatusCode.BAD_REQUEST, "Can't find user");
-        }
-        ;
-        const updatedUser = await this._ownerRepository.update(ownerId, {
-            isBlocked: !user.isBlocked,
+    blockOrUnblockOwner(ownerId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield this._ownerRepository.findById(ownerId);
+            if (!user) {
+                throw new http_error_1.HttpError(types_2.StatusCode.BAD_REQUEST, "Can't find user");
+            }
+            ;
+            const updatedUser = yield this._ownerRepository.update(ownerId, {
+                isBlocked: !user.isBlocked,
+            });
+            if (!updatedUser) {
+                throw new http_error_1.HttpError(types_2.StatusCode.INTERNAL_SERVER_ERROR, "Failed to block user");
+            }
+            return (0, helperFunctions_1.toOwnerResponseDTO)(updatedUser);
         });
-        if (!updatedUser) {
-            throw new http_error_js_1.HttpError(types_js_2.StatusCode.INTERNAL_SERVER_ERROR, "Failed to block user");
-        }
-        return updatedUser;
     }
     ;
 };
 OwnerService = __decorate([
     (0, inversify_1.injectable)(),
-    __param(0, (0, inversify_1.inject)(types_js_1.default.IOwnerRepository)),
+    __param(0, (0, inversify_1.inject)(types_1.default.IOwnerRepository)),
     __metadata("design:paramtypes", [Object])
 ], OwnerService);
 exports.default = OwnerService;
 ;
-//# sourceMappingURL=owner.service.js.map

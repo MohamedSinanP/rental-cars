@@ -13,4 +13,3 @@ const subscriptionSchema = new mongoose_1.Schema({
     isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 exports.Subscription = (0, mongoose_1.model)("Subscription", subscriptionSchema);
-//# sourceMappingURL=subscription.model.js.map

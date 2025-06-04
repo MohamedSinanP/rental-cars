@@ -145,7 +145,7 @@ const SignupPage = () => {
             )}
             <input
               name="email"
-              type="email"
+              type="text"
               placeholder="Email"
               className="w-full p-2 border border-teal-500 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-black placeholder:text-black/60"
               value={formData.email}

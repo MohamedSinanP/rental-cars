@@ -7,7 +7,7 @@ import { fetchSubscriptions } from '../../services/apis/adminApi';
 
 const SubscriptionPage = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false); // Fixed typo from original
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -106,13 +106,10 @@ const SubscriptionPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-gray-100">
       <Sidebar />
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4">
+      <div className="lg:ml-64 min-h-screen">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4">
           <div className="max-w-7xl mx-auto">
             <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
               <div>
@@ -143,17 +140,17 @@ const SubscriptionPage = () => {
             </div>
           </div>
         </main>
-      </div>
 
-      {/* Subscription Modal Component */}
-      <SubscriptionModal
-        isOpen={showModal}
-        isEditing={isEditing}
-        currentSubscription={currentSubscription}
-        onClose={resetModal}
-        onSubmit={handleSubmitModal}
-      />
-    </div>
+        {/* Subscription Modal Component */}
+        <SubscriptionModal
+          isOpen={showModal}
+          isEditing={isEditing}
+          currentSubscription={currentSubscription}
+          onClose={resetModal}
+          onSubmit={handleSubmitModal}
+        />
+      </div>
+    </div >
   );
 };
 

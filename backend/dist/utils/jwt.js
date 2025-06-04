@@ -13,8 +13,10 @@ exports.JwtService = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const inversify_1 = require("inversify");
 let JwtService = class JwtService {
-    accessTokenSecret = process.env.JWT_ACCESS_SECRET;
-    refreshTokenSecret = process.env.JWT_REFRESH_SECRET;
+    constructor() {
+        this.accessTokenSecret = process.env.JWT_ACCESS_SECRET;
+        this.refreshTokenSecret = process.env.JWT_REFRESH_SECRET;
+    }
     generateAccessToken(userId, role) {
         return jsonwebtoken_1.default.sign({ userId, role }, this.accessTokenSecret, { expiresIn: "15m" });
     }
@@ -42,4 +44,3 @@ exports.JwtService = JwtService;
 exports.JwtService = JwtService = __decorate([
     (0, inversify_1.injectable)()
 ], JwtService);
-//# sourceMappingURL=jwt.js.map

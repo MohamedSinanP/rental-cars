@@ -232,12 +232,12 @@ const UserSubscriptionPage = () => {
   );
 
   return (
-    <div className="flex h-full">
-      {/* Sidebar is always visible, regardless of loading state */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Fixed Sidebar */}
       <Sidebar />
 
-      {/* Main Content - Made responsive to adapt to sidebar */}
-      <div className="flex-1 min-w-0 overflow-x-auto bg-gray-50">
+      {/* Main Content - Offset for fixed sidebar */}
+      <div className="lg:ml-64 min-h-screen">
         <div className="p-4 lg:p-6">
           {/* Page title */}
           <div className="mb-4 lg:mb-6">

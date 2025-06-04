@@ -114,7 +114,7 @@ const SubscriptionModal = ({
     try {
       // Validate features
       if (features.length === 0) {
-        setError('description', { // Using description field to show error since features is not in the form
+        setError('description', {
           type: 'manual',
           message: 'At least one feature is required'
         });

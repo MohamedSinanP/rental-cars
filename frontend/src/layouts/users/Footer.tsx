@@ -13,9 +13,9 @@ const Footer: React.FC = () => {
     {
       title: "Company",
       links: [
-        { name: "About Us", href: "/about-us" },
-        { name: "Careers", href: "/careers" },
-        { name: "News", href: "/news" },
+        { name: "About Us", href: "/about" },
+        { name: "Careers", href: "#" },
+        { name: "News", href: "#" },
       ],
     },
     {
@@ -28,8 +28,8 @@ const Footer: React.FC = () => {
     {
       title: "Legal",
       links: [
-        { name: "Privacy Policy", href: "/privacy-policy" },
-        { name: "Terms & Conditions", href: "/terms" },
+        { name: "Privacy Policy", href: "#" },
+        { name: "Terms & Conditions", href: "#" },
       ],
     },
   ];

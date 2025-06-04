@@ -76,13 +76,13 @@ const carSchema = new mongoose_1.Schema({
         },
         address: { type: String, required: true },
     },
-    availability: {
+    status: {
         type: String,
-        enum: ["Available", "Unavailable"],
-        required: true,
+        enum: ["Available", "Booked", "Unavailable", "UnderMaintenance", "PendingApproval", "Archived"],
+        default: "PendingApproval",
     },
     features: [{ type: String }],
-    pricePerDay: { type: Number, required: true },
+    pricePerHour: { type: Number, required: true },
     deposit: { type: Number, required: true },
     lastmaintenanceDate: { type: String, required: true },
     maintenanceInterval: { type: Number, required: true },
@@ -92,4 +92,3 @@ const carSchema = new mongoose_1.Schema({
 });
 carSchema.index({ location: "2dsphere" });
 exports.Car = (0, mongoose_1.model)("Car", carSchema);
-//# sourceMappingURL=car.model.js.map

@@ -48,7 +48,7 @@ export default class DashboardService implements IDashboardService {
   };
 
   async getStatsForOwner(ownerId: string): Promise<IOwnerDashboardData> {
-    const totalEarnings = await this._bookingRepository.getTotalOwnerEarnings();
+    const totalEarnings = await this._bookingRepository.getTotalOwnerEarnings(ownerId);
     const totalCars = await this._carRepository.countCars(ownerId)
     const totalBookings = await this._bookingRepository.bookingCountOfOwnerCars(ownerId)
     const platformCommission = await this._bookingRepository.getTotalAdminCommissionForOwner(ownerId);

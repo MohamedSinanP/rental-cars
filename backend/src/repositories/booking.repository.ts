@@ -255,10 +255,11 @@ export class BookingRepository extends BaseRepository<IBookingModel> implements 
     return result;
   }
 
-  async getTotalOwnerEarnings(): Promise<number> {
+  async getTotalOwnerEarnings(ownerId: string): Promise<number> {
     const result = await this._bookingModel.aggregate([
       {
         $match: {
+          _id: ownerId,
           paymentStatus: "completed"
         }
       },

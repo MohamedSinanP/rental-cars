@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   User,
   Car,
@@ -15,6 +15,7 @@ import { toast } from 'react-toastify';
 
 const AccountSidebar: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeItem, setActiveItem] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -25,6 +26,14 @@ const AccountSidebar: React.FC = () => {
     { id: 'subscription history', icon: <Wallet className="w-5 h-5" />, text: 'My Subscription', path: '/subscription-history' },
     { id: 'wishlist', icon: <Heart className="w-5 h-5" />, text: 'Wishlist', path: '/wishlist' },
   ];
+
+  // Set active item based on current route
+  useEffect(() => {
+    const currentItem = menuItems.find(item => item.path === location.pathname);
+    if (currentItem) {
+      setActiveItem(currentItem.id);
+    }
+  }, [location.pathname]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -43,6 +52,13 @@ const AccountSidebar: React.FC = () => {
       }
     }
   };
+
+  const handleItemClick = (item: typeof menuItems[0]) => {
+    setActiveItem(item.id);
+    navigate(item.path);
+    if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+  };
+
   return (
     <>
       {/* Mobile menu toggle button */}
@@ -70,17 +86,19 @@ const AccountSidebar: React.FC = () => {
           {menuItems.map(item => (
             <div
               key={item.id}
-              className={`flex items-center p-3 cursor-pointer hover:bg-gray-100 rounded-md transition-colors ${activeItem === item.text ? 'bg-gray-100' : ''
+              className={`flex items-center p-3 cursor-pointer rounded-md transition-all duration-200 ${activeItem === item.id
+                  ? 'bg-teal-50 border-l-4 border-teal-500 text-teal-700 shadow-sm'
+                  : 'hover:bg-gray-100 text-gray-700 border-l-4 border-transparent'
                 }`}
-              onClick={() => {
-                setActiveItem(item.text);
-                navigate(item.path);
-                if (isMobileMenuOpen) setIsMobileMenuOpen(false);
-              }}
+              onClick={() => handleItemClick(item)}
             >
-              <span className="mr-3 text-gray-700">{item.icon}</span>
-              <span className="text-gray-700">{item.text}</span>
-              <span className="ml-auto text-gray-400">
+              <span className={`mr-3 ${activeItem === item.id ? 'text-teal-600' : 'text-gray-700'}`}>
+                {item.icon}
+              </span>
+              <span className={`font-medium ${activeItem === item.id ? 'text-teal-700' : 'text-gray-700'}`}>
+                {item.text}
+              </span>
+              <span className={`ml-auto ${activeItem === item.id ? 'text-teal-500' : 'text-gray-400'}`}>
                 <ChevronRight className="w-4 h-4" />
               </span>
             </div>
@@ -88,7 +106,7 @@ const AccountSidebar: React.FC = () => {
         </div>
 
         <div className="px-6 mt-12">
-          <button className="flex items-center justify-between w-full border border-gray-300 rounded-md px-4 py-2 text-gray-700 mb-2 cursor-pointer"
+          <button className="flex items-center justify-between w-full border border-gray-300 rounded-md px-4 py-2 text-gray-700 mb-2 cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={handleLogout}
           >
             <span>Sign out</span>

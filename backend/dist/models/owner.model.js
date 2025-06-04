@@ -23,7 +23,7 @@ const ownerSchema = new mongoose_1.Schema({
         type: String,
         default: "user",
     },
-    commision: {
+    commission: {
         type: Number,
         required: true,
     },
@@ -59,4 +59,3 @@ const ownerSchema = new mongoose_1.Schema({
     timestamps: true,
 });
 exports.Owner = (0, mongoose_1.model)("Owner", ownerSchema);
-//# sourceMappingURL=owner.model.js.map

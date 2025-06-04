@@ -13,7 +13,7 @@ export default interface IBookingRepository extends IBaseRepository<IBookingMode
   getTotalAdminEarnings(): Promise<number>;
   getRentalStatsForAdmin(type: string, year: number, from: string, to: string): Promise<RentalStatsForAdmin[]>;
   getRentalStatsForOwner(ownerId: string, type: string, year: number, from: string, to: string): Promise<RentalStatsForOwner[]>;
-  getTotalOwnerEarnings(): Promise<number>;
+  getTotalOwnerEarnings(ownerId: string): Promise<number>;
   bookingCountOfOwnerCars(ownerId: string): Promise<number>;
   getTotalAdminCommissionForOwner(ownerId: string): Promise<number>;
   getPopulatedBooking(bookingId: string): Promise<IBookingPopulated | null>;

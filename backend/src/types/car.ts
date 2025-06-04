@@ -58,6 +58,9 @@ export default interface ICar {
   lastmaintenanceDate: string;
   maintenanceInterval: number;
   isListed: boolean;
+  isVerified?: boolean;
+  verificationRejected?: boolean;
+  rejectionReason?: string;
 }
 
 export interface ICarModel extends Document {

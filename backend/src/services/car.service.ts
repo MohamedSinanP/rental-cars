@@ -75,7 +75,13 @@ export default class CarService implements ICarService {
       delete carToEdit.pucDoc;
     }
 
-    const updatedCar = await this._carRepository.editCar(carId, carToEdit);
+    const updatedCar = await this._carRepository.editCar(carId, {
+      ...carToEdit,
+      isVerified: false,
+      verificationRejected: false,
+      rejectionReason: '',
+      status: "PendingApproval",
+    });
     return mapToCarDTO(updatedCar);
   };
 

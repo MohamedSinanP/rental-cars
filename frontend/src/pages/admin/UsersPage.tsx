@@ -141,23 +141,24 @@ const UsersPage = () => {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
+      {/* Fixed Sidebar */}
       <Sidebar />
 
-      {/* Main Content - Made responsive and scrollable */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-4 lg:p-6">
+      {/* Main Content Area - With left margin to accommodate fixed sidebar */}
+      <div className="lg:ml-64 min-h-screen">
+        <div className="p-4 lg:p-8">
           {/* Page title */}
           <div className="mb-4 lg:mb-6">
-            <h1 className="text-xl lg:text-2xl font-bold text-gray-800">Users Management</h1>
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-800 mt-12 lg:mt-0">Users Management</h1>
           </div>
 
           {/* Search Bar */}
-          <div className="mb-4">
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="mb-4 lg:mb-6">
+            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
               Search Users
             </label>
-            <div className="relative">
+            <div className="relative max-w-md">
               <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
                 <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
               </div>
@@ -172,8 +173,8 @@ const UsersPage = () => {
             </div>
           </div>
 
-          {/* Table with horizontal scroll on small screens */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          {/* Table Container */}
+          <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
             <div className="overflow-x-auto">
               {loading ? (
                 <LoadingSpinner />
@@ -191,7 +192,7 @@ const UsersPage = () => {
 
           {/* Pagination - only show when not loading */}
           {!loading && (
-            <div className="mt-4">
+            <div className="flex justify-center">
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
