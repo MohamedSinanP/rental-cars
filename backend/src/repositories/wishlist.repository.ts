@@ -38,8 +38,6 @@ export default class WishlistRepository extends BaseRepository<IWishlistModel> i
   }
 
   async removeCarFromWishlist(userId: string, carId: string): Promise<IWishlistModel | null> {
-
-    console.log(" total : ", userId, carId);
     const userObjectId = new Types.ObjectId(userId);
     const carObjectId = new Types.ObjectId(carId);
 
