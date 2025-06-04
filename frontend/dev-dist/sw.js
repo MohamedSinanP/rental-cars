@@ -112,8 +112,8 @@ define(['./workbox-6f5e3fbb'], (function (workbox) {
       maxAgeSeconds: 3600
     })]
   }), 'GET');
-  workbox.registerRoute(({
-    url
-  }) => url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/"), new workbox.NetworkOnly(), 'GET');
-
+  workbox.registerRoute(
+    ({ url }) => url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/"),
+    new workbox.NetworkOnly()
+  );
 }));
