@@ -66,10 +66,13 @@ export default defineConfig({
         enabled: true,
       },
       strategies: 'generateSW',
+      injectRegister: 'auto',
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,jpg,svg,ico,webp}'],
         skipWaiting: true,
         clientsClaim: true,
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api\//, /^\/auth\//],
         runtimeCaching: [
           {
             urlPattern: ({ request }: { request: Request }) => request.destination === 'image',
